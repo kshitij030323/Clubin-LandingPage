@@ -306,8 +306,8 @@ const MorphingFeatureSection = () => {
             <div className="hidden lg:block h-[300vh]">
                 <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                     {/* Main Unified Glass Container */}
-                    <div className="max-w-7xl w-full mx-auto px-6">
-                        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[80vh] flex items-center">
+                    <div className="max-w-6xl w-full mx-auto px-6">
+                        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[75vh] flex items-center">
 
                             {/* Subtle Ambient Glows inside the box */}
                             <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
@@ -370,11 +370,12 @@ const MorphingFeatureSection = () => {
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout - phone flush to box edge
+                                                // Single Image Layout - phone pushed left, bottom fades out
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className="h-[130%] w-auto object-contain drop-shadow-2xl -mb-[15%] -mr-[15%]"
+                                                    className="h-[110%] w-auto object-contain drop-shadow-2xl -mb-[10%] mr-4"
+                                                    style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}
                                                 />
                                             )}
                                         </div>
