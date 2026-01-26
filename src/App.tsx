@@ -370,11 +370,11 @@ const MorphingFeatureSection = () => {
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout - phone touching box edge (oversize to compensate for image padding)
+                                                // Single Image Layout - phone at box edge
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className="h-[105%] w-auto object-contain drop-shadow-2xl -mb-[3%] -mr-[3%]"
+                                                    className="h-[115%] w-auto object-contain drop-shadow-2xl -mb-[8%] -mr-[8%]"
                                                 />
                                             )}
                                         </div>
