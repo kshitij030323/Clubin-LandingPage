@@ -344,7 +344,7 @@ const MorphingFeatureSection = () => {
                                     ))}
                                 </div>
 
-                                {/* RIGHT: Image Content - overflow hidden clips phone at bottom edge */}
+                                {/* RIGHT: Image Content - phone ends at box edge */}
                                 <div className="h-full flex items-end justify-center relative overflow-hidden">
                                     {featuresData.map((feature, idx) => (
                                         <div
@@ -355,25 +355,26 @@ const MorphingFeatureSection = () => {
                                                 }`}
                                         >
                                             {feature.layoutType === "double" ? (
-                                                // Double Image Layout - diagonal like reference
+                                                // Double Image Layout - diagonal with fade on back phone
                                                 <div className="relative w-full h-full">
                                                     <img
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
-                                                        className="absolute left-[2%] bottom-[-8%] h-[85%] w-auto object-contain drop-shadow-2xl z-20 -rotate-6"
+                                                        className="absolute left-[5%] bottom-0 h-[88%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
-                                                        className="absolute right-[2%] top-[2%] h-[65%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
+                                                        className="absolute right-[5%] top-[-5%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
+                                                        style={{ maskImage: 'linear-gradient(to top, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)' }}
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout - phone sits at bottom edge, clipped
+                                                // Single Image Layout - phone bottom aligned to box edge
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className="h-[95%] w-auto object-contain drop-shadow-2xl translate-y-[10%]"
+                                                    className="h-[90%] w-auto object-contain drop-shadow-2xl mb-0"
                                                 />
                                             )}
                                         </div>
@@ -406,26 +407,27 @@ const MorphingFeatureSection = () => {
                                 </p>
                             </div>
 
-                            {/* Image Area - phone clips at bottom edge */}
-                            <div className="mt-6 flex justify-center items-end overflow-hidden h-[320px] relative">
+                            {/* Image Area - phone ends at box edge */}
+                            <div className="mt-6 flex justify-center items-end overflow-hidden h-[350px] relative">
                                 {feature.layoutType === "double" ? (
                                     <div className="relative w-full h-full">
                                         <img
                                             src={feature.mockupSrc}
                                             alt="Screen 1"
-                                            className="absolute left-[5%] bottom-[-5%] h-[90%] w-auto object-contain drop-shadow-2xl z-20 -rotate-6"
+                                            className="absolute left-[5%] bottom-0 h-[90%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                         />
                                         <img
                                             src={feature.mockupSrc2}
                                             alt="Screen 2"
-                                            className="absolute right-[5%] top-[5%] h-[65%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
+                                            className="absolute right-[5%] top-[-5%] h-[55%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
+                                            style={{ maskImage: 'linear-gradient(to top, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)' }}
                                         />
                                     </div>
                                 ) : (
                                     <img
                                         src={feature.mockupSrc}
                                         alt="App Screen"
-                                        className="h-[110%] w-auto object-contain drop-shadow-2xl translate-y-[12%]"
+                                        className="h-[100%] w-auto object-contain drop-shadow-2xl"
                                     />
                                 )}
                             </div>
