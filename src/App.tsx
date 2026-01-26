@@ -1,20 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
+
+// --- Extend Window for HLS.js ---
+declare global {
+    interface Window {
+        Hls: {
+            isSupported(): boolean;
+            Events: { MANIFEST_PARSED: string };
+            new(): {
+                loadSource(src: string): void;
+                attachMedia(video: HTMLVideoElement): void;
+                on(event: string, callback: () => void): void;
+            };
+        };
+    }
+}
 
 // --- Icons (Inline SVGs to replace external dependency) ---
 
-const AppleIcon = ({ className }) => (
+const AppleIcon = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
         <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.45-1.02 3.96-.86 1.76.18 3.07.88 3.92 2.15-3.52 1.95-2.9 6.7 1.25 8.16-.32.96-.74 1.9-1.21 2.78zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
     </svg>
 );
 
-const GooglePlayIcon = ({ className }) => (
+const GooglePlayIcon = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
         <path d="M4.09 21.94c-.58.17-1.09-.17-1.09-.9V2.96c0-.73.51-1.06 1.09-.9l.06.02 9.66 8.56-4.14 4.14-5.58 7.16zm12.37-9.37L6.44 2.57c-.55-.3-1.3-.11-1.66.42l8.89 7.9 2.79 1.68zM4.78 21.01l11.67-9.62 2.79 1.68-8.9 7.9c-.35.52-1.1.72-1.65.41l-3.91-2.17zm11.23-6.93l3.66 2.06c.72.41.72 1.06 0 1.47l-3.66 2.06-2.5-2.79 2.5-2.8z" />
     </svg>
 );
 
-const CheckCircle = ({ className, strokeWidth = 2 }) => (
+const CheckCircle = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -30,7 +45,7 @@ const CheckCircle = ({ className, strokeWidth = 2 }) => (
     </svg>
 );
 
-const Music = ({ className, strokeWidth = 2 }) => (
+const Music = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -47,7 +62,7 @@ const Music = ({ className, strokeWidth = 2 }) => (
     </svg>
 );
 
-const Star = ({ className, strokeWidth = 2 }) => (
+const Star = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -94,7 +109,7 @@ const ResourceLoader = () => {
  * Background Video Component using HLS
  */
 const BackgroundVideo = () => {
-    const videoRef = useRef(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
     const videoSrc = "https://customer-cbeadsgr09pnsezs.cloudflarestream.com/257c7359efd4b4aaebcc03aa8fc78a36/manifest/video.m3u8";
@@ -107,7 +122,7 @@ const BackgroundVideo = () => {
 
             if (videoSrc.endsWith('.mp4')) {
                 video.src = videoSrc;
-                video.play().then(() => setIsPlaying(true)).catch(e => console.log("Autoplay blocked", e));
+                video.play().then(() => setIsPlaying(true)).catch((e: unknown) => console.log("Autoplay blocked", e));
                 return;
             }
 
@@ -159,7 +174,7 @@ const BackgroundVideo = () => {
 /**
  * Store Buttons Component
  */
-const StoreButtons = ({ centered = false }) => (
+const StoreButtons = ({ centered = false }: { centered?: boolean }) => (
     <div className={`flex flex-col sm:flex-row gap-4 ${centered ? 'justify-center' : ''}`}>
         <button className="group relative flex items-center justify-center gap-3 bg-[#2b2344] hover:bg-[#352b54] text-white px-6 py-3 rounded-xl border border-[rgba(164,132,215,0.3)] backdrop-blur-sm transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg">
             <AppleIcon className="w-6 h-6 fill-current" />
@@ -184,11 +199,12 @@ const StoreButtons = ({ centered = false }) => (
 /**
  * Scroll Reveal Wrapper
  */
-const ScrollReveal = ({ children, delay = 0 }) => {
+const ScrollReveal = ({ children, delay = 0 }: { children: ReactNode; delay?: number }) => {
     const [isVisible, setIsVisible] = useState(false);
-    const ref = useRef(null);
+    const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const currentRef = ref.current;
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) setIsVisible(true);
@@ -196,9 +212,9 @@ const ScrollReveal = ({ children, delay = 0 }) => {
             { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
         );
 
-        if (ref.current) observer.observe(ref.current);
+        if (currentRef) observer.observe(currentRef);
         return () => {
-            if (ref.current) observer.unobserve(ref.current);
+            if (currentRef) observer.unobserve(currentRef);
         };
     }, []);
 
@@ -224,8 +240,8 @@ const featuresData = [
         text: "Skip the chaos. Clubin makes nights simple and effortless. No more uncertainty at the door.",
         icon: CheckCircle,
         accentColor: "#a484d7",
-        // New zoomed in image
         mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(4).png?raw=true",
+        mockupSrc2: undefined as string | undefined,
         layoutType: "zoomed"
     },
     {
@@ -235,7 +251,6 @@ const featuresData = [
         text: "From techno to hip-hop, find the right vibe instantly. Curated events just for you.",
         icon: Music,
         accentColor: "#f87b52",
-        // Two new images for this card
         mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(5).png?raw=true",
         mockupSrc2: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(6).png?raw=true",
         layoutType: "double"
@@ -247,14 +262,14 @@ const featuresData = [
         text: "Join in seconds and walk in with confidence. Your digital pass is all you need.",
         icon: Star,
         accentColor: "#7b39fc",
-        // Original image, zoomed out layout
         mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(2).png?raw=true",
+        mockupSrc2: undefined as string | undefined,
         layoutType: "fit"
     }
 ];
 
 const MorphingFeatureSection = () => {
-    const containerRef = useRef(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
@@ -433,6 +448,99 @@ const MorphingFeatureSection = () => {
                 ))}
             </div>
 
+        </div>
+    );
+};
+
+// --- Main App Component ---
+
+const App = () => {
+    return (
+        <div className="min-h-screen font-manrope bg-black text-white selection:bg-[#7b39fc] selection:text-white">
+            <ResourceLoader />
+            <BackgroundVideo />
+
+            {/* Navbar */}
+            <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 md:py-6 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
+                <div className="relative z-10 flex items-center gap-3">
+                    <img
+                        src="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
+                        alt="Clubin Logo"
+                        className="h-10 w-auto md:h-12 object-contain drop-shadow-lg"
+                    />
+                </div>
+                <div className="relative z-10 hidden md:block">
+                    <StoreButtons />
+                </div>
+            </nav>
+
+            {/* Main Content Scroll Wrapper */}
+            <div className="relative z-30 pt-32 pb-20">
+
+                {/* Hero Section */}
+                <div className="px-6 md:px-12 min-h-[85vh] flex flex-col justify-center items-center text-center max-w-5xl mx-auto mb-20">
+                    <ScrollReveal>
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-inter font-extrabold tracking-tighter text-white mb-6 drop-shadow-2xl">
+                            Get In.<br />
+                            <span className="font-instrument italic font-normal text-[#a484d7]">No Lines. No Stress.</span>
+                        </h1>
+                    </ScrollReveal>
+
+                    <ScrollReveal delay={200}>
+                        <p className="text-xl md:text-2xl font-manrope text-gray-200 max-w-2xl mx-auto mb-10 leading-relaxed font-light drop-shadow-md">
+                            The easiest way to get into the best nights — <br className="hidden md:block" />without the hassle.
+                        </p>
+                    </ScrollReveal>
+
+                    <ScrollReveal delay={400}>
+                        <div className="flex flex-col items-center gap-6">
+                            <StoreButtons centered />
+                            <div className="text-sm font-manrope text-white/50 animate-pulse">
+                                Scroll to explore
+                            </div>
+                        </div>
+                    </ScrollReveal>
+                </div>
+
+                {/* Morphing Features Section */}
+                <MorphingFeatureSection />
+
+                {/* Final CTA Section */}
+                <div className="px-6 md:px-12 min-h-[60vh] flex flex-col justify-center items-center text-center max-w-4xl mx-auto mt-20">
+                    <ScrollReveal>
+                        <div className="p-8 md:p-16 rounded-3xl bg-gradient-to-b from-[rgba(85,80,110,0.4)] to-black border border-[rgba(164,132,215,0.3)] backdrop-blur-xl">
+                            <h2 className="text-4xl md:text-6xl font-inter font-bold mb-8 tracking-tight">
+                                Your nights <span className="font-instrument italic font-normal text-[#f87b52]">start here.</span>
+                            </h2>
+
+                            <div className="mb-10">
+                                <StoreButtons centered />
+                            </div>
+
+                            <div className="flex justify-center items-center gap-2 text-white/40 text-sm font-cabin">
+                                <span>Clubin © 2024</span>
+                                <span>•</span>
+                                <span>Experience Nightlife</span>
+                            </div>
+                        </div>
+                    </ScrollReveal>
+                </div>
+
+            </div>
+
+            <style>{`
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .font-cabin { font-family: 'Cabin', sans-serif; }
+        .font-instrument { font-family: 'Instrument Serif', serif; }
+
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: black; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+      `}</style>
         </div>
     );
 };
