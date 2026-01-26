@@ -370,12 +370,12 @@ const MorphingFeatureSection = () => {
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout - phone pushed left, bottom fades out
+                                                // Single Image Layout - phone at box edge with bottom fade
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className="h-[110%] w-auto object-contain drop-shadow-2xl -mb-[10%] mr-4"
-                                                    style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}
+                                                    className="h-[120%] w-auto object-contain drop-shadow-2xl -mb-[12%] -mr-[10%]"
+                                                    style={{ maskImage: 'linear-gradient(to bottom, black 65%, transparent 95%)', WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 95%)' }}
                                                 />
                                             )}
                                         </div>
