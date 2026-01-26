@@ -360,12 +360,12 @@ const MorphingFeatureSection = () => {
                                                     <img
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
-                                                        className="absolute left-[5%] bottom-[5%] h-[70%] w-auto object-contain drop-shadow-2xl z-20"
+                                                        className="absolute left-[8%] bottom-[8%] h-[55%] w-auto object-contain drop-shadow-2xl z-20"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
-                                                        className="absolute right-[5%] top-[5%] h-[70%] w-auto object-contain drop-shadow-2xl z-10"
+                                                        className="absolute right-[8%] top-[8%] h-[55%] w-auto object-contain drop-shadow-2xl z-10"
                                                     />
                                                 </div>
                                             ) : (
