@@ -15,17 +15,17 @@ declare global {
     }
 }
 
-// --- Icons (Inline SVGs to replace external dependency) ---
+// --- Icons (Inline SVGs) ---
 
 const AppleIcon = ({ className }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.45-1.02 3.96-.86 1.76.18 3.07.88 3.92 2.15-3.52 1.95-2.9 6.7 1.25 8.16-.32.96-.74 1.9-1.21 2.78zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+    <svg className={className} viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
 );
 
 const GooglePlayIcon = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4.09 21.94c-.58.17-1.09-.17-1.09-.9V2.96c0-.73.51-1.06 1.09-.9l.06.02 9.66 8.56-4.14 4.14-5.58 7.16zm12.37-9.37L6.44 2.57c-.55-.3-1.3-.11-1.66.42l8.89 7.9 2.79 1.68zM4.78 21.01l11.67-9.62 2.79 1.68-8.9 7.9c-.35.52-1.1.72-1.65.41l-3.91-2.17zm11.23-6.93l3.66 2.06c.72.41.72 1.06 0 1.47l-3.66 2.06-2.5-2.79 2.5-2.8z" />
+        <path d="M3.609 1.814L13.445 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 9.099l-2.41 2.41-8.526-8.85z" />
     </svg>
 );
 
@@ -307,13 +307,16 @@ const MorphingFeatureSection = () => {
                 <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                     {/* Main Unified Glass Container */}
                     <div className="max-w-6xl w-full mx-auto px-6">
-                        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[75vh] flex items-center">
+                        <div className="relative rounded-[2.5rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[75vh] flex items-center">
 
                             {/* Subtle Ambient Glows inside the box */}
                             <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
                             <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
 
-                            <div className="w-full h-full grid grid-cols-2 gap-8 items-center pl-14 pr-0 relative z-10">
+                            {/* Bottom fade overlay for phone mockups - sits above the images */}
+                            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#120f1d] via-[#120f1d]/90 to-transparent rounded-b-[2.5rem] z-40 pointer-events-none" />
+
+                            <div className="w-full h-full grid grid-cols-2 gap-8 items-center pl-14 pr-0 relative z-10 overflow-hidden rounded-[2.5rem]">
 
                                 {/* LEFT: Text Content */}
                                 <div className="flex flex-col justify-center h-full relative">
@@ -321,10 +324,10 @@ const MorphingFeatureSection = () => {
                                         <div
                                             key={feature.id}
                                             className={`absolute left-0 right-0 flex flex-col justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
-                                                    ? 'opacity-100 translate-y-0 blur-0'
-                                                    : idx < activeIndex
-                                                        ? 'opacity-0 -translate-y-12 blur-sm'
-                                                        : 'opacity-0 translate-y-12 blur-sm'
+                                                ? 'opacity-100 translate-y-0 blur-0'
+                                                : idx < activeIndex
+                                                    ? 'opacity-0 -translate-y-12 blur-sm'
+                                                    : 'opacity-0 translate-y-12 blur-sm'
                                                 }`}
                                         >
                                             <div className="mb-8">
@@ -344,38 +347,36 @@ const MorphingFeatureSection = () => {
                                     ))}
                                 </div>
 
-                                {/* RIGHT: Image Content - phone pushed to box edge */}
-                                <div className="h-full flex items-end justify-end relative overflow-hidden">
+                                {/* RIGHT: Image Content - phone extends to bottom edge of box */}
+                                <div className="h-full flex items-end justify-end relative">
                                     {featuresData.map((feature, idx) => (
                                         <div
                                             key={feature.id}
                                             className={`absolute inset-0 flex items-end justify-end transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
-                                                    ? 'opacity-100 translate-x-0 scale-100'
-                                                    : 'opacity-0 translate-x-12 scale-95'
+                                                ? 'opacity-100 translate-x-0 scale-100'
+                                                : 'opacity-0 translate-x-12 scale-95'
                                                 }`}
                                         >
                                             {feature.layoutType === "double" ? (
-                                                // Double Image Layout - diagonal with fade on back phone
+                                                // Double Image Layout - phones extending to bottom
                                                 <div className="relative w-full h-full">
                                                     <img
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
-                                                        className="absolute left-[5%] bottom-[-4%] h-[92%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
+                                                        className="absolute left-[8%] bottom-[-20px] h-[105%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
-                                                        className="absolute right-[0%] top-[-8%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
-                                                        style={{ maskImage: 'linear-gradient(to top, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)' }}
+                                                        className="absolute right-[0%] top-[-5%] h-[65%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout - phone at box edge with bottom fade
+                                                // Single Image Layout - phone extends past bottom edge
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className="h-[120%] w-auto object-contain drop-shadow-2xl -mb-[12%] -mr-[10%]"
-                                                    style={{ maskImage: 'linear-gradient(to bottom, black 65%, transparent 95%)', WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 95%)' }}
+                                                    className="absolute right-[0%] bottom-[-20px] h-[105%] w-auto object-contain drop-shadow-2xl"
                                                 />
                                             )}
                                         </div>
@@ -408,28 +409,29 @@ const MorphingFeatureSection = () => {
                                 </p>
                             </div>
 
-                            {/* Image Area - phone ends at box edge */}
-                            <div className="mt-6 flex justify-center items-end overflow-hidden h-[350px] relative">
+                            {/* Image Area - phone ends at box edge with bottom fade */}
+                            <div className="mt-6 flex justify-center items-end h-[350px] relative">
+                                {/* Bottom fade overlay */}
+                                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#120f1d] via-[#120f1d]/90 to-transparent z-30 pointer-events-none rounded-b-[2rem]" />
+
                                 {feature.layoutType === "double" ? (
-                                    <div className="relative w-full h-full">
+                                    <div className="relative w-full h-full overflow-hidden">
                                         <img
                                             src={feature.mockupSrc}
                                             alt="Screen 1"
-                                            className="absolute left-[5%] bottom-0 h-[90%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
+                                            className="absolute left-[10%] bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                         />
                                         <img
                                             src={feature.mockupSrc2}
                                             alt="Screen 2"
-                                            className="absolute right-[5%] top-[-5%] h-[55%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
-                                            style={{ maskImage: 'linear-gradient(to top, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)' }}
+                                            className="absolute right-[5%] top-[-5%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                         />
                                     </div>
                                 ) : (
                                     <img
                                         src={feature.mockupSrc}
                                         alt="App Screen"
-                                        className="h-[100%] w-auto object-contain drop-shadow-2xl"
-                                        style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}
+                                        className="absolute bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-10"
                                     />
                                 )}
                             </div>
@@ -438,7 +440,7 @@ const MorphingFeatureSection = () => {
                 ))}
             </div>
 
-        </div>
+        </div >
     );
 };
 
@@ -509,7 +511,7 @@ const App = () => {
                             </div>
 
                             <div className="flex justify-center items-center gap-2 text-white/40 text-sm font-cabin">
-                                <span>Clubin © 2024</span>
+                                <span>Clubin © 2026</span>
                                 <span>•</span>
                                 <span>Experience Nightlife</span>
                             </div>
