@@ -344,12 +344,12 @@ const MorphingFeatureSection = () => {
                                     ))}
                                 </div>
 
-                                {/* RIGHT: Image Content - phone ends at box edge */}
-                                <div className="h-full flex items-end justify-center relative overflow-hidden">
+                                {/* RIGHT: Image Content - phone pushed to box edge */}
+                                <div className="h-full flex items-end justify-end relative overflow-hidden">
                                     {featuresData.map((feature, idx) => (
                                         <div
                                             key={feature.id}
-                                            className={`absolute inset-0 flex items-end justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
+                                            className={`absolute inset-0 flex items-end justify-end transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
                                                     ? 'opacity-100 translate-x-0 scale-100'
                                                     : 'opacity-0 translate-x-12 scale-95'
                                                 }`}
@@ -360,21 +360,21 @@ const MorphingFeatureSection = () => {
                                                     <img
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
-                                                        className="absolute left-[5%] bottom-0 h-[88%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
+                                                        className="absolute left-[5%] bottom-[-4%] h-[92%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
-                                                        className="absolute right-[5%] top-[-5%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
+                                                        className="absolute right-[0%] top-[-8%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                                         style={{ maskImage: 'linear-gradient(to top, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to top, black 60%, transparent 100%)' }}
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout - phone bottom aligned to box edge
+                                                // Single Image Layout - phone touching box edge (oversize to compensate for image padding)
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className="h-[90%] w-auto object-contain drop-shadow-2xl mb-0"
+                                                    className="h-[105%] w-auto object-contain drop-shadow-2xl -mb-[3%] -mr-[3%]"
                                                 />
                                             )}
                                         </div>
@@ -455,7 +455,7 @@ const App = () => {
                     <img
                         src="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
                         alt="Clubin Logo"
-                        className="h-10 w-auto md:h-12 object-contain drop-shadow-lg"
+                        className="h-14 w-auto md:h-16 object-contain drop-shadow-lg"
                     />
                 </div>
                 <div className="relative z-10 hidden md:block">
