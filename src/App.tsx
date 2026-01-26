@@ -306,14 +306,14 @@ const MorphingFeatureSection = () => {
             <div className="hidden lg:block h-[300vh]">
                 <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                     {/* Main Unified Glass Container */}
-                    <div className="max-w-5xl w-full mx-auto px-6">
-                        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[65vh] flex items-center">
+                    <div className="max-w-7xl w-full mx-auto px-6">
+                        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[80vh] flex items-center">
 
                             {/* Subtle Ambient Glows inside the box */}
-                            <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] bg-purple-900/20 rounded-full blur-[100px] pointer-events-none" />
-                            <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-indigo-900/10 rounded-full blur-[80px] pointer-events-none" />
+                            <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
+                            <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
 
-                            <div className="w-full h-full grid grid-cols-2 gap-8 items-center px-10 relative z-10">
+                            <div className="w-full h-full grid grid-cols-2 gap-8 items-center pl-14 pr-0 relative z-10">
 
                                 {/* LEFT: Text Content */}
                                 <div className="flex flex-col justify-center h-full relative">
@@ -327,53 +327,53 @@ const MorphingFeatureSection = () => {
                                                         : 'opacity-0 translate-y-12 blur-sm'
                                                 }`}
                                         >
-                                            <div className="mb-6">
-                                                <div className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-xl backdrop-blur-md">
-                                                    <feature.icon className="w-7 h-7 text-white drop-shadow-md" strokeWidth={1.5} />
+                                            <div className="mb-8">
+                                                <div className="inline-flex w-16 h-16 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-xl backdrop-blur-md">
+                                                    <feature.icon className="w-8 h-8 text-white drop-shadow-md" strokeWidth={1.5} />
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-3xl xl:text-4xl font-inter font-bold text-white mb-4 leading-[1.1]">
+                                            <h3 className="text-4xl xl:text-5xl font-inter font-bold text-white mb-6 leading-[1.1]">
                                                 {feature.titlePrefix} <br />
                                                 <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
                                             </h3>
-                                            <p className="text-base font-manrope text-white/70 leading-relaxed font-light max-w-sm">
+                                            <p className="text-lg font-manrope text-white/70 leading-relaxed font-light max-w-md">
                                                 {feature.text}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* RIGHT: Image Content */}
-                                <div className="h-full flex items-center justify-center relative py-6">
+                                {/* RIGHT: Image Content - overflow hidden clips phone at bottom edge */}
+                                <div className="h-full flex items-end justify-center relative overflow-hidden">
                                     {featuresData.map((feature, idx) => (
                                         <div
                                             key={feature.id}
-                                            className={`absolute inset-0 flex items-center justify-center py-6 transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
+                                            className={`absolute inset-0 flex items-end justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
                                                     ? 'opacity-100 translate-x-0 scale-100'
                                                     : 'opacity-0 translate-x-12 scale-95'
                                                 }`}
                                         >
                                             {feature.layoutType === "double" ? (
-                                                // Double Image Layout
-                                                <div className="relative w-full h-full flex items-center justify-center">
+                                                // Double Image Layout - diagonal like reference
+                                                <div className="relative w-full h-full">
                                                     <img
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
-                                                        className="absolute left-[8%] bottom-[8%] h-[55%] w-auto object-contain drop-shadow-2xl z-20"
+                                                        className="absolute left-[2%] bottom-[-8%] h-[85%] w-auto object-contain drop-shadow-2xl z-20 -rotate-6"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
-                                                        className="absolute right-[8%] top-[8%] h-[55%] w-auto object-contain drop-shadow-2xl z-10"
+                                                        className="absolute right-[2%] top-[2%] h-[65%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout
+                                                // Single Image Layout - phone sits at bottom edge, clipped
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className="max-h-full w-auto object-contain drop-shadow-2xl"
+                                                    className="h-[95%] w-auto object-contain drop-shadow-2xl translate-y-[10%]"
                                                 />
                                             )}
                                         </div>
@@ -386,62 +386,48 @@ const MorphingFeatureSection = () => {
             </div>
 
             {/* MOBILE LAYOUT (Unified Cards) */}
-            <div className="lg:hidden flex flex-col gap-16 py-12 px-4">
+            <div className="lg:hidden flex flex-col gap-12 py-12 px-4">
                 {featuresData.map((feature) => (
                     <ScrollReveal key={feature.id}>
-                        {/* Single Unified Card for Mobile */}
-                        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/15 bg-[#120f1d]/80 backdrop-blur-2xl shadow-2xl">
-                            <div className="p-8 pb-0 flex flex-col gap-6">
-                                <div className="flex items-start justify-between">
-                                    <div className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-lg">
-                                        <feature.icon className="w-7 h-7 text-white" strokeWidth={1.5} />
+                        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-2xl shadow-2xl">
+                            {/* Text Content */}
+                            <div className="p-6 pb-0">
+                                <div className="mb-4">
+                                    <div className="inline-flex w-12 h-12 rounded-lg bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-lg">
+                                        <feature.icon className="w-6 h-6 text-white" strokeWidth={1.5} />
                                     </div>
                                 </div>
-
-                                <div>
-                                    <h3 className="text-3xl font-inter font-bold text-white mb-3 leading-tight">
-                                        {feature.titlePrefix} <br />
-                                        <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
-                                    </h3>
-                                    <p className="text-base font-manrope text-white/70 leading-relaxed font-light">
-                                        {feature.text}
-                                    </p>
-                                </div>
+                                <h3 className="text-2xl font-inter font-bold text-white mb-2 leading-tight">
+                                    {feature.titlePrefix}{' '}
+                                    <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
+                                </h3>
+                                <p className="text-sm font-manrope text-white/60 leading-relaxed font-light">
+                                    {feature.text}
+                                </p>
                             </div>
 
-                            {/* Image Area */}
-                            <div className="mt-8 flex justify-center items-end overflow-hidden">
-
+                            {/* Image Area - phone clips at bottom edge */}
+                            <div className="mt-6 flex justify-center items-end overflow-hidden h-[320px] relative">
                                 {feature.layoutType === "double" ? (
-                                    // Double Layout for Mobile
-                                    <div className="relative w-full h-[350px] flex justify-center mt-4">
+                                    <div className="relative w-full h-full">
                                         <img
                                             src={feature.mockupSrc}
                                             alt="Screen 1"
-                                            className="absolute left-[-10px] bottom-0 w-[60%] h-auto object-contain drop-shadow-2xl z-20"
+                                            className="absolute left-[5%] bottom-[-5%] h-[90%] w-auto object-contain drop-shadow-2xl z-20 -rotate-6"
                                         />
                                         <img
                                             src={feature.mockupSrc2}
                                             alt="Screen 2"
-                                            className="absolute right-[-10px] top-0 w-[60%] h-auto object-contain drop-shadow-2xl z-10"
+                                            className="absolute right-[5%] top-[5%] h-[65%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                         />
                                     </div>
-                                ) : feature.layoutType === "fit" ? (
-                                    // Fit Layout (Zoomed Out - Card 3)
-                                    <img
-                                        src={feature.mockupSrc}
-                                        alt="App Screen"
-                                        className="w-full max-w-[280px] h-auto object-contain drop-shadow-2xl translate-y-2 mb-8"
-                                    />
                                 ) : (
-                                    // Zoomed Layout (Card 1)
                                     <img
                                         src={feature.mockupSrc}
                                         alt="App Screen"
-                                        className="w-[140%] max-w-none h-auto object-cover translate-y-10 drop-shadow-2xl"
+                                        className="h-[110%] w-auto object-contain drop-shadow-2xl translate-y-[12%]"
                                     />
                                 )}
-
                             </div>
                         </div>
                     </ScrollReveal>
