@@ -306,17 +306,17 @@ const MorphingFeatureSection = () => {
             <div className="hidden lg:block h-[300vh]">
                 <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                     {/* Main Unified Glass Container */}
-                    <div className="max-w-[85rem] w-full mx-auto px-6">
-                        <div className="relative overflow-hidden rounded-[3rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[85vh] flex items-center">
+                    <div className="max-w-5xl w-full mx-auto px-6">
+                        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[65vh] flex items-center">
 
                             {/* Subtle Ambient Glows inside the box */}
-                            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
-                            <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
+                            <div className="absolute top-[-20%] right-[-10%] w-[400px] h-[400px] bg-purple-900/20 rounded-full blur-[100px] pointer-events-none" />
+                            <div className="absolute bottom-[-20%] left-[-10%] w-[300px] h-[300px] bg-indigo-900/10 rounded-full blur-[80px] pointer-events-none" />
 
-                            <div className="w-full h-full grid grid-cols-12 gap-12 items-center px-16 relative z-10">
+                            <div className="w-full h-full grid grid-cols-2 gap-8 items-center px-10 relative z-10">
 
-                                {/* LEFT: Text Content (Sticky Position inside relative container) */}
-                                <div className="col-span-5 flex flex-col justify-center h-full relative">
+                                {/* LEFT: Text Content */}
+                                <div className="flex flex-col justify-center h-full relative">
                                     {featuresData.map((feature, idx) => (
                                         <div
                                             key={feature.id}
@@ -327,53 +327,53 @@ const MorphingFeatureSection = () => {
                                                         : 'opacity-0 translate-y-12 blur-sm'
                                                 }`}
                                         >
-                                            <div className="mb-10">
-                                                <div className="inline-flex w-20 h-20 rounded-2xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-xl backdrop-blur-md">
-                                                    <feature.icon className="w-10 h-10 text-white drop-shadow-md" strokeWidth={1.5} />
+                                            <div className="mb-6">
+                                                <div className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-xl backdrop-blur-md">
+                                                    <feature.icon className="w-7 h-7 text-white drop-shadow-md" strokeWidth={1.5} />
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-5xl xl:text-6xl font-inter font-bold text-white mb-8 leading-[1.1]">
+                                            <h3 className="text-3xl xl:text-4xl font-inter font-bold text-white mb-4 leading-[1.1]">
                                                 {feature.titlePrefix} <br />
                                                 <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
                                             </h3>
-                                            <p className="text-xl font-manrope text-white/70 leading-relaxed font-light max-w-md">
+                                            <p className="text-base font-manrope text-white/70 leading-relaxed font-light max-w-sm">
                                                 {feature.text}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* RIGHT: Image Content (Inside the box now) */}
-                                <div className="col-span-7 h-full flex items-center justify-center relative">
+                                {/* RIGHT: Image Content */}
+                                <div className="h-full flex items-center justify-center relative py-6">
                                     {featuresData.map((feature, idx) => (
                                         <div
                                             key={feature.id}
-                                            className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
+                                            className={`absolute inset-0 flex items-center justify-center py-6 transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
                                                     ? 'opacity-100 translate-x-0 scale-100'
                                                     : 'opacity-0 translate-x-12 scale-95'
                                                 }`}
                                         >
                                             {feature.layoutType === "double" ? (
-                                                // Double Image Layout (Card 2)
+                                                // Double Image Layout
                                                 <div className="relative w-full h-full flex items-center justify-center">
                                                     <img
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
-                                                        className="absolute left-[10%] bottom-[10%] h-[75%] w-auto object-contain drop-shadow-2xl z-20 hover:z-40 transition-all duration-500 hover:scale-105"
+                                                        className="absolute left-[5%] bottom-[5%] h-[70%] w-auto object-contain drop-shadow-2xl z-20"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
-                                                        className="absolute right-[10%] top-[10%] h-[75%] w-auto object-contain drop-shadow-2xl z-10 hover:z-40 transition-all duration-500 hover:scale-105"
+                                                        className="absolute right-[5%] top-[5%] h-[70%] w-auto object-contain drop-shadow-2xl z-10"
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout (Zoomed or Fit)
+                                                // Single Image Layout
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className={`w-auto object-contain drop-shadow-2xl ${feature.layoutType === 'fit' ? 'h-[80%]' : 'h-[92%]'}`}
+                                                    className="max-h-full w-auto object-contain drop-shadow-2xl"
                                                 />
                                             )}
                                         </div>
