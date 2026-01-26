@@ -462,9 +462,6 @@ const App = () => {
                         className="h-14 w-auto md:h-16 object-contain drop-shadow-lg"
                     />
                 </div>
-                <div className="relative z-10 hidden md:block">
-                    <StoreButtons />
-                </div>
             </nav>
 
             {/* Main Content Scroll Wrapper */}
