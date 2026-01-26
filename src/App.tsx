@@ -429,6 +429,7 @@ const MorphingFeatureSection = () => {
                                         src={feature.mockupSrc}
                                         alt="App Screen"
                                         className="h-[100%] w-auto object-contain drop-shadow-2xl"
+                                        style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}
                                     />
                                 )}
                             </div>
