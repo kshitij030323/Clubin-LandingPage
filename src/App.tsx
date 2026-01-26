@@ -1,20 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 
-// --- Icons (Inline SVGs to replace external dependency) ---
+// --- Extend Window for HLS.js ---
+declare global {
+    interface Window {
+        Hls: {
+            isSupported(): boolean;
+            Events: { MANIFEST_PARSED: string };
+            new(): {
+                loadSource(src: string): void;
+                attachMedia(video: HTMLVideoElement): void;
+                on(event: string, callback: () => void): void;
+            };
+        };
+    }
+}
 
-const AppleIcon = ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.45-1.02 3.96-.86 1.76.18 3.07.88 3.92 2.15-3.52 1.95-2.9 6.7 1.25 8.16-.32.96-.74 1.9-1.21 2.78zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+// --- Icons (Inline SVGs) ---
+
+const AppleIcon = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
     </svg>
 );
 
-const GooglePlayIcon = ({ className }) => (
+const GooglePlayIcon = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4.09 21.94c-.58.17-1.09-.17-1.09-.9V2.96c0-.73.51-1.06 1.09-.9l.06.02 9.66 8.56-4.14 4.14-5.58 7.16zm12.37-9.37L6.44 2.57c-.55-.3-1.3-.11-1.66.42l8.89 7.9 2.79 1.68zM4.78 21.01l11.67-9.62 2.79 1.68-8.9 7.9c-.35.52-1.1.72-1.65.41l-3.91-2.17zm11.23-6.93l3.66 2.06c.72.41.72 1.06 0 1.47l-3.66 2.06-2.5-2.79 2.5-2.8z" />
+        <path d="M3.609 1.814L13.445 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 9.099l-2.41 2.41-8.526-8.85z" />
     </svg>
 );
 
-const CheckCircle = ({ className, strokeWidth = 2 }) => (
+const CheckCircle = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -30,7 +45,7 @@ const CheckCircle = ({ className, strokeWidth = 2 }) => (
     </svg>
 );
 
-const Music = ({ className, strokeWidth = 2 }) => (
+const Music = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -47,7 +62,7 @@ const Music = ({ className, strokeWidth = 2 }) => (
     </svg>
 );
 
-const Star = ({ className, strokeWidth = 2 }) => (
+const Star = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -94,7 +109,7 @@ const ResourceLoader = () => {
  * Background Video Component using HLS
  */
 const BackgroundVideo = () => {
-    const videoRef = useRef(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
     const videoSrc = "https://customer-cbeadsgr09pnsezs.cloudflarestream.com/257c7359efd4b4aaebcc03aa8fc78a36/manifest/video.m3u8";
@@ -107,7 +122,7 @@ const BackgroundVideo = () => {
 
             if (videoSrc.endsWith('.mp4')) {
                 video.src = videoSrc;
-                video.play().then(() => setIsPlaying(true)).catch(e => console.log("Autoplay blocked", e));
+                video.play().then(() => setIsPlaying(true)).catch((e: unknown) => console.log("Autoplay blocked", e));
                 return;
             }
 
@@ -159,7 +174,7 @@ const BackgroundVideo = () => {
 /**
  * Store Buttons Component
  */
-const StoreButtons = ({ centered = false }) => (
+const StoreButtons = ({ centered = false }: { centered?: boolean }) => (
     <div className={`flex flex-col sm:flex-row gap-4 ${centered ? 'justify-center' : ''}`}>
         <button className="group relative flex items-center justify-center gap-3 bg-[#2b2344] hover:bg-[#352b54] text-white px-6 py-3 rounded-xl border border-[rgba(164,132,215,0.3)] backdrop-blur-sm transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg">
             <AppleIcon className="w-6 h-6 fill-current" />
@@ -184,11 +199,12 @@ const StoreButtons = ({ centered = false }) => (
 /**
  * Scroll Reveal Wrapper
  */
-const ScrollReveal = ({ children, delay = 0 }) => {
+const ScrollReveal = ({ children, delay = 0 }: { children: ReactNode; delay?: number }) => {
     const [isVisible, setIsVisible] = useState(false);
-    const ref = useRef(null);
+    const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const currentRef = ref.current;
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) setIsVisible(true);
@@ -196,9 +212,9 @@ const ScrollReveal = ({ children, delay = 0 }) => {
             { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
         );
 
-        if (ref.current) observer.observe(ref.current);
+        if (currentRef) observer.observe(currentRef);
         return () => {
-            if (ref.current) observer.unobserve(ref.current);
+            if (currentRef) observer.unobserve(currentRef);
         };
     }, []);
 
@@ -224,8 +240,8 @@ const featuresData = [
         text: "Skip the chaos. Clubin makes nights simple and effortless. No more uncertainty at the door.",
         icon: CheckCircle,
         accentColor: "#a484d7",
-        // New zoomed in image
         mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(4).png?raw=true",
+        mockupSrc2: undefined as string | undefined,
         layoutType: "zoomed"
     },
     {
@@ -235,7 +251,6 @@ const featuresData = [
         text: "From techno to hip-hop, find the right vibe instantly. Curated events just for you.",
         icon: Music,
         accentColor: "#f87b52",
-        // Two new images for this card
         mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(5).png?raw=true",
         mockupSrc2: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(6).png?raw=true",
         layoutType: "double"
@@ -247,14 +262,14 @@ const featuresData = [
         text: "Join in seconds and walk in with confidence. Your digital pass is all you need.",
         icon: Star,
         accentColor: "#7b39fc",
-        // Original image, zoomed out layout
         mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(2).png?raw=true",
+        mockupSrc2: undefined as string | undefined,
         layoutType: "fit"
     }
 ];
 
 const MorphingFeatureSection = () => {
-    const containerRef = useRef(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
@@ -291,74 +306,77 @@ const MorphingFeatureSection = () => {
             <div className="hidden lg:block h-[300vh]">
                 <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                     {/* Main Unified Glass Container */}
-                    <div className="max-w-[85rem] w-full mx-auto px-6">
-                        <div className="relative overflow-hidden rounded-[3rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[85vh] flex items-center">
+                    <div className="max-w-6xl w-full mx-auto px-6">
+                        <div className="relative rounded-[2.5rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-3xl shadow-2xl h-[75vh] flex items-center">
 
                             {/* Subtle Ambient Glows inside the box */}
-                            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
-                            <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
+                            <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none" />
+                            <div className="absolute bottom-[-20%] left-[-10%] w-[400px] h-[400px] bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
 
-                            <div className="w-full h-full grid grid-cols-12 gap-12 items-center px-16 relative z-10">
+                            {/* Bottom fade overlay for phone mockups - sits above the images */}
+                            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#120f1d] via-[#120f1d]/90 to-transparent rounded-b-[2.5rem] z-40 pointer-events-none" />
 
-                                {/* LEFT: Text Content (Sticky Position inside relative container) */}
-                                <div className="col-span-5 flex flex-col justify-center h-full relative">
+                            <div className="w-full h-full grid grid-cols-2 gap-8 items-center pl-14 pr-0 relative z-10 overflow-hidden rounded-[2.5rem]">
+
+                                {/* LEFT: Text Content */}
+                                <div className="flex flex-col justify-center h-full relative">
                                     {featuresData.map((feature, idx) => (
                                         <div
                                             key={feature.id}
                                             className={`absolute left-0 right-0 flex flex-col justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
-                                                    ? 'opacity-100 translate-y-0 blur-0'
-                                                    : idx < activeIndex
-                                                        ? 'opacity-0 -translate-y-12 blur-sm'
-                                                        : 'opacity-0 translate-y-12 blur-sm'
+                                                ? 'opacity-100 translate-y-0 blur-0'
+                                                : idx < activeIndex
+                                                    ? 'opacity-0 -translate-y-12 blur-sm'
+                                                    : 'opacity-0 translate-y-12 blur-sm'
                                                 }`}
                                         >
-                                            <div className="mb-10">
-                                                <div className="inline-flex w-20 h-20 rounded-2xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-xl backdrop-blur-md">
-                                                    <feature.icon className="w-10 h-10 text-white drop-shadow-md" strokeWidth={1.5} />
+                                            <div className="mb-8">
+                                                <div className="inline-flex w-16 h-16 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-xl backdrop-blur-md">
+                                                    <feature.icon className="w-8 h-8 text-white drop-shadow-md" strokeWidth={1.5} />
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-5xl xl:text-6xl font-inter font-bold text-white mb-8 leading-[1.1]">
+                                            <h3 className="text-4xl xl:text-5xl font-inter font-bold text-white mb-6 leading-[1.1]">
                                                 {feature.titlePrefix} <br />
                                                 <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
                                             </h3>
-                                            <p className="text-xl font-manrope text-white/70 leading-relaxed font-light max-w-md">
+                                            <p className="text-lg font-manrope text-white/70 leading-relaxed font-light max-w-md">
                                                 {feature.text}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
 
-                                {/* RIGHT: Image Content (Inside the box now) */}
-                                <div className="col-span-7 h-full flex items-center justify-center relative">
+                                {/* RIGHT: Image Content - phone extends to bottom edge of box */}
+                                <div className="h-full flex items-end justify-end relative">
                                     {featuresData.map((feature, idx) => (
                                         <div
                                             key={feature.id}
-                                            className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
-                                                    ? 'opacity-100 translate-x-0 scale-100'
-                                                    : 'opacity-0 translate-x-12 scale-95'
+                                            className={`absolute inset-0 flex items-end justify-end transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
+                                                ? 'opacity-100 translate-x-0 scale-100'
+                                                : 'opacity-0 translate-x-12 scale-95'
                                                 }`}
                                         >
                                             {feature.layoutType === "double" ? (
-                                                // Double Image Layout (Card 2)
-                                                <div className="relative w-full h-full flex items-center justify-center">
+                                                // Double Image Layout - phones extending to bottom
+                                                <div className="relative w-full h-full">
                                                     <img
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
-                                                        className="absolute left-[10%] bottom-[10%] h-[75%] w-auto object-contain drop-shadow-2xl z-20 hover:z-40 transition-all duration-500 hover:scale-105"
+                                                        className="absolute left-[8%] bottom-[-20px] h-[105%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
-                                                        className="absolute right-[10%] top-[10%] h-[75%] w-auto object-contain drop-shadow-2xl z-10 hover:z-40 transition-all duration-500 hover:scale-105"
+                                                        className="absolute right-[0%] top-[-5%] h-[65%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                                     />
                                                 </div>
                                             ) : (
-                                                // Single Image Layout (Zoomed or Fit)
+                                                // Single Image Layout - phone extends past bottom edge
                                                 <img
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
-                                                    className={`w-auto object-contain drop-shadow-2xl ${feature.layoutType === 'fit' ? 'h-[80%]' : 'h-[92%]'}`}
+                                                    className="absolute right-[0%] bottom-[-20px] h-[105%] w-auto object-contain drop-shadow-2xl"
                                                 />
                                             )}
                                         </div>
@@ -371,68 +389,150 @@ const MorphingFeatureSection = () => {
             </div>
 
             {/* MOBILE LAYOUT (Unified Cards) */}
-            <div className="lg:hidden flex flex-col gap-16 py-12 px-4">
+            <div className="lg:hidden flex flex-col gap-12 py-12 px-4">
                 {featuresData.map((feature) => (
                     <ScrollReveal key={feature.id}>
-                        {/* Single Unified Card for Mobile */}
-                        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/15 bg-[#120f1d]/80 backdrop-blur-2xl shadow-2xl">
-                            <div className="p-8 pb-0 flex flex-col gap-6">
-                                <div className="flex items-start justify-between">
-                                    <div className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-lg">
-                                        <feature.icon className="w-7 h-7 text-white" strokeWidth={1.5} />
+                        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#120f1d]/80 backdrop-blur-2xl shadow-2xl">
+                            {/* Text Content */}
+                            <div className="p-6 pb-0">
+                                <div className="mb-4">
+                                    <div className="inline-flex w-12 h-12 rounded-lg bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-lg">
+                                        <feature.icon className="w-6 h-6 text-white" strokeWidth={1.5} />
                                     </div>
                                 </div>
-
-                                <div>
-                                    <h3 className="text-3xl font-inter font-bold text-white mb-3 leading-tight">
-                                        {feature.titlePrefix} <br />
-                                        <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
-                                    </h3>
-                                    <p className="text-base font-manrope text-white/70 leading-relaxed font-light">
-                                        {feature.text}
-                                    </p>
-                                </div>
+                                <h3 className="text-2xl font-inter font-bold text-white mb-2 leading-tight">
+                                    {feature.titlePrefix}{' '}
+                                    <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
+                                </h3>
+                                <p className="text-sm font-manrope text-white/60 leading-relaxed font-light">
+                                    {feature.text}
+                                </p>
                             </div>
 
-                            {/* Image Area */}
-                            <div className="mt-8 flex justify-center items-end overflow-hidden">
+                            {/* Image Area - phone ends at box edge with bottom fade */}
+                            <div className="mt-6 flex justify-center items-end h-[350px] relative">
+                                {/* Bottom fade overlay */}
+                                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#120f1d] via-[#120f1d]/90 to-transparent z-30 pointer-events-none rounded-b-[2rem]" />
 
                                 {feature.layoutType === "double" ? (
-                                    // Double Layout for Mobile
-                                    <div className="relative w-full h-[350px] flex justify-center mt-4">
+                                    <div className="relative w-full h-full overflow-hidden">
                                         <img
                                             src={feature.mockupSrc}
                                             alt="Screen 1"
-                                            className="absolute left-[-10px] bottom-0 w-[60%] h-auto object-contain drop-shadow-2xl z-20"
+                                            className="absolute left-[10%] bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                         />
                                         <img
                                             src={feature.mockupSrc2}
                                             alt="Screen 2"
-                                            className="absolute right-[-10px] top-0 w-[60%] h-auto object-contain drop-shadow-2xl z-10"
+                                            className="absolute right-[5%] top-[-5%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                         />
                                     </div>
-                                ) : feature.layoutType === "fit" ? (
-                                    // Fit Layout (Zoomed Out - Card 3)
-                                    <img
-                                        src={feature.mockupSrc}
-                                        alt="App Screen"
-                                        className="w-full max-w-[280px] h-auto object-contain drop-shadow-2xl translate-y-2 mb-8"
-                                    />
                                 ) : (
-                                    // Zoomed Layout (Card 1)
                                     <img
                                         src={feature.mockupSrc}
                                         alt="App Screen"
-                                        className="w-[140%] max-w-none h-auto object-cover translate-y-10 drop-shadow-2xl"
+                                        className="absolute bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-10"
                                     />
                                 )}
-
                             </div>
                         </div>
                     </ScrollReveal>
                 ))}
             </div>
 
+        </div >
+    );
+};
+
+// --- Main App Component ---
+
+const App = () => {
+    return (
+        <div className="min-h-screen font-manrope bg-black text-white selection:bg-[#7b39fc] selection:text-white">
+            <ResourceLoader />
+            <BackgroundVideo />
+
+            {/* Navbar */}
+            <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 md:py-6 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
+                <div className="relative z-10 flex items-center gap-3">
+                    <img
+                        src="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
+                        alt="Clubin Logo"
+                        className="h-14 w-auto md:h-16 object-contain drop-shadow-lg"
+                    />
+                </div>
+                <div className="relative z-10 hidden md:block">
+                    <StoreButtons />
+                </div>
+            </nav>
+
+            {/* Main Content Scroll Wrapper */}
+            <div className="relative z-30 pt-32 pb-20">
+
+                {/* Hero Section */}
+                <div className="px-6 md:px-12 min-h-[85vh] flex flex-col justify-center items-center text-center max-w-5xl mx-auto mb-20">
+                    <ScrollReveal>
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-inter font-extrabold tracking-tighter text-white mb-6 drop-shadow-2xl">
+                            Get In.<br />
+                            <span className="font-instrument italic font-normal text-[#a484d7]">No Lines. No Stress.</span>
+                        </h1>
+                    </ScrollReveal>
+
+                    <ScrollReveal delay={200}>
+                        <p className="text-xl md:text-2xl font-manrope text-gray-200 max-w-2xl mx-auto mb-10 leading-relaxed font-light drop-shadow-md">
+                            The easiest way to get into the best nights — <br className="hidden md:block" />without the hassle.
+                        </p>
+                    </ScrollReveal>
+
+                    <ScrollReveal delay={400}>
+                        <div className="flex flex-col items-center gap-6">
+                            <StoreButtons centered />
+                            <div className="text-sm font-manrope text-white/50 animate-pulse">
+                                Scroll to explore
+                            </div>
+                        </div>
+                    </ScrollReveal>
+                </div>
+
+                {/* Morphing Features Section */}
+                <MorphingFeatureSection />
+
+                {/* Final CTA Section */}
+                <div className="px-6 md:px-12 min-h-[60vh] flex flex-col justify-center items-center text-center max-w-4xl mx-auto mt-20">
+                    <ScrollReveal>
+                        <div className="p-8 md:p-16 rounded-3xl bg-gradient-to-b from-[rgba(85,80,110,0.4)] to-black border border-[rgba(164,132,215,0.3)] backdrop-blur-xl">
+                            <h2 className="text-4xl md:text-6xl font-inter font-bold mb-8 tracking-tight">
+                                Your nights <span className="font-instrument italic font-normal text-[#f87b52]">start here.</span>
+                            </h2>
+
+                            <div className="mb-10">
+                                <StoreButtons centered />
+                            </div>
+
+                            <div className="flex justify-center items-center gap-2 text-white/40 text-sm font-cabin">
+                                <span>Clubin © 2026</span>
+                                <span>•</span>
+                                <span>Experience Nightlife</span>
+                            </div>
+                        </div>
+                    </ScrollReveal>
+                </div>
+
+            </div>
+
+            <style>{`
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .font-cabin { font-family: 'Cabin', sans-serif; }
+        .font-instrument { font-family: 'Instrument Serif', serif; }
+
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: black; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+      `}</style>
         </div>
     );
 };

@@ -233,10 +233,10 @@ const MorphingFeatureSection = () => {
                                     <div
                                         key={feature.id}
                                         className={`absolute inset-0 p-10 flex flex-col justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
-                                                ? 'opacity-100 translate-y-0 scale-100'
-                                                : idx < activeIndex
-                                                    ? 'opacity-0 -translate-y-8 scale-95'
-                                                    : 'opacity-0 translate-y-8 scale-95'
+                                            ? 'opacity-100 translate-y-0 scale-100'
+                                            : idx < activeIndex
+                                                ? 'opacity-0 -translate-y-8 scale-95'
+                                                : 'opacity-0 translate-y-8 scale-95'
                                             }`}
                                     >
                                         <div className="mb-8">
@@ -263,14 +263,18 @@ const MorphingFeatureSection = () => {
                                 <div
                                     key={feature.id}
                                     className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out transform-gpu ${idx === activeIndex
-                                            ? 'opacity-100 translate-y-0 scale-100 blur-0'
-                                            : 'opacity-0 translate-y-20 scale-95 blur-sm'
+                                        ? 'opacity-100 translate-y-0 scale-100 blur-0'
+                                        : 'opacity-0 translate-y-20 scale-95 blur-sm'
                                         }`}
                                 >
                                     <img
                                         src={feature.mockupSrc}
                                         alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
                                         className="h-full max-h-[90vh] w-auto object-contain drop-shadow-2xl hover:scale-[1.02] transition-transform duration-700"
+                                        style={feature.id === 1 ? {
+                                            maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+                                            WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
+                                        } : {}}
                                     />
                                 </div>
                             ))}
@@ -309,6 +313,10 @@ const MorphingFeatureSection = () => {
                                     alt="App Screen"
                                     // Changed max-w from 280px to 360px (or full width on very small screens) to make it "BIG"
                                     className="w-full max-w-[360px] h-auto object-contain drop-shadow-2xl"
+                                    style={feature.id === 1 ? {
+                                        maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+                                        WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
+                                    } : {}}
                                 />
                             </div>
 
