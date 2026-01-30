@@ -160,7 +160,7 @@ const featuresData = [
         id: 1,
         titlePrefix: "Get In.",
         titleSuffix: "No Stress.",
-        text: "Skip the chaos. Clubin makes nights simple and effortless. No more uncertainty at the door.",
+        text: "Skip the chaos. Clubin makes events simple and effortless. No more uncertainty at the door.",
         icon: CheckCircle,
         accentColor: "#a484d7",
         mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone.png?raw=true"
@@ -168,7 +168,7 @@ const featuresData = [
     {
         id: 2,
         titlePrefix: "One App.",
-        titleSuffix: "Every Night.",
+        titleSuffix: "Every Event.",
         text: "From techno to hip-hop, find the right vibe instantly. Curated events just for you.",
         icon: Music,
         accentColor: "#f87b52",
@@ -366,7 +366,7 @@ const App = () => {
 
                     <ScrollReveal delay={200}>
                         <p className="text-xl md:text-2xl font-manrope text-gray-200 max-w-2xl mx-auto mb-10 leading-relaxed font-light drop-shadow-md">
-                            The easiest way to get into the best nights — <br className="hidden md:block" />without the hassle.
+                            The easiest way to get into the best events — <br className="hidden md:block" />without the hassle.
                         </p>
                     </ScrollReveal>
 
@@ -388,7 +388,7 @@ const App = () => {
                     <ScrollReveal>
                         <div className="p-8 md:p-16 rounded-3xl bg-gradient-to-b from-[rgba(85,80,110,0.4)] to-black border border-[rgba(164,132,215,0.3)] backdrop-blur-xl">
                             <h2 className="text-4xl md:text-6xl font-inter font-bold mb-8 tracking-tight">
-                                Your nights <span className="font-instrument italic font-normal text-[#f87b52]">start here.</span>
+                                Your events <span className="font-instrument italic font-normal text-[#f87b52]">start here.</span>
                             </h2>
 
                             <div className="mb-10">
@@ -398,7 +398,7 @@ const App = () => {
                             <div className="flex justify-center items-center gap-2 text-white/40 text-sm font-cabin">
                                 <span>Clubin © 2024</span>
                                 <span>•</span>
-                                <span>Experience Nightlife</span>
+                                <span>Experience Events</span>
                             </div>
                         </div>
                     </ScrollReveal>
