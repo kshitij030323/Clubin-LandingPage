@@ -1,13 +1,237 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clubin - Get In. No Lines. No Stress.</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary SEO Meta Tags -->
+  <title>Clubin - Best Nightclub & Party Event Entry App | Bangalore Mumbai Delhi NCR Gurgaon Noida Pune Goa</title>
+  <meta name="description"
+    content="Clubin is India's #1 nightclub and party event entry app. Skip the queue at the best clubs in Bangalore, Mumbai, Delhi, Delhi NCR, Noida, Gurgaon, Gurugram, Lucknow, Pune, Goa & Chandigarh. Get on the guest list, find exclusive events, and walk in stress-free. Download now!" />
+  <meta name="keywords"
+    content="club in bangalore, clubs in bangalore, best clubs bangalore, nightclub bangalore, party in bangalore, bangalore nightlife, club in mumbai, clubs in mumbai, best clubs mumbai, nightclub mumbai, mumbai nightlife, party mumbai, club in delhi, clubs in delhi, best clubs delhi, nightclub delhi, delhi nightlife, party delhi, club in noida, clubs in noida, best clubs noida, nightclub noida, noida nightlife, party noida, club in delhi ncr, clubs in delhi ncr, best clubs delhi ncr, nightclub delhi ncr, delhi ncr nightlife, party delhi ncr, club in gurgaon, clubs in gurgaon, best clubs gurgaon, nightclub gurgaon, gurgaon nightlife, party gurgaon, club in gurugram, clubs in gurugram, best clubs gurugram, nightclub gurugram, gurugram nightlife, party gurugram, club in lucknow, clubs in lucknow, best clubs lucknow, nightclub lucknow, lucknow nightlife, party lucknow, club in pune, clubs in pune, best clubs pune, nightclub pune, pune nightlife, party pune, club in goa, clubs in goa, best clubs goa, nightclub goa, goa nightlife, party goa, beach party goa, club in chandigarh, clubs in chandigarh, best clubs chandigarh, nightclub chandigarh, chandigarh nightlife, party chandigarh, clubin, club entry app, guestlist app, nightclub app, party app, event entry, skip the line, vip entry, nightlife app india, best party app, club booking app, night out app, weekend party, dj night, electronic music, edm clubs, hip hop clubs, bollywood nights, ladies night, pub in bangalore, pub in mumbai, pub in delhi, pub in noida, pub in gurgaon, pub in lucknow, lounge bar, rooftop club, underground club, cyber hub clubs, hauz khas clubs, connaught place clubs, koramangala clubs, indiranagar clubs" />
+  <meta name="author" content="Clubin" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <link rel="canonical" href="https://clubin.co.in/" />
+
+  <!-- Geo Targeting for India -->
+  <meta name="geo.region" content="IN" />
+  <meta name="geo.placename" content="India" />
+  <meta name="geo.position" content="20.5937;78.9629" />
+  <meta name="ICBM" content="20.5937, 78.9629" />
+  <meta name="language" content="English" />
+  <meta name="distribution" content="global" />
+  <meta name="rating" content="general" />
+  <meta name="revisit-after" content="3 days" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://clubin.co.in/" />
+  <meta property="og:title" content="Clubin - Best Nightclub & Party Event Entry App in India" />
+  <meta property="og:description"
+    content="Skip the queue at the best clubs in Bangalore, Mumbai, Delhi, Delhi NCR, Noida, Gurgaon, Lucknow, Pune, Goa & Chandigarh. Get on the guest list and walk in stress-free. Download Clubin now!" />
+  <meta property="og:image"
+    content="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="Clubin" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://clubin.co.in/" />
+  <meta name="twitter:title" content="Clubin - Best Nightclub & Party Event Entry App in India" />
+  <meta name="twitter:description"
+    content="Skip the queue at the best clubs in Bangalore, Mumbai, Delhi, Delhi NCR, Noida, Gurgaon, Lucknow, Pune, Goa & Chandigarh. Get on the guest list and walk in stress-free!" />
+  <meta name="twitter:image"
+    content="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png" />
+
+  <!-- Apple Mobile Web App -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Clubin" />
+
+  <!-- Microsoft Tiles -->
+  <meta name="msapplication-TileColor" content="#7b39fc" />
+  <meta name="theme-color" content="#7b39fc" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/favicon.ico" />
+
+  <!-- Preconnect to external domains for faster resource loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="preconnect" href="https://customer-cbeadsgr09pnsezs.cloudflarestream.com" />
+  <link rel="preconnect" href="https://raw.githubusercontent.com" />
+
+  <!-- Preload Google Fonts (moved from JavaScript for faster loading) -->
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap"
+    media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" />
+  </noscript>
+
+  <!-- Preload hero poster image for faster LCP -->
+  <link rel="preload" as="image"
+    href="https://customer-cbeadsgr09pnsezs.cloudflarestream.com/257c7359efd4b4aaebcc03aa8fc78a36/thumbnails/thumbnail.jpg"
+    fetchpriority="high" />
+
+  <!-- Schema.org JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://clubin.co.in/#organization",
+          "name": "Clubin",
+          "url": "https://clubin.co.in",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
+          },
+          "description": "India's #1 nightclub and party event entry app for Bangalore, Mumbai, Delhi, Delhi NCR, Noida, Gurgaon, Lucknow, Pune, Goa and Chandigarh",
+          "foundingDate": "2024",
+          "areaServed": [
+            {"@type": "City", "name": "Bangalore", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Mumbai", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Delhi", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Noida", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Gurgaon", "alternativeName": "Gurugram", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Lucknow", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Pune", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Goa", "containedInPlace": {"@type": "Country", "name": "India"}},
+            {"@type": "City", "name": "Chandigarh", "containedInPlace": {"@type": "Country", "name": "India"}}
+          ],
+          "sameAs": []
+        },
+        {
+          "@type": "MobileApplication",
+          "@id": "https://clubin.co.in/#app",
+          "name": "Clubin - Nightclub & Event Entry App",
+          "operatingSystem": ["iOS", "Android"],
+          "applicationCategory": "EntertainmentApplication",
+          "description": "Skip the queue at the best nightclubs and party events in Bangalore, Mumbai, Delhi, Delhi NCR, Noida, Gurgaon, Lucknow, Pune, Goa and Chandigarh. Get on the guest list, discover exclusive events, and walk in stress-free.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "INR"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "1000",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "author": {
+            "@id": "https://clubin.co.in/#organization"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://clubin.co.in/#website",
+          "url": "https://clubin.co.in",
+          "name": "Clubin - Best Nightclub & Party Event Entry App in India",
+          "description": "Find and enter the best nightclubs and party events in Bangalore, Mumbai, Delhi, Delhi NCR, Noida, Gurgaon, Lucknow, Pune, Goa and Chandigarh",
+          "publisher": {
+            "@id": "https://clubin.co.in/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://clubin.co.in/?s={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://clubin.co.in/#webpage",
+          "url": "https://clubin.co.in",
+          "name": "Clubin - Best Nightclub & Party Event Entry App | Bangalore Mumbai Delhi NCR Gurgaon Noida Pune Goa",
+          "isPartOf": {
+            "@id": "https://clubin.co.in/#website"
+          },
+          "about": {
+            "@id": "https://clubin.co.in/#app"
+          },
+          "description": "Download Clubin to skip the queue at the best clubs in Bangalore, Mumbai, Delhi, Delhi NCR, Noida, Gurgaon, Lucknow, Pune, Goa & Chandigarh. Get on the guest list and walk in stress-free."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is the best app for club entry in Bangalore?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Clubin is the best app for nightclub entry in Bangalore. It lets you skip the queue, get on guest lists, and find the best parties and events in the city."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How can I skip the line at clubs in Mumbai?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Download Clubin to skip the line at the best clubs in Mumbai. The app provides instant guest list access and hassle-free entry to top nightclubs."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What are the best nightclubs in Delhi?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Clubin helps you discover and enter the best nightclubs in Delhi. From EDM clubs to Bollywood nights, find curated events and get VIP-style entry."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How to find parties in Goa?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Use Clubin to find the hottest beach parties and nightclub events in Goa. Get guest list access to exclusive venues and walk in without the hassle."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Clubin available in Pune and Chandigarh?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Clubin is available in Pune and Chandigarh. Discover the best nightlife spots and events in both cities with easy guest list entry."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What are the best clubs in Noida and Gurgaon?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Clubin covers all the top clubs in Noida and Gurgaon (Gurugram) including Cyber Hub hotspots. Get instant guest list access to the best Delhi NCR nightlife venues."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How to find nightclubs in Lucknow?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Download Clubin to discover and enter the best nightclubs and party venues in Lucknow. Skip the queue and enjoy hassle-free entry to top events."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

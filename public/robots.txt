@@ -1,0 +1,24 @@
+# Clubin - Nightclub & Event Entry App
+# https://clubin.co.in
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://clubin.co.in/sitemap.xml
+
+# Optimize crawl rate
+Crawl-delay: 1
+
+# Allow all search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /

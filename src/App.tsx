@@ -84,21 +84,17 @@ const Star = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?
  */
 const ResourceLoader = () => {
     useEffect(() => {
-        // Load Google Fonts
-        const link = document.createElement('link');
-        link.href = "https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap";
-        link.rel = "stylesheet";
-        document.head.appendChild(link);
-
-        // Load HLS.js
+        // Load HLS.js (Google Fonts moved to index.html for faster loading)
         const script = document.createElement('script');
         script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js";
         script.async = true;
+        script.defer = true;
         document.head.appendChild(script);
 
         return () => {
-            document.head.removeChild(link);
-            document.head.removeChild(script);
+            if (script.parentNode) {
+                document.head.removeChild(script);
+            }
         };
     }, []);
 
@@ -166,6 +162,9 @@ const BackgroundVideo = () => {
                 muted
                 loop
                 autoPlay
+                preload="metadata"
+                width="1920"
+                height="1080"
             />
         </div>
     );
@@ -364,11 +363,19 @@ const MorphingFeatureSection = () => {
                                                         src={feature.mockupSrc}
                                                         alt="App Screen 1"
                                                         className="absolute left-[8%] bottom-[-20px] h-[105%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
+                                                        width="280"
+                                                        height="570"
+                                                        loading="lazy"
+                                                        decoding="async"
                                                     />
                                                     <img
                                                         src={feature.mockupSrc2}
                                                         alt="App Screen 2"
                                                         className="absolute right-[0%] top-[-5%] h-[65%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
+                                                        width="280"
+                                                        height="570"
+                                                        loading="lazy"
+                                                        decoding="async"
                                                     />
                                                 </div>
                                             ) : (
@@ -377,6 +384,10 @@ const MorphingFeatureSection = () => {
                                                     src={feature.mockupSrc}
                                                     alt={`${feature.titlePrefix} ${feature.titleSuffix}`}
                                                     className="absolute right-[0%] bottom-[-20px] h-[105%] w-auto object-contain drop-shadow-2xl"
+                                                    width="280"
+                                                    height="570"
+                                                    loading="lazy"
+                                                    decoding="async"
                                                 />
                                             )}
                                         </div>
@@ -420,11 +431,19 @@ const MorphingFeatureSection = () => {
                                             src={feature.mockupSrc}
                                             alt="Screen 1"
                                             className="absolute left-[10%] bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
+                                            width="200"
+                                            height="408"
+                                            loading="lazy"
+                                            decoding="async"
                                         />
                                         <img
                                             src={feature.mockupSrc2}
                                             alt="Screen 2"
                                             className="absolute right-[5%] top-[-5%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
+                                            width="200"
+                                            height="408"
+                                            loading="lazy"
+                                            decoding="async"
                                         />
                                     </div>
                                 ) : (
@@ -432,6 +451,10 @@ const MorphingFeatureSection = () => {
                                         src={feature.mockupSrc}
                                         alt="App Screen"
                                         className="absolute bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-10"
+                                        width="200"
+                                        height="408"
+                                        loading="lazy"
+                                        decoding="async"
                                     />
                                 )}
                             </div>
@@ -460,6 +483,9 @@ const App = () => {
                         src="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
                         alt="Clubin Logo"
                         className="h-14 w-auto md:h-16 object-contain drop-shadow-lg"
+                        width="64"
+                        height="64"
+                        fetchPriority="high"
                     />
                 </div>
             </nav>
