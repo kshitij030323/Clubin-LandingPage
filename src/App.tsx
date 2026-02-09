@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 // --- Extend Window for HLS.js ---
 declare global {
@@ -488,6 +489,12 @@ const App = () => {
                         fetchPriority="high"
                     />
                 </div>
+                <Link
+                    to="/clubs"
+                    className="relative z-10 px-5 py-2.5 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-sm font-semibold rounded-xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/20"
+                >
+                    Browse Clubs
+                </Link>
             </nav>
 
             {/* Main Content Scroll Wrapper */}
