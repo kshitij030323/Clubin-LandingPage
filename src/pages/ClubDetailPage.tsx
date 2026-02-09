@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import type { Club, Event } from '../types';
 import { fetchClubDetails, formatDate, formatTime } from '../api';
+import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, Loader2, ExternalLink } from 'lucide-react';
 
 export function ClubDetailPage() {
-    const { city, clubId } = useParams<{ city: string; clubId: string }>();
+    const { clubId } = useParams<{ city: string; clubId: string }>();
     const navigate = useNavigate();
     const [club, setClub] = useState<Club | null>(null);
     const [loading, setLoading] = useState(true);
@@ -29,6 +29,21 @@ export function ClubDetailPage() {
         }
         loadClub();
     }, [clubId]);
+
+    // SEO
+    useSEO({
+        title: club ? `${club.name} - Nightclub in ${club.location} | Clubin` : 'Club | Clubin',
+        description: club ? `${club.name} in ${club.location}. ${club.description || 'Book guestlists and VIP tables on Clubin.'}` : undefined,
+        image: club?.imageUrl,
+        structuredData: club ? {
+            '@context': 'https://schema.org',
+            '@type': 'NightClub',
+            name: club.name,
+            address: club.address || club.location,
+            image: club.imageUrl,
+            description: club.description,
+        } : undefined,
+    });
 
     // Filter upcoming events
     const upcomingEvents = club?.events?.filter(
@@ -59,23 +74,6 @@ export function ClubDetailPage() {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope">
-            <Helmet>
-                <title>{club.name} - Nightclub in {club.location} | Clubin</title>
-                <meta
-                    name="description"
-                    content={`${club.name} in ${club.location}. ${club.description || 'Book guestlists and VIP tables on Clubin.'}`}
-                />
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'NightClub',
-                        name: club.name,
-                        address: club.address || club.location,
-                        image: club.imageUrl,
-                        description: club.description,
-                    })}
-                </script>
-            </Helmet>
 
             {/* Hero Image */}
             <div className="relative h-64 md:h-96">

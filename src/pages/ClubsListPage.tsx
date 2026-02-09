@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import type { Club } from '../types';
 import { CITIES } from '../types';
 import { fetchClubs } from '../api';
+import { useSEO } from '../hooks/useSEO';
 import { MapPin, Calendar, ArrowLeft, Search, Loader2 } from 'lucide-react';
 
 export function ClubsListPage() {
@@ -20,6 +20,12 @@ export function ClubsListPage() {
     );
     const displayCity = cityData?.label || city || 'All Cities';
     const cityParam = cityData?.id || city;
+
+    // SEO
+    useSEO({
+        title: `Best Nightclubs in ${displayCity} | Clubin`,
+        description: `Discover the hottest nightclubs and party venues in ${displayCity}. Book guestlists and get VIP table reservations on Clubin.`,
+    });
 
     useEffect(() => {
         async function loadClubs() {
@@ -46,13 +52,6 @@ export function ClubsListPage() {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope">
-            <Helmet>
-                <title>Best Nightclubs in {displayCity} | Clubin</title>
-                <meta
-                    name="description"
-                    content={`Discover the hottest nightclubs and party venues in ${displayCity}. Book guestlists and get VIP table reservations on Clubin.`}
-                />
-            </Helmet>
 
             {/* Header */}
             <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/10">

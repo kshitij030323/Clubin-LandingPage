@@ -1,35 +1,32 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
 import './index.css'
 import App from './App.tsx'
 import { LocationSelectPage, ClubsListPage, ClubDetailPage, EventDetailPage } from './pages'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HelmetProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Home page (existing landing page) */}
-          <Route path="/" element={<App />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Home page (existing landing page) */}
+        <Route path="/" element={<App />} />
 
-          {/* Clubs browsing routes */}
-          <Route path="/clubs" element={<LocationSelectPage />} />
-          <Route path="/clubs/:city" element={<ClubsListPage />} />
-          <Route path="/clubs/:city/:clubId" element={<ClubDetailPage />} />
+        {/* Clubs browsing routes */}
+        <Route path="/clubs" element={<LocationSelectPage />} />
+        <Route path="/clubs/:city" element={<ClubsListPage />} />
+        <Route path="/clubs/:city/:clubId" element={<ClubDetailPage />} />
 
-          {/* Event routes */}
-          <Route path="/events/:eventId" element={<EventDetailPage />} />
+        {/* Event routes */}
+        <Route path="/events/:eventId" element={<EventDetailPage />} />
 
-          {/* Short link routes */}
-          <Route path="/e/:code" element={<EventDetailPage />} />
-          <Route path="/c/:code" element={<ClubDetailPage />} />
+        {/* Short link routes */}
+        <Route path="/e/:code" element={<EventDetailPage />} />
+        <Route path="/c/:code" element={<ClubDetailPage />} />
 
-          {/* Fallback to home */}
-          <Route path="*" element={<App />} />
-        </Routes>
-      </BrowserRouter>
-    </HelmetProvider>
+        {/* Fallback to home */}
+        <Route path="*" element={<App />} />
+      </Routes>
+    </BrowserRouter>
   </StrictMode>,
 )

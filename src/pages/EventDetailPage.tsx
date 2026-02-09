@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
+import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, Loader2, Share2, Ticket, Users, Check, Copy, ExternalLink } from 'lucide-react';
 
 export function EventDetailPage() {
@@ -46,6 +46,35 @@ export function EventDetailPage() {
         }
         loadEvent();
     }, [eventId, code]);
+
+    // SEO
+    const isGuestlistOpen = event?.guestlistStatus === 'open' || event?.guestlistStatus === 'closing';
+    useSEO({
+        title: event ? `${event.title} at ${event.club} - ${formatDate(event.date)} | Clubin` : 'Event | Clubin',
+        description: event ? `${event.title} at ${event.club} on ${formatDate(event.date)}. ${event.description?.substring(0, 150) || 'Book your spot on Clubin!'}` : undefined,
+        image: event?.imageUrl,
+        structuredData: event ? {
+            '@context': 'https://schema.org',
+            '@type': 'Event',
+            name: event.title,
+            startDate: event.date,
+            location: {
+                '@type': 'Place',
+                name: event.club,
+                address: event.location,
+            },
+            image: event.imageUrl,
+            description: event.description,
+            offers: {
+                '@type': 'Offer',
+                price: event.price,
+                priceCurrency: 'INR',
+                availability: isGuestlistOpen
+                    ? 'https://schema.org/InStock'
+                    : 'https://schema.org/SoldOut',
+            },
+        } : undefined,
+    });
 
     const handleShare = async () => {
         if (!event) return;
@@ -113,43 +142,8 @@ export function EventDetailPage() {
         );
     }
 
-    const isGuestlistOpen = event.guestlistStatus === 'open' || event.guestlistStatus === 'closing';
-
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope pb-24">
-            <Helmet>
-                <title>{event.title} at {event.club} - {formatDate(event.date)} | Clubin</title>
-                <meta
-                    name="description"
-                    content={`${event.title} at ${event.club} on ${formatDate(event.date)}. ${event.description?.substring(0, 150) || 'Book your spot on Clubin!'}`}
-                />
-                <meta property="og:title" content={`${event.title} - ${event.club} | Clubin`} />
-                <meta property="og:description" content={event.description?.substring(0, 150) || 'Book your spot on Clubin!'} />
-                <meta property="og:image" content={event.imageUrl} />
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'Event',
-                        name: event.title,
-                        startDate: event.date,
-                        location: {
-                            '@type': 'Place',
-                            name: event.club,
-                            address: event.location,
-                        },
-                        image: event.imageUrl,
-                        description: event.description,
-                        offers: {
-                            '@type': 'Offer',
-                            price: event.price,
-                            priceCurrency: 'INR',
-                            availability: isGuestlistOpen
-                                ? 'https://schema.org/InStock'
-                                : 'https://schema.org/SoldOut',
-                        },
-                    })}
-                </script>
-            </Helmet>
 
             {/* Hero Image/Video */}
             <div className="relative h-72 md:h-[28rem]">
