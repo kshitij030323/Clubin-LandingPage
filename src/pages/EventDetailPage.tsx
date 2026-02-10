@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, ArrowLeft, Calendar, Clock, Loader2, Share2, Ticket, Users, Check, Copy, ExternalLink } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, Clock, Loader2, Share2, Ticket, Check, Copy, ExternalLink } from 'lucide-react';
 
 export function EventDetailPage() {
     const { eventId, code } = useParams<{ eventId?: string; code?: string }>();
@@ -14,6 +14,15 @@ export function EventDetailPage() {
     const [shortUrl, setShortUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+
+    // Track screen size for performance
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         async function loadEvent() {
@@ -141,173 +150,307 @@ export function EventDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope pb-24">
+        <div className="min-h-screen bg-[#0f0a1e] md:bg-[#0a0a0a] text-white font-manrope">
+            {isDesktop ? (
+                /* Desktop Layout - 35% Left (Media) / 65% Right (Content) */
+                <div className="h-screen overflow-hidden flex animate-in fade-in duration-500">
+                    {/* Left Column: Media (35%) */}
+                    <div className="w-[35%] h-full relative border-r border-white/5 bg-black">
+                        {event.videoUrl ? (
+                            <video
+                                src={event.videoUrl}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="w-full h-full object-cover opacity-80"
+                            />
+                        ) : (
+                            <img
+                                src={event.imageUrl}
+                                alt={event.title}
+                                className="w-full h-full object-cover opacity-80"
+                            />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-90" />
 
-            {/* Hero Image/Video */}
-            <div className="relative h-64 sm:h-80 md:h-96 lg:h-[28rem]">
-                {event.videoUrl ? (
-                    <video
-                        src={event.videoUrl}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <img
-                        src={event.imageUrl}
-                        alt={event.title}
-                        className="w-full h-full object-cover"
-                    />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent" />
-
-                {/* Top Bar */}
-                <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                        onClick={handleShare}
-                        className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
-                    >
-                        <Share2 className="w-5 h-5" />
-                    </button>
-                </div>
-            </div>
-
-            {/* Event Info - two column on large screens */}
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-12 sm:-mt-16 relative z-10">
-                <div className="lg:grid lg:grid-cols-[1fr,340px] lg:gap-6">
-
-                    {/* Left column - main info */}
-                    <div>
-                        {/* Main Info Card */}
-                        <div className="bg-[#120f1d]/90 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-5 sm:p-6 lg:p-8 mb-6">
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{event.title}</h1>
-
-                            {/* Date & Time */}
-                            <div className="flex flex-wrap gap-4 mb-4 text-white/70">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="w-5 h-5 text-purple-400" />
-                                    <span className="font-medium">{formatDate(event.date)}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock className="w-5 h-5 text-purple-400" />
-                                    <span>{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
-                                </div>
-                            </div>
-
-                            {/* Club & Location */}
-                            <div className="flex items-start gap-2.5 text-white/60 mb-5">
-                                <MapPin className="w-5 h-5 mt-0.5 text-purple-400 flex-shrink-0" />
-                                <div>
-                                    <p className="font-semibold text-white">{event.club}</p>
-                                    <p className="text-sm">{event.location}</p>
-                                </div>
-                            </div>
-
-                            {/* Price Info */}
-                            <div className="grid grid-cols-3 gap-3 p-4 bg-purple-600/8 rounded-xl border border-purple-500/15">
-                                <div className="text-center">
-                                    <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Stags</p>
-                                    <p className="font-semibold text-sm sm:text-base">
-                                        {event.originalStagPrice && event.originalStagPrice > event.stagPrice && (
-                                            <span className="text-white/30 line-through text-xs sm:text-sm mr-1">
-                                                ₹{event.originalStagPrice}
-                                            </span>
-                                        )}
-                                        <span className="text-green-400">₹{event.stagPrice}</span>
-                                    </p>
-                                </div>
-                                <div className="text-center border-x border-purple-500/15">
-                                    <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Couples</p>
-                                    <p className="font-semibold text-sm sm:text-base">
-                                        {event.originalCouplePrice && event.originalCouplePrice > event.couplePrice && (
-                                            <span className="text-white/30 line-through text-xs sm:text-sm mr-1">
-                                                ₹{event.originalCouplePrice}
-                                            </span>
-                                        )}
-                                        <span className="text-green-400">₹{event.couplePrice}</span>
-                                    </p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Ladies</p>
-                                    <p className="font-semibold text-sm sm:text-base">
-                                        {event.originalLadiesPrice && event.originalLadiesPrice > event.ladiesPrice && (
-                                            <span className="text-white/30 line-through text-xs sm:text-sm mr-1">
-                                                ₹{event.originalLadiesPrice}
-                                            </span>
-                                        )}
-                                        <span className="text-green-400">₹{event.ladiesPrice}</span>
-                                    </p>
-                                </div>
-                            </div>
+                        {/* Top Bar on Image */}
+                        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-10">
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="p-3 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-colors border border-white/10"
+                            >
+                                <ArrowLeft className="w-6 h-6" />
+                            </button>
+                            <button
+                                onClick={handleShare}
+                                className="p-3 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-colors border border-white/10"
+                            >
+                                <Share2 className="w-6 h-6" />
+                            </button>
                         </div>
 
-                        {/* Description */}
-                        {event.description && (
-                            <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
-                                <h2 className="text-lg font-semibold mb-3">About This Event</h2>
-                                <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                                    {event.description}
-                                </p>
+                        {/* Event Title Overlay */}
+                        <div className="absolute bottom-0 left-0 right-0 p-8 pb-12 z-10">
+                            <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight mb-3">
+                                {event.title}
+                            </h1>
+                            <div className="flex items-center gap-2 text-white/70">
+                                <MapPin className="w-5 h-5 text-purple-400" />
+                                <span className="text-base font-medium">{event.club}</span>
                             </div>
-                        )}
-
-                        {/* Rules */}
-                        {event.rules && (
-                            <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
-                                <h2 className="text-lg font-semibold mb-3">Entry Rules</h2>
-                                <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                                    {event.rules}
-                                </p>
-                            </div>
-                        )}
+                        </div>
                     </div>
 
-                    {/* Right column - sidebar (desktop) / inline (mobile) */}
-                    <div className="lg:sticky lg:top-6 lg:self-start">
-                        {/* Guestlist Status */}
-                        <div className="flex items-center gap-3 p-4 bg-[#120f1d]/80 backdrop-blur-xl border border-purple-500/15 rounded-xl mb-4">
-                            <Users className="w-6 h-6 text-purple-400 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm">Guestlist Status</p>
-                                <p className="text-xs text-white/50">
-                                    {event.guestlistStatus === 'open'
-                                        ? 'Guestlist is open - book now!'
-                                        : event.guestlistStatus === 'closing'
-                                            ? 'Guestlist closing soon!'
-                                            : 'Guestlist is closed'}
-                                </p>
-                            </div>
-                            <div
-                                className={`px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${event.guestlistStatus === 'open'
-                                    ? 'bg-green-500/15 text-green-400'
-                                    : event.guestlistStatus === 'closing'
-                                        ? 'bg-yellow-500/15 text-yellow-400'
-                                        : 'bg-red-500/15 text-red-400'
-                                    }`}
-                            >
-                                {event.guestlistStatus === 'open'
-                                    ? 'Open'
-                                    : event.guestlistStatus === 'closing'
-                                        ? 'Closing'
-                                        : 'Closed'}
+                    {/* Right Column: Content (65%) */}
+                    <div className="w-[65%] h-full flex flex-col bg-[#0a0a0a]">
+                        {/* Scrollable Content Area */}
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="max-w-4xl mx-auto p-8 pb-12">
+                                {/* Key Info Grid */}
+                                <div className="grid grid-cols-2 gap-4 mb-8">
+                                    <div className="p-5 rounded-2xl bg-white/5 border border-white/5">
+                                        <div className="flex items-center gap-3 mb-2 text-purple-400">
+                                            <Calendar className="w-5 h-5" />
+                                            <span className="text-xs font-bold uppercase tracking-wider">Date</span>
+                                        </div>
+                                        <p className="text-xl font-bold">{formatDate(event.date)}</p>
+                                    </div>
+                                    <div className="p-5 rounded-2xl bg-white/5 border border-white/5">
+                                        <div className="flex items-center gap-3 mb-2 text-purple-400">
+                                            <Clock className="w-5 h-5" />
+                                            <span className="text-xs font-bold uppercase tracking-wider">Time</span>
+                                        </div>
+                                        <p className="text-xl font-bold">{formatTime(event.startTime)} - {formatTime(event.endTime)}</p>
+                                    </div>
+                                </div>
+
+                                {/* Ticket Prices */}
+                                <div className="mb-8">
+                                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                        <Ticket className="w-5 h-5 text-purple-400" />
+                                        Entry & Pricing
+                                    </h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Stags</p>
+                                            <p className="text-2xl font-bold text-green-400">₹{event.stagPrice}</p>
+                                            {event.originalStagPrice && event.originalStagPrice > event.stagPrice && (
+                                                <p className="text-xs line-through text-white/20 mt-0.5">₹{event.originalStagPrice}</p>
+                                            )}
+                                        </div>
+                                        <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Couples</p>
+                                            <p className="text-2xl font-bold text-green-400">₹{event.couplePrice}</p>
+                                            {event.originalCouplePrice && event.originalCouplePrice > event.couplePrice && (
+                                                <p className="text-xs line-through text-white/20 mt-0.5">₹{event.originalCouplePrice}</p>
+                                            )}
+                                        </div>
+                                        <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Ladies</p>
+                                            <p className="text-2xl font-bold text-green-400">₹{event.ladiesPrice}</p>
+                                            {event.originalLadiesPrice && event.originalLadiesPrice > event.ladiesPrice && (
+                                                <p className="text-xs line-through text-white/20 mt-0.5">₹{event.originalLadiesPrice}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description & Rules */}
+                                <div className="grid gap-6">
+                                    {event.description && (
+                                        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                                            <h3 className="text-lg font-bold mb-3">About This Event</h3>
+                                            <p className="text-base text-white/70 leading-relaxed whitespace-pre-line">
+                                                {event.description}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {event.rules && (
+                                        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                                            <h3 className="text-lg font-bold mb-3">Entry Rules</h3>
+                                            <p className="text-base text-white/70 leading-relaxed whitespace-pre-line">
+                                                {event.rules}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Desktop CTA */}
-                        <div className="hidden lg:block">
+                        {/* Fixed Footer for Desktop */}
+                        <div className="flex-shrink-0 p-6 bg-[#0a0a0a] border-t border-white/5 flex items-center justify-between z-10 relative">
+                            {/* Gradient Fade Top */}
+                            <div className="absolute -top-12 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none" />
+
+                            <div>
+                                <p className="text-xs text-white/50 mb-1">Guestlist Status</p>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${isGuestlistOpen ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                                    <span className={`font-bold text-sm ${isGuestlistOpen ? 'text-green-400' : 'text-red-400'}`}>
+                                        {event.guestlistStatus === 'open' ? 'Open & Filling Fast' : 'Closed'}
+                                    </span>
+                                </div>
+                            </div>
                             <button
                                 onClick={handleGetTickets}
                                 disabled={!isGuestlistOpen}
-                                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${isGuestlistOpen
-                                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-lg shadow-purple-500/20'
+                                className={`px-8 py-3 rounded-xl font-bold text-base transition-all ${isGuestlistOpen
+                                    ? 'bg-white text-black hover:bg-white/90 hover:scale-105 shadow-xl shadow-white/10'
+                                    : 'bg-white/10 text-white/30 cursor-not-allowed'
+                                    }`}
+                            >
+                                {isGuestlistOpen ? 'Get Tickets on App' : 'Guestlist Closed'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                /* Mobile Layout - Conserved EXACTLY as before */
+                <div className="pb-24 animate-in fade-in duration-500">
+                    {/* Hero Image/Video */}
+                    <div className="relative h-[55vh]">
+                        {event.videoUrl ? (
+                            <video
+                                src={event.videoUrl}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <img
+                                src={event.imageUrl}
+                                alt={event.title}
+                                className="w-full h-full object-cover"
+                            />
+                        )}
+                        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+
+                        {/* Top Bar */}
+                        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={handleShare}
+                                className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
+                            >
+                                <Share2 className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Event Info - two column on large screens */}
+                    <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-20 relative z-10">
+                        <div className="lg:grid lg:grid-cols-[1fr,340px] lg:gap-6">
+
+                            {/* Left column - main info */}
+                            <div>
+                                {/* Main Info Card */}
+                                <div className="bg-[#120f1d]/95 backdrop-blur-2xl border border-purple-500/20 rounded-2xl p-5 sm:p-8 lg:p-10 mb-6 shadow-2xl">
+                                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight">{event.title}</h1>
+
+                                    {/* Date & Time */}
+                                    <div className="flex flex-wrap gap-4 sm:gap-6 mb-5 sm:mb-6 text-white/80">
+                                        <div className="flex items-center gap-2 sm:gap-2.5">
+                                            <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10">
+                                                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                                            </div>
+                                            <span className="font-semibold text-xs sm:text-base">{formatDate(event.date)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 sm:gap-2.5">
+                                            <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10">
+                                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                                            </div>
+                                            <span className="font-medium text-xs sm:text-base">{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Club & Location */}
+                                    <div className="flex items-start gap-2.5 sm:gap-3 text-white/70 mb-6 sm:mb-8 p-0.5">
+                                        <MapPin className="w-5 h-5 sm:w-6 sm:h-6 mt-0.5 text-purple-400 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-bold text-white text-sm sm:text-lg mb-0.5">{event.club}</p>
+                                            <p className="text-xs sm:text-base font-medium opacity-80">{event.location}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Price Info */}
+                                    <div className="grid grid-cols-3 gap-2 sm:gap-4 p-3 sm:p-5 bg-white/[0.03] rounded-2xl border border-white/5">
+                                        <div className="text-center flex flex-col justify-between h-full">
+                                            <p className="text-[9px] sm:text-[10px] text-white/40 mb-2 uppercase tracking-[0.1em] sm:tracking-[0.2em] font-bold">Stags</p>
+                                            <div className="flex flex-col justify-end h-full">
+                                                {event.originalStagPrice && event.originalStagPrice > event.stagPrice && (
+                                                    <span className="text-white/20 line-through text-[9px] sm:text-sm block mb-0.5">
+                                                        ₹{event.originalStagPrice}
+                                                    </span>
+                                                )}
+                                                <span className="font-bold text-sm sm:text-lg text-green-400">₹{event.stagPrice}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-center border-x border-white/10 flex flex-col justify-between h-full">
+                                            <p className="text-[9px] sm:text-[10px] text-white/40 mb-2 uppercase tracking-[0.1em] sm:tracking-[0.2em] font-bold">Couples</p>
+                                            <div className="flex flex-col justify-end h-full">
+                                                {event.originalCouplePrice && event.originalCouplePrice > event.couplePrice && (
+                                                    <span className="text-white/20 line-through text-[9px] sm:text-sm block mb-0.5">
+                                                        ₹{event.originalCouplePrice}
+                                                    </span>
+                                                )}
+                                                <span className="font-bold text-sm sm:text-lg text-green-400">₹{event.couplePrice}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-center flex flex-col justify-between h-full">
+                                            <p className="text-[9px] sm:text-[10px] text-white/40 mb-2 uppercase tracking-[0.1em] sm:tracking-[0.2em] font-bold">Ladies</p>
+                                            <div className="flex flex-col justify-end h-full">
+                                                {event.originalLadiesPrice && event.originalLadiesPrice > event.ladiesPrice && (
+                                                    <span className="text-white/20 line-through text-[9px] sm:text-sm block mb-0.5">
+                                                        ₹{event.originalLadiesPrice}
+                                                    </span>
+                                                )}
+                                                <span className="font-bold text-sm sm:text-lg text-green-400">₹{event.ladiesPrice}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description */}
+                                {event.description && (
+                                    <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
+                                        <h2 className="text-lg font-semibold mb-3">About This Event</h2>
+                                        <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                                            {event.description}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Rules */}
+                                {event.rules && (
+                                    <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
+                                        <h2 className="text-lg font-semibold mb-3">Entry Rules</h2>
+                                        <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                                            {event.rules}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Fixed Bottom CTA (mobile / tablet) */}
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0f0a1e]/95 backdrop-blur-xl border-t border-white/5 z-40">
+                        <div className="max-w-5xl mx-auto">
+                            <button
+                                onClick={handleGetTickets}
+                                disabled={!isGuestlistOpen}
+                                className={`w-full py-3.5 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${isGuestlistOpen
+                                    ? 'bg-white text-black hover:bg-white/90 shadow-lg shadow-white/5'
                                     : 'bg-white/5 text-white/40 cursor-not-allowed'
                                     }`}
                             >
@@ -317,26 +460,9 @@ export function EventDetailPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Fixed Bottom CTA (mobile / tablet) */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-white/10 lg:hidden z-40">
-                <div className="max-w-5xl mx-auto">
-                    <button
-                        onClick={handleGetTickets}
-                        disabled={!isGuestlistOpen}
-                        className={`w-full py-3.5 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${isGuestlistOpen
-                            ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white'
-                            : 'bg-white/5 text-white/40 cursor-not-allowed'
-                            }`}
-                    >
-                        <Ticket className="w-5 h-5" />
-                        {isGuestlistOpen ? 'Get Tickets on App' : 'Guestlist Closed'}
-                    </button>
-                </div>
-            </div>
-
-            {/* Share / Download Modal */}
+            {/* Share / Download Modal (Common) */}
             {showShareModal && (
                 <div
                     className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
@@ -402,10 +528,10 @@ export function EventDetailPage() {
                 </div>
             )}
 
-            {/* Background decorations */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-                <div className="absolute top-40 left-0 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-violet-600/5 rounded-full blur-3xl" />
+            {/* Background decorations (Common) */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 md:hidden">
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-900/30 rounded-full blur-[120px] -translate-x-1/3 -translate-y-1/3 mix-blend-screen" />
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-900/30 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 mix-blend-screen" />
             </div>
         </div>
     );
