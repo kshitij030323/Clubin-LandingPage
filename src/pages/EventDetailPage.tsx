@@ -24,7 +24,6 @@ export function EventDetailPage() {
                 let eventData: Event;
 
                 if (code) {
-                    // Resolve short link
                     const response = await fetch(`https://api.clubin.info/api/shortlinks/${code}`);
                     if (!response.ok) throw new Error('Event not found');
                     const data = await response.json();
@@ -78,7 +77,6 @@ export function EventDetailPage() {
 
     const handleShare = async () => {
         if (!event) return;
-
         try {
             if (!shortUrl) {
                 const result = await createShortLink('event', event.id);
@@ -97,7 +95,6 @@ export function EventDetailPage() {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch {
-            // Fallback for older browsers
             const input = document.createElement('input');
             input.value = shortUrl;
             document.body.appendChild(input);
@@ -111,11 +108,9 @@ export function EventDetailPage() {
 
     const handleGetTickets = () => {
         if (!event) return;
-
         if (isMobileDevice()) {
             openInApp('event', event.id);
         } else {
-            // Show download prompt for desktop
             setShowShareModal(true);
         }
     };
@@ -130,11 +125,14 @@ export function EventDetailPage() {
 
     if (error || !event) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-white">
-                <p className="text-red-400 mb-4">{error || 'Event not found'}</p>
+            <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center text-white px-4">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <span className="text-2xl">!</span>
+                </div>
+                <p className="text-red-400 mb-4 text-center">{error || 'Event not found'}</p>
                 <button
                     onClick={() => navigate('/')}
-                    className="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-500 transition-colors"
+                    className="px-6 py-2.5 bg-purple-600 rounded-lg hover:bg-purple-500 transition-colors font-medium"
                 >
                     Go Home
                 </button>
@@ -146,7 +144,7 @@ export function EventDetailPage() {
         <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope pb-24">
 
             {/* Hero Image/Video */}
-            <div className="relative h-72 md:h-[28rem]">
+            <div className="relative h-64 sm:h-80 md:h-96 lg:h-[28rem]">
                 {event.videoUrl ? (
                     <video
                         src={event.videoUrl}
@@ -169,143 +167,167 @@ export function EventDetailPage() {
                 <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
                     <button
                         onClick={() => navigate(-1)}
-                        className="p-2 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
+                        className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <button
                         onClick={handleShare}
-                        className="p-2 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
+                        className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
                     >
                         <Share2 className="w-5 h-5" />
                     </button>
                 </div>
             </div>
 
-            {/* Event Info */}
-            <div className="max-w-3xl mx-auto px-4 -mt-16 relative z-10">
-                {/* Main Info Card */}
-                <div className="bg-[#120f1d]/90 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 mb-6">
-                    <h1 className="text-2xl md:text-3xl font-bold mb-3">{event.title}</h1>
+            {/* Event Info - two column on large screens */}
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-12 sm:-mt-16 relative z-10">
+                <div className="lg:grid lg:grid-cols-[1fr,340px] lg:gap-6">
 
-                    {/* Date & Time */}
-                    <div className="flex flex-wrap gap-4 mb-4 text-white/80">
-                        <div className="flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-purple-400" />
-                            {formatDate(event.date)}
+                    {/* Left column - main info */}
+                    <div>
+                        {/* Main Info Card */}
+                        <div className="bg-[#120f1d]/90 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-5 sm:p-6 lg:p-8 mb-6">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{event.title}</h1>
+
+                            {/* Date & Time */}
+                            <div className="flex flex-wrap gap-4 mb-4 text-white/70">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-5 h-5 text-purple-400" />
+                                    <span className="font-medium">{formatDate(event.date)}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-purple-400" />
+                                    <span>{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
+                                </div>
+                            </div>
+
+                            {/* Club & Location */}
+                            <div className="flex items-start gap-2.5 text-white/60 mb-5">
+                                <MapPin className="w-5 h-5 mt-0.5 text-purple-400 flex-shrink-0" />
+                                <div>
+                                    <p className="font-semibold text-white">{event.club}</p>
+                                    <p className="text-sm">{event.location}</p>
+                                </div>
+                            </div>
+
+                            {/* Price Info */}
+                            <div className="grid grid-cols-3 gap-3 p-4 bg-purple-600/8 rounded-xl border border-purple-500/15">
+                                <div className="text-center">
+                                    <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Stags</p>
+                                    <p className="font-semibold text-sm sm:text-base">
+                                        {event.originalStagPrice && event.originalStagPrice > event.stagPrice && (
+                                            <span className="text-white/30 line-through text-xs sm:text-sm mr-1">
+                                                ₹{event.originalStagPrice}
+                                            </span>
+                                        )}
+                                        <span className="text-green-400">₹{event.stagPrice}</span>
+                                    </p>
+                                </div>
+                                <div className="text-center border-x border-purple-500/15">
+                                    <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Couples</p>
+                                    <p className="font-semibold text-sm sm:text-base">
+                                        {event.originalCouplePrice && event.originalCouplePrice > event.couplePrice && (
+                                            <span className="text-white/30 line-through text-xs sm:text-sm mr-1">
+                                                ₹{event.originalCouplePrice}
+                                            </span>
+                                        )}
+                                        <span className="text-green-400">₹{event.couplePrice}</span>
+                                    </p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Ladies</p>
+                                    <p className="font-semibold text-sm sm:text-base">
+                                        {event.originalLadiesPrice && event.originalLadiesPrice > event.ladiesPrice && (
+                                            <span className="text-white/30 line-through text-xs sm:text-sm mr-1">
+                                                ₹{event.originalLadiesPrice}
+                                            </span>
+                                        )}
+                                        <span className="text-green-400">₹{event.ladiesPrice}</span>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-purple-400" />
-                            {formatTime(event.startTime)} - {formatTime(event.endTime)}
-                        </div>
+
+                        {/* Description */}
+                        {event.description && (
+                            <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
+                                <h2 className="text-lg font-semibold mb-3">About This Event</h2>
+                                <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                                    {event.description}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Rules */}
+                        {event.rules && (
+                            <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
+                                <h2 className="text-lg font-semibold mb-3">Entry Rules</h2>
+                                <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                                    {event.rules}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Club & Location */}
-                    <div className="flex items-start gap-2 text-white/70 mb-4">
-                        <MapPin className="w-5 h-5 mt-0.5 text-purple-400 flex-shrink-0" />
-                        <div>
-                            <p className="font-medium text-white">{event.club}</p>
-                            <p className="text-sm">{event.location}</p>
+                    {/* Right column - sidebar (desktop) / inline (mobile) */}
+                    <div className="lg:sticky lg:top-6 lg:self-start">
+                        {/* Guestlist Status */}
+                        <div className="flex items-center gap-3 p-4 bg-[#120f1d]/80 backdrop-blur-xl border border-purple-500/15 rounded-xl mb-4">
+                            <Users className="w-6 h-6 text-purple-400 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm">Guestlist Status</p>
+                                <p className="text-xs text-white/50">
+                                    {event.guestlistStatus === 'open'
+                                        ? 'Guestlist is open - book now!'
+                                        : event.guestlistStatus === 'closing'
+                                            ? 'Guestlist closing soon!'
+                                            : 'Guestlist is closed'}
+                                </p>
+                            </div>
+                            <div
+                                className={`px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0 ${event.guestlistStatus === 'open'
+                                    ? 'bg-green-500/15 text-green-400'
+                                    : event.guestlistStatus === 'closing'
+                                        ? 'bg-yellow-500/15 text-yellow-400'
+                                        : 'bg-red-500/15 text-red-400'
+                                    }`}
+                            >
+                                {event.guestlistStatus === 'open'
+                                    ? 'Open'
+                                    : event.guestlistStatus === 'closing'
+                                        ? 'Closing'
+                                        : 'Closed'}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Price Info */}
-                    <div className="grid grid-cols-3 gap-3 p-4 bg-purple-600/10 rounded-xl border border-purple-500/20">
-                        <div className="text-center">
-                            <p className="text-xs text-white/50 mb-1">Stags</p>
-                            <p className="font-semibold">
-                                {event.originalStagPrice && event.originalStagPrice > event.stagPrice && (
-                                    <span className="text-white/40 line-through text-sm mr-1">
-                                        ₹{event.originalStagPrice}
-                                    </span>
-                                )}
-                                ₹{event.stagPrice}
-                            </p>
+                        {/* Desktop CTA */}
+                        <div className="hidden lg:block">
+                            <button
+                                onClick={handleGetTickets}
+                                disabled={!isGuestlistOpen}
+                                className={`w-full py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${isGuestlistOpen
+                                    ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-lg shadow-purple-500/20'
+                                    : 'bg-white/5 text-white/40 cursor-not-allowed'
+                                    }`}
+                            >
+                                <Ticket className="w-5 h-5" />
+                                {isGuestlistOpen ? 'Get Tickets on App' : 'Guestlist Closed'}
+                            </button>
                         </div>
-                        <div className="text-center">
-                            <p className="text-xs text-white/50 mb-1">Couples</p>
-                            <p className="font-semibold">
-                                {event.originalCouplePrice && event.originalCouplePrice > event.couplePrice && (
-                                    <span className="text-white/40 line-through text-sm mr-1">
-                                        ₹{event.originalCouplePrice}
-                                    </span>
-                                )}
-                                ₹{event.couplePrice}
-                            </p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-xs text-white/50 mb-1">Ladies</p>
-                            <p className="font-semibold">
-                                {event.originalLadiesPrice && event.originalLadiesPrice > event.ladiesPrice && (
-                                    <span className="text-white/40 line-through text-sm mr-1">
-                                        ₹{event.originalLadiesPrice}
-                                    </span>
-                                )}
-                                ₹{event.ladiesPrice}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Description */}
-                {event.description && (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-3">About This Event</h2>
-                        <p className="text-white/70 leading-relaxed whitespace-pre-line">
-                            {event.description}
-                        </p>
-                    </div>
-                )}
-
-                {/* Rules */}
-                {event.rules && (
-                    <div className="mb-6">
-                        <h2 className="text-lg font-semibold mb-3">Entry Rules</h2>
-                        <p className="text-white/70 leading-relaxed whitespace-pre-line">
-                            {event.rules}
-                        </p>
-                    </div>
-                )}
-
-                {/* Guestlist Status */}
-                <div className="flex items-center gap-3 p-4 bg-[#120f1d]/80 backdrop-blur-xl border border-purple-500/20 rounded-xl mb-6">
-                    <Users className="w-6 h-6 text-purple-400" />
-                    <div className="flex-1">
-                        <p className="font-medium">Guestlist Status</p>
-                        <p className="text-sm text-white/60">
-                            {event.guestlistStatus === 'open'
-                                ? 'Guestlist is open - book now!'
-                                : event.guestlistStatus === 'closing'
-                                    ? 'Guestlist closing soon!'
-                                    : 'Guestlist is closed'}
-                        </p>
-                    </div>
-                    <div
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${event.guestlistStatus === 'open'
-                            ? 'bg-green-500/20 text-green-400'
-                            : event.guestlistStatus === 'closing'
-                                ? 'bg-yellow-500/20 text-yellow-400'
-                                : 'bg-red-500/20 text-red-400'
-                            }`}
-                    >
-                        {event.guestlistStatus === 'open'
-                            ? 'Open'
-                            : event.guestlistStatus === 'closing'
-                                ? 'Closing'
-                                : 'Closed'}
                     </div>
                 </div>
             </div>
 
-            {/* Fixed Bottom CTA */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/10">
-                <div className="max-w-3xl mx-auto">
+            {/* Fixed Bottom CTA (mobile / tablet) */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-white/10 lg:hidden z-40">
+                <div className="max-w-5xl mx-auto">
                     <button
                         onClick={handleGetTickets}
                         disabled={!isGuestlistOpen}
-                        className={`w-full py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 transition-all ${isGuestlistOpen
+                        className={`w-full py-3.5 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${isGuestlistOpen
                             ? 'bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white'
-                            : 'bg-white/10 text-white/50 cursor-not-allowed'
+                            : 'bg-white/5 text-white/40 cursor-not-allowed'
                             }`}
                     >
                         <Ticket className="w-5 h-5" />
@@ -316,44 +338,45 @@ export function EventDetailPage() {
 
             {/* Share / Download Modal */}
             {showShareModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-2xl p-6 max-w-sm w-full">
+                <div
+                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
+                    onClick={(e) => { if (e.target === e.currentTarget) setShowShareModal(false); }}
+                >
+                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm">
                         <h3 className="text-xl font-semibold mb-4 text-center">
                             {isMobileDevice() ? 'Share Event' : 'Download Clubin App'}
                         </h3>
 
-                        {/* Share URL */}
                         {shortUrl && (
                             <div className="mb-6">
-                                <p className="text-sm text-white/60 mb-2">Share this link:</p>
-                                <div className="flex items-center gap-2 p-3 bg-black/30 rounded-lg">
+                                <p className="text-sm text-white/50 mb-2">Share this link:</p>
+                                <div className="flex items-center gap-2 p-3 bg-black/30 rounded-lg border border-white/5">
                                     <input
                                         type="text"
                                         value={shortUrl}
                                         readOnly
-                                        className="flex-1 bg-transparent text-sm text-white/80 outline-none"
+                                        className="flex-1 bg-transparent text-sm text-white/80 outline-none min-w-0"
                                     />
                                     <button
                                         onClick={copyToClipboard}
-                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
                                     >
                                         {copied ? (
                                             <Check className="w-4 h-4 text-green-400" />
                                         ) : (
-                                            <Copy className="w-4 h-4" />
+                                            <Copy className="w-4 h-4 text-white/60" />
                                         )}
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        {/* App Store Buttons */}
-                        <div className="space-y-3 mb-4">
+                        <div className="space-y-2.5 mb-4">
                             <a
                                 href={PLAY_STORE_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                                className="flex items-center justify-center gap-2 w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-sm font-medium"
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 Google Play Store
@@ -362,7 +385,7 @@ export function EventDetailPage() {
                                 href={APP_STORE_URL}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                                className="flex items-center justify-center gap-2 w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-sm font-medium"
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 Apple App Store
@@ -371,7 +394,7 @@ export function EventDetailPage() {
 
                         <button
                             onClick={() => setShowShareModal(false)}
-                            className="w-full py-3 text-white/60 hover:text-white transition-colors"
+                            className="w-full py-3 text-white/50 hover:text-white transition-colors text-sm"
                         >
                             Close
                         </button>
