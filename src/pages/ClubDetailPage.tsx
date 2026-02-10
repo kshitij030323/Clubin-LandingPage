@@ -368,35 +368,35 @@ export function ClubDetailPage() {
                         </div>
 
                         {/* Club Info Overlay (Bottom Left) */}
-                        <div className="absolute bottom-8 left-5 right-5 z-20">
-                            <h1 className="text-4xl font-extrabold text-white mb-2 leading-tight drop-shadow-lg tracking-tight">{club.name}</h1>
-                            <div className="flex items-center gap-2 text-white/90">
-                                <MapPin className="w-4 h-4 text-purple-400 fill-purple-400/20" />
-                                <span className="text-sm font-medium opacity-90">{club.location}</span>
+                        <div className="absolute bottom-6 left-5 right-5 z-20">
+                            <h1 className="text-2xl font-extrabold text-white mb-1.5 leading-tight drop-shadow-lg tracking-tight">{club.name}</h1>
+                            <div className="flex items-center gap-1.5 text-white/90">
+                                <MapPin className="w-3.5 h-3.5 text-purple-400 fill-purple-400/20" />
+                                <span className="text-xs font-medium opacity-90">{club.location}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Content Container */}
-                    <div className="px-5 -mt-2 relative z-10 space-y-8">
+                    <div className="px-5 -mt-2 relative z-10 space-y-6">
                         {/* Upcoming Events */}
                         <section>
-                            <h2 className="text-xl font-bold text-white mb-5">Upcoming Events</h2>
+                            <h2 className="text-base font-bold text-white mb-3">Upcoming Events</h2>
                             {upcomingEvents.length === 0 ? (
-                                <div className="text-center py-10 bg-[#1e1b2e] rounded-2xl border border-white/5">
-                                    <Calendar className="w-8 h-8 mx-auto mb-3 text-white/20" />
-                                    <p className="text-white/40 font-medium">No upcoming events</p>
+                                <div className="text-center py-8 bg-[#1e1b2e] rounded-xl border border-white/5">
+                                    <Calendar className="w-6 h-6 mx-auto mb-2 text-white/20" />
+                                    <p className="text-white/40 text-sm font-medium">No upcoming events</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {upcomingEvents.map((event) => (
                                         <Link
                                             key={event.id}
                                             to={`/events/${event.id}`}
-                                            className="flex items-stretch bg-[#1e1b2e] border border-white/5 rounded-2xl overflow-hidden hover:bg-[#252139] transition-colors shadow-lg shadow-black/20"
+                                            className="flex items-stretch bg-[#1e1b2e] border border-white/5 rounded-xl overflow-hidden hover:bg-[#252139] transition-colors shadow-lg shadow-black/20"
                                         >
                                             {/* Image */}
-                                            <div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 relative">
+                                            <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 relative">
                                                 <img
                                                     src={event.imageUrl}
                                                     alt={event.title}
@@ -405,15 +405,15 @@ export function ClubDetailPage() {
                                                 <div className="absolute inset-0 bg-black/10" />
                                             </div>
                                             {/* Info */}
-                                            <div className="flex-1 p-4 flex flex-col justify-center min-w-0 relative">
-                                                <h3 className="text-base font-bold text-white mb-1.5 truncate pr-2">{event.title}</h3>
-                                                <div className="flex items-center gap-2 text-xs text-white/50 mb-3 font-medium">
+                                            <div className="flex-1 p-3 flex flex-col justify-center min-w-0 relative">
+                                                <h3 className="text-sm font-bold text-white mb-1 truncate pr-2">{event.title}</h3>
+                                                <div className="flex items-center gap-2 text-[10px] text-white/50 mb-2 font-medium">
                                                     <Calendar className="w-3 h-3 text-purple-400" />
                                                     <span>{formatDate(event.date)}</span>
                                                     <span className="w-0.5 h-0.5 rounded-full bg-white/30" />
                                                     <span>{formatTime(event.startTime)}</span>
                                                 </div>
-                                                <span className={`text-sm font-bold ${event.price === 0 ? 'text-green-400' : 'text-purple-200'}`}>
+                                                <span className={`text-xs font-bold ${event.price === 0 ? 'text-green-400' : 'text-purple-200'}`}>
                                                     {event.price === 0 ? 'Free Entry' : `₹${event.price}`}
                                                 </span>
                                             </div>
@@ -428,10 +428,10 @@ export function ClubDetailPage() {
                             <div className="pt-2">
                                 <button
                                     onClick={() => setShowPastEvents(!showPastEvents)}
-                                    className="w-full flex items-center justify-between p-4 bg-[#1e1b2e]/50 rounded-xl border border-white/5 text-white/60 hover:text-white hover:bg-[#1e1b2e] transition-all"
+                                    className="w-full flex items-center justify-between p-3 bg-[#1e1b2e]/50 rounded-lg border border-white/5 text-white/60 hover:text-white hover:bg-[#1e1b2e] transition-all"
                                 >
-                                    <span className="font-medium text-sm">Past Events ({pastEvents.length})</span>
-                                    {showPastEvents ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                    <span className="font-medium text-xs">Past Events ({pastEvents.length})</span>
+                                    {showPastEvents ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                                 </button>
 
                                 {showPastEvents && (

@@ -41,14 +41,14 @@ export function LocationSelectPage() {
             </header>
 
             {/* Hero area */}
-            <div className="pt-16 pb-12 px-4 sm:px-6 text-center max-w-7xl mx-auto">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-[1.25rem] bg-purple-600/10 border border-purple-500/20 mb-6 shadow-2xl shadow-purple-500/10">
-                    <MapPin className="w-8 h-8 text-purple-400" />
+            <div className="pt-12 pb-8 px-4 sm:px-6 text-center max-w-7xl mx-auto">
+                <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.25rem] bg-purple-600/10 border border-purple-500/20 mb-4 sm:mb-6 shadow-2xl shadow-purple-500/10">
+                    <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
                 </div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent tracking-tighter">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 sm:mb-4 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent tracking-tighter">
                     Select Your City
                 </h2>
-                <p className="text-white/40 text-lg sm:text-xl max-w-2xl mx-auto font-medium">
+                <p className="text-white/40 text-base sm:text-xl max-w-2xl mx-auto font-medium">
                     Discover the hottest clubs and events near you
                 </p>
             </div>
