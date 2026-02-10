@@ -1,25 +1,40 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Club, Event } from '../types';
-import { fetchClubDetails, formatDate, formatTime } from '../api';
+import { fetchClubDetails, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, ArrowLeft, Calendar, Clock, Loader2, ExternalLink } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, Clock, Loader2, ExternalLink, Share2, Check, Copy } from 'lucide-react';
 
 export function ClubDetailPage() {
-    const { clubId } = useParams<{ city: string; clubId: string }>();
+    const { clubId, code } = useParams<{ city: string; clubId: string; code: string }>();
     const navigate = useNavigate();
     const [club, setClub] = useState<Club | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [shortUrl, setShortUrl] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     useEffect(() => {
         async function loadClub() {
-            if (!clubId) return;
             try {
                 setLoading(true);
                 setError(null);
-                const data = await fetchClubDetails(clubId);
-                setClub(data);
+
+                let clubData: Club;
+
+                if (code) {
+                    // Resolve short link
+                    const data = await resolveShortLink(code);
+                    if (data.type !== 'club') throw new Error('Invalid link');
+                    clubData = data.data as Club;
+                } else if (clubId) {
+                    clubData = await fetchClubDetails(clubId);
+                } else {
+                    throw new Error('No club specified');
+                }
+
+                setClub(clubData);
             } catch (err) {
                 setError('Failed to load club details. Please try again.');
                 console.error(err);
@@ -28,7 +43,7 @@ export function ClubDetailPage() {
             }
         }
         loadClub();
-    }, [clubId]);
+    }, [clubId, code]);
 
     // SEO
     useSEO({
@@ -44,6 +59,39 @@ export function ClubDetailPage() {
             description: club.description,
         } : undefined,
     });
+
+    const handleShare = async () => {
+        if (!club) return;
+
+        try {
+            if (!shortUrl) {
+                const result = await createShortLink('club', club.id);
+                setShortUrl(result.shortUrl);
+            }
+            setShowShareModal(true);
+        } catch (err) {
+            console.error('Failed to create share link:', err);
+        }
+    };
+
+    const copyToClipboard = async () => {
+        if (!shortUrl) return;
+        try {
+            await navigator.clipboard.writeText(shortUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            // Fallback for older browsers
+            const input = document.createElement('input');
+            input.value = shortUrl;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     // Filter upcoming events
     const upcomingEvents = club?.events?.filter(
@@ -84,13 +132,21 @@ export function ClubDetailPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent" />
 
-                {/* Back Button */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="absolute top-4 left-4 p-2 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                </button>
+                {/* Top Bar */}
+                <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="p-2 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                        onClick={handleShare}
+                        className="p-2 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
+                    >
+                        <Share2 className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
 
             {/* Club Info */}
@@ -190,6 +246,71 @@ export function ClubDetailPage() {
                     )}
                 </section>
             </div>
+
+            {/* Share Modal */}
+            {showShareModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-2xl p-6 max-w-sm w-full">
+                        <h3 className="text-xl font-semibold mb-4 text-center">
+                            {isMobileDevice() ? 'Share Club' : 'Share & Download App'}
+                        </h3>
+
+                        {/* Share URL */}
+                        {shortUrl && (
+                            <div className="mb-6">
+                                <p className="text-sm text-white/60 mb-2">Share this link:</p>
+                                <div className="flex items-center gap-2 p-3 bg-black/30 rounded-lg">
+                                    <input
+                                        type="text"
+                                        value={shortUrl}
+                                        readOnly
+                                        className="flex-1 bg-transparent text-sm text-white/80 outline-none"
+                                    />
+                                    <button
+                                        onClick={copyToClipboard}
+                                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                    >
+                                        {copied ? (
+                                            <Check className="w-4 h-4 text-green-400" />
+                                        ) : (
+                                            <Copy className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* App Store Buttons */}
+                        <div className="space-y-3 mb-4">
+                            <a
+                                href={PLAY_STORE_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                                Google Play Store
+                            </a>
+                            <a
+                                href={APP_STORE_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                                Apple App Store
+                            </a>
+                        </div>
+
+                        <button
+                            onClick={() => setShowShareModal(false)}
+                            className="w-full py-3 text-white/60 hover:text-white transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Background decorations */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
