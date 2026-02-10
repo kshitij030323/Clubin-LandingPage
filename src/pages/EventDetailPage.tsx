@@ -1,14 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Skeleton } from '../components/Skeleton';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, ArrowLeft, Calendar, Clock, Loader2, Share2, Ticket, Check, Copy, ExternalLink } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink } from 'lucide-react';
 
 export function EventDetailPage() {
     const { eventId, code } = useParams<{ eventId?: string; code?: string }>();
     const navigate = useNavigate();
     const [event, setEvent] = useState<Event | null>(null);
+
+    const handleBackAction = () => {
+        // Check if there is history to go back to
+        if (window.history.state && window.history.state.idx > 0) {
+            navigate(-1);
+        } else {
+            navigate('/clubs');
+        }
+    };
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [shortUrl, setShortUrl] = useState<string | null>(null);
@@ -126,8 +136,49 @@ export function EventDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+            <div className="min-h-screen bg-[#0a0a0a] text-white">
+                {isDesktop ? (
+                    <div className="h-screen overflow-hidden flex">
+                        {/* Left column skeleton */}
+                        <div className="w-[35%] h-full relative border-r border-white/5 bg-white/5">
+                            <Skeleton className="w-full h-full" />
+                            <div className="absolute bottom-0 left-0 right-0 p-8 pb-12">
+                                <Skeleton className="h-10 w-3/4 mb-3" />
+                                <Skeleton className="h-5 w-1/2" />
+                            </div>
+                        </div>
+                        {/* Right column skeleton */}
+                        <div className="w-[65%] h-full flex flex-col p-8 lg:p-12">
+                            <div className="max-w-4xl mx-auto w-full space-y-8">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Skeleton className="h-24 rounded-2xl" />
+                                    <Skeleton className="h-24 rounded-2xl" />
+                                </div>
+                                <div className="space-y-4">
+                                    <Skeleton className="h-8 w-48" />
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <Skeleton className="h-28 rounded-2xl" />
+                                        <Skeleton className="h-28 rounded-2xl" />
+                                        <Skeleton className="h-28 rounded-2xl" />
+                                    </div>
+                                </div>
+                                <div className="space-y-6">
+                                    <Skeleton className="h-48 rounded-2xl" />
+                                    <Skeleton className="h-48 rounded-2xl" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="bg-[#0f0a1e] min-h-screen">
+                        <Skeleton className="h-[55vh] w-full" />
+                        <div className="px-4 -mt-16 relative z-10 space-y-6">
+                            <Skeleton className="h-72 w-full rounded-2xl bg-[#120f1d]/95 border border-purple-500/20" />
+                            <Skeleton className="h-40 w-full rounded-2xl bg-[#120f1d]/50" />
+                            <Skeleton className="h-40 w-full rounded-2xl bg-[#120f1d]/50" />
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -177,7 +228,7 @@ export function EventDetailPage() {
                         {/* Top Bar on Image */}
                         <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-10">
                             <button
-                                onClick={() => navigate(-1)}
+                                onClick={handleBackAction}
                                 className="p-3 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-colors border border-white/10"
                             >
                                 <ArrowLeft className="w-6 h-6" />
@@ -331,7 +382,7 @@ export function EventDetailPage() {
                         {/* Top Bar */}
                         <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
                             <button
-                                onClick={() => navigate(-1)}
+                                onClick={handleBackAction}
                                 className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
                             >
                                 <ArrowLeft className="w-5 h-5" />

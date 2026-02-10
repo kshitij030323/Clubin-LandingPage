@@ -18,6 +18,15 @@ export function ClubDetailPage() {
     const { clubId, code } = useParams<{ city: string; clubId: string; code: string }>();
     const navigate = useNavigate();
     const [club, setClub] = useState<Club | null>(null);
+
+    const handleBackAction = () => {
+        // If there's history, go back, otherwise go to clubs list
+        if (window.history.state && window.history.state.idx > 0) {
+            navigate(-1);
+        } else {
+            navigate('/clubs');
+        }
+    };
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [events, setEvents] = useState<Event[]>([]);
@@ -223,8 +232,8 @@ export function ClubDetailPage() {
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
                             <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start">
                                 <button
-                                    onClick={() => navigate(-1)}
-                                    className="p-3 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-colors border border-white/10"
+                                    onClick={handleBackAction}
+                                    className="p-2 sm:p-3 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-colors border border-white/10"
                                 >
                                     <ArrowLeft className="w-5 h-5" />
                                 </button>
@@ -360,7 +369,7 @@ export function ClubDetailPage() {
                         {/* Top Bar - Back Button Only */}
                         <div className="absolute top-0 left-0 right-0 p-4 safe-top flex items-center justify-between z-20">
                             <button
-                                onClick={() => navigate(-1)}
+                                onClick={handleBackAction}
                                 className="p-3 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-colors border border-white/5"
                             >
                                 <ArrowLeft className="w-5 h-5" />
