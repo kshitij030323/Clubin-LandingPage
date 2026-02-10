@@ -66,7 +66,7 @@ export function LocationSelectPage() {
                             <div className="absolute inset-0 bg-gradient-to-br from-purple-600/0 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                             {/* Icon */}
-                            <div className="relative text-3xl sm:text-4xl mb-3 transition-transform duration-300 group-hover:scale-110">
+                            <div className="relative text-xl sm:text-2xl mb-2 transition-transform duration-300 group-hover:scale-110">
                                 {city.icon}
                             </div>
 

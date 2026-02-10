@@ -5,10 +5,12 @@ import { fetchClubDetails, resolveShortLink, createShortLink, formatDate, format
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, Loader2, ExternalLink, Share2, Check, Copy } from 'lucide-react';
 
-function getStartOfToday(): Date {
+function getTodayDateString(): string {
     const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return now;
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 }
 
 export function ClubDetailPage() {
@@ -96,10 +98,10 @@ export function ClubDetailPage() {
         }
     };
 
-    // Filter upcoming events - include today's events by comparing date-only
-    const today = getStartOfToday();
+    // Filter upcoming events - compare date strings to avoid timezone issues
+    const todayStr = getTodayDateString();
     const upcomingEvents = club?.events?.filter(
-        (e) => new Date(e.date) >= today
+        (e) => e.date.substring(0, 10) >= todayStr
     ) || [];
 
     if (loading) {
