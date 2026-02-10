@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Club, Event } from '../types';
-import { fetchClubDetails, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
+import { fetchClubDetails, fetchEventsByClubId, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, Loader2, ExternalLink, Share2, Check, Copy } from 'lucide-react';
 
@@ -19,6 +19,7 @@ export function ClubDetailPage() {
     const [club, setClub] = useState<Club | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [events, setEvents] = useState<Event[]>([]);
     const [shortUrl, setShortUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
@@ -42,6 +43,10 @@ export function ClubDetailPage() {
                 }
 
                 setClub(clubData);
+
+                // Fetch events separately since /api/clubs/:id returns empty events
+                const clubEvents = await fetchEventsByClubId(clubData.id);
+                setEvents(clubEvents);
             } catch (err) {
                 setError('Failed to load club details. Please try again.');
                 console.error(err);
@@ -100,9 +105,9 @@ export function ClubDetailPage() {
 
     // Filter upcoming events - compare date strings to avoid timezone issues
     const todayStr = getTodayDateString();
-    const upcomingEvents = club?.events?.filter(
+    const upcomingEvents = events.filter(
         (e) => e.date.substring(0, 10) >= todayStr
-    ) || [];
+    );
 
     if (loading) {
         return (
@@ -160,20 +165,20 @@ export function ClubDetailPage() {
 
             {/* Club Info */}
             <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-20 relative z-10">
-                <div className="bg-[#120f1d]/90 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-5 sm:p-6 lg:p-8 mb-8">
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">{club.name}</h1>
-                    <div className="flex flex-wrap items-center gap-2 text-white/60 mb-4">
-                        <MapPin className="w-4 h-4 flex-shrink-0 text-purple-400" />
+                <div className="bg-[#120f1d]/90 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-4 sm:p-5 lg:p-6 mb-6">
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2">{club.name}</h1>
+                    <div className="flex flex-wrap items-center gap-1.5 text-white/60 mb-3 text-xs sm:text-sm">
+                        <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-purple-400" />
                         <span>{club.location}</span>
                         {club.address && (
                             <>
                                 <span className="text-white/20">|</span>
-                                <span className="text-sm">{club.address}</span>
+                                <span>{club.address}</span>
                             </>
                         )}
                     </div>
                     {club.description && (
-                        <p className="text-white/50 leading-relaxed text-sm sm:text-base">{club.description}</p>
+                        <p className="text-white/50 leading-relaxed text-xs sm:text-sm">{club.description}</p>
                     )}
 
                     {club.mapUrl && (
@@ -181,32 +186,32 @@ export function ClubDetailPage() {
                             href={club.mapUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-sm transition-colors"
+                            className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs sm:text-sm transition-colors"
                         >
-                            <MapPin className="w-4 h-4" />
+                            <MapPin className="w-3.5 h-3.5" />
                             View on Map
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <ExternalLink className="w-3 h-3" />
                         </a>
                     )}
                 </div>
 
                 {/* Upcoming Events */}
                 <section className="pb-16">
-                    <h2 className="text-xl sm:text-2xl font-semibold mb-5 flex items-center gap-2.5">
-                        <Calendar className="w-5 h-5 text-purple-400" />
+                    <h2 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-purple-400" />
                         Upcoming Events
                         {upcomingEvents.length > 0 && (
-                            <span className="text-sm text-white/40 font-normal bg-white/5 px-2.5 py-0.5 rounded-full">
+                            <span className="text-xs text-white/40 font-normal bg-white/5 px-2 py-0.5 rounded-full">
                                 {upcomingEvents.length}
                             </span>
                         )}
                     </h2>
 
                     {upcomingEvents.length === 0 ? (
-                        <div className="text-center py-16 text-white/40 bg-[#120f1d]/50 rounded-2xl border border-purple-500/10">
-                            <Calendar className="w-10 h-10 mx-auto mb-3 text-white/15" />
-                            <p className="text-base">No upcoming events at this club</p>
-                            <p className="text-sm mt-1 text-white/25">Check back later for new events</p>
+                        <div className="text-center py-12 text-white/40 bg-[#120f1d]/50 rounded-2xl border border-purple-500/10">
+                            <Calendar className="w-8 h-8 mx-auto mb-2 text-white/15" />
+                            <p className="text-sm">No upcoming events at this club</p>
+                            <p className="text-xs mt-1 text-white/25">Check back later for new events</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -227,22 +232,22 @@ export function ClubDetailPage() {
                                         </div>
 
                                         {/* Event Info */}
-                                        <div className="flex-1 p-4 min-w-0">
-                                            <h3 className="text-base font-semibold mb-2 group-hover:text-purple-300 transition-colors truncate">
+                                        <div className="flex-1 p-3 sm:p-4 min-w-0">
+                                            <h3 className="text-sm sm:text-base font-semibold mb-1.5 group-hover:text-purple-300 transition-colors truncate">
                                                 {event.title}
                                             </h3>
-                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/50 mb-2.5">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Calendar className="w-3.5 h-3.5 text-purple-400/70" />
+                                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:text-sm text-white/50 mb-2">
+                                                <div className="flex items-center gap-1">
+                                                    <Calendar className="w-3 h-3 text-purple-400/70" />
                                                     {formatDate(event.date)}
                                                 </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <Clock className="w-3.5 h-3.5 text-purple-400/70" />
+                                                <div className="flex items-center gap-1">
+                                                    <Clock className="w-3 h-3 text-purple-400/70" />
                                                     {formatTime(event.startTime)}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium text-purple-400">
+                                                <span className="text-xs sm:text-sm font-medium text-purple-400">
                                                     {event.priceLabel || `₹${event.price}`}
                                                 </span>
                                                 {event.guestlistStatus === 'open' && (
@@ -271,8 +276,8 @@ export function ClubDetailPage() {
                     className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
                     onClick={(e) => { if (e.target === e.currentTarget) setShowShareModal(false); }}
                 >
-                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm">
-                        <h3 className="text-xl font-semibold mb-4 text-center">
+                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-t-2xl sm:rounded-2xl p-5 w-full sm:max-w-sm">
+                        <h3 className="text-base sm:text-lg font-semibold mb-4 text-center">
                             {isMobileDevice() ? 'Share Club' : 'Share & Download App'}
                         </h3>
 
