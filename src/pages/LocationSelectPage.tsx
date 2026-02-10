@@ -57,27 +57,27 @@ export function LocationSelectPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
 
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
                     {CITIES.map((city) => (
                         <button
                             key={city.id}
                             onClick={() => handleCitySelect(city)}
-                            className="group relative overflow-hidden rounded-[2rem] bg-white/[0.03] backdrop-blur-md border border-white/5 p-6 sm:p-8 transition-all duration-500 hover:bg-white/[0.06] hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/20 text-left"
+                            className="group relative overflow-hidden rounded-2xl sm:rounded-[2rem] bg-white/[0.03] backdrop-blur-md border border-white/5 p-4 sm:p-8 transition-all duration-500 hover:bg-white/[0.06] hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/20 text-left"
                         >
                             {/* Gradient overlay on hover */}
                             <div className="absolute inset-0 bg-gradient-to-br from-purple-600/0 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                             {/* Icon */}
-                            <div className="relative text-3xl sm:text-4xl mb-4 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
+                            <div className="relative text-2xl sm:text-4xl mb-3 sm:mb-4 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6">
                                 {city.icon}
                             </div>
 
                             {/* City name + arrow */}
                             <div className="relative flex items-center justify-between">
-                                <span className="text-base sm:text-lg font-bold text-white/90 group-hover:text-white transition-colors">
+                                <span className="text-sm sm:text-lg font-bold text-white/90 group-hover:text-white transition-colors">
                                     {city.label}
                                 </span>
-                                <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-x-1" />
+                                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white/20 group-hover:text-purple-400 transition-all duration-300 group-hover:translate-x-1" />
                             </div>
                         </button>
                     ))}
