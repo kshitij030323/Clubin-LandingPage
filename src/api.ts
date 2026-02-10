@@ -20,7 +20,7 @@ export async function fetchClubs(city?: string): Promise<Club[]> {
 }
 
 /**
- * Fetch a single club by ID (includes upcoming events)
+ * Fetch a single club by ID
  */
 export async function fetchClubDetails(id: string): Promise<Club> {
     const response = await fetch(`${API_BASE}/clubs/${id}`);
@@ -28,6 +28,19 @@ export async function fetchClubDetails(id: string): Promise<Club> {
         throw new Error('Failed to fetch club details');
     }
     return response.json();
+}
+
+/**
+ * Fetch events for a specific club by fetching all events and filtering by clubId.
+ * The /api/clubs/:id endpoint does not reliably include events.
+ */
+export async function fetchEventsByClubId(clubId: string): Promise<Event[]> {
+    const response = await fetch(`${API_BASE}/events`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch events');
+    }
+    const allEvents: Event[] = await response.json();
+    return allEvents.filter((e) => e.clubId === clubId);
 }
 
 /**
