@@ -70,7 +70,7 @@ export function ClubsListPage() {
                     </div>
                     <Link
                         to="/"
-                        className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-sm font-medium rounded-lg border border-purple-500/20 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs sm:text-sm font-medium rounded-lg border border-purple-500/20 transition-colors flex-shrink-0"
                     >
                         Download App
                     </Link>
