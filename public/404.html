@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Clubin</title>
+  <script>
+    // GitHub Pages SPA redirect workaround
+    // Stores the original path in sessionStorage, then redirects to index.html
+    // so React Router can handle the route client-side
+    var pathSegmentsToKeep = 0;
+    var l = window.location;
+    sessionStorage.setItem('spa-redirect', l.pathname + l.search + l.hash);
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/'
+    );
+  </script>
+</head>
+<body>
+</body>
+</html>
