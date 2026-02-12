@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Skeleton } from '../components/Skeleton';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
@@ -71,27 +71,47 @@ export function EventDetailPage() {
         title: event ? `${event.title} at ${event.club} - ${formatDate(event.date)} | Clubin` : 'Event | Clubin',
         description: event ? `${event.title} at ${event.club} on ${formatDate(event.date)}. ${event.description?.substring(0, 150) || 'Book your spot on Clubin!'}` : undefined,
         image: event?.imageUrl,
-        structuredData: event ? {
-            '@context': 'https://schema.org',
-            '@type': 'Event',
-            name: event.title,
-            startDate: event.date,
-            location: {
-                '@type': 'Place',
-                name: event.club,
-                address: event.location,
+        url: event ? `https://clubin.co.in/events/${event.id}` : undefined,
+        structuredData: event ? [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'Event',
+                name: event.title,
+                startDate: event.date.split('T')[0] + (event.startTime ? `T${event.startTime}:00` : ''),
+                endDate: event.date.split('T')[0] + (event.endTime ? `T${event.endTime}:00` : ''),
+                eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+                eventStatus: 'https://schema.org/EventScheduled',
+                location: {
+                    '@type': 'Place',
+                    name: event.club,
+                    address: {
+                        '@type': 'PostalAddress',
+                        streetAddress: event.clubRef?.address || '',
+                        addressLocality: event.location,
+                        addressCountry: 'IN',
+                    },
+                },
+                image: event.imageUrl,
+                description: event.description,
+                url: `https://clubin.co.in/events/${event.id}`,
+                offers: [
+                    { '@type': 'Offer', name: 'Stag Entry', price: event.stagPrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: `https://clubin.co.in/events/${event.id}` },
+                    { '@type': 'Offer', name: 'Couple Entry', price: event.couplePrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: `https://clubin.co.in/events/${event.id}` },
+                    { '@type': 'Offer', name: 'Ladies Entry', price: event.ladiesPrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: `https://clubin.co.in/events/${event.id}` },
+                ],
+                ...(event.promoterRef ? { organizer: { '@type': 'Organization', name: event.promoterRef.name, url: `https://clubin.co.in/promoters/${event.promoterRef.id}` } } : {}),
+                performer: { '@type': 'PerformingGroup', name: event.genre || event.title },
             },
-            image: event.imageUrl,
-            description: event.description,
-            offers: {
-                '@type': 'Offer',
-                price: event.price,
-                priceCurrency: 'INR',
-                availability: isGuestlistOpen
-                    ? 'https://schema.org/InStock'
-                    : 'https://schema.org/SoldOut',
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
+                    { '@type': 'ListItem', position: 2, name: 'Events' },
+                    { '@type': 'ListItem', position: 3, name: event.title },
+                ],
             },
-        } : undefined,
+        ] : undefined,
     });
 
     const handleShare = async () => {
@@ -333,7 +353,7 @@ export function EventDetailPage() {
                                                 <User className="w-5 h-5 text-purple-400" />
                                                 Promoted by
                                             </h3>
-                                            <div className="flex items-center gap-3">
+                                            <Link to={`/promoters/${event.promoterRef.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                                                 {event.promoterRef.logoUrl ? (
                                                     <img
                                                         src={event.promoterRef.logoUrl}
@@ -352,16 +372,14 @@ export function EventDetailPage() {
                                                     )}
                                                 </div>
                                                 {event.promoterRef.instagramUrl && (
-                                                    <a
-                                                        href={event.promoterRef.instagramUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                    <span
+                                                        onClick={(e) => { e.preventDefault(); window.open(event.promoterRef!.instagramUrl!, '_blank'); }}
                                                         className="p-2.5 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
                                                     >
                                                         <Instagram className="w-4 h-4" />
-                                                    </a>
+                                                    </span>
                                                 )}
-                                            </div>
+                                            </Link>
                                         </div>
                                     )}
 
@@ -592,7 +610,7 @@ export function EventDetailPage() {
                                             <User className="w-4 h-4 text-purple-400" />
                                             Promoted by
                                         </h2>
-                                        <div className="flex items-center gap-3">
+                                        <Link to={`/promoters/${event.promoterRef.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                                             {event.promoterRef.logoUrl ? (
                                                 <img
                                                     src={event.promoterRef.logoUrl}
@@ -611,16 +629,14 @@ export function EventDetailPage() {
                                                 )}
                                             </div>
                                             {event.promoterRef.instagramUrl && (
-                                                <a
-                                                    href={event.promoterRef.instagramUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                <span
+                                                    onClick={(e) => { e.preventDefault(); window.open(event.promoterRef!.instagramUrl!, '_blank'); }}
                                                     className="p-2.5 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
                                                 >
                                                     <Instagram className="w-4 h-4" />
-                                                </a>
+                                                </span>
                                             )}
-                                        </div>
+                                        </Link>
                                     </div>
                                 )}
 

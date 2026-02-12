@@ -81,14 +81,35 @@ export function ClubDetailPage() {
         title: club ? `${club.name} - Nightclub in ${club.location} | Clubin` : 'Club | Clubin',
         description: club ? `${club.name} in ${club.location}. ${club.description || 'Book guestlists and VIP tables on Clubin.'}` : undefined,
         image: club?.imageUrl,
-        structuredData: club ? {
-            '@context': 'https://schema.org',
-            '@type': 'NightClub',
-            name: club.name,
-            address: club.address || club.location,
-            image: club.imageUrl,
-            description: club.description,
-        } : undefined,
+        url: club ? `https://clubin.co.in/clubs/${encodeURIComponent(club.location)}/${club.id}` : undefined,
+        structuredData: club ? [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'NightClub',
+                name: club.name,
+                address: {
+                    '@type': 'PostalAddress',
+                    streetAddress: club.address || '',
+                    addressLocality: club.location,
+                    addressCountry: 'IN',
+                },
+                image: club.imageUrl,
+                description: club.description,
+                url: `https://clubin.co.in/clubs/${encodeURIComponent(club.location)}/${club.id}`,
+                ...(club.mapUrl ? { hasMap: club.mapUrl } : {}),
+                ...(club.instagramUrl ? { sameAs: [club.instagramUrl] } : {}),
+            },
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
+                    { '@type': 'ListItem', position: 2, name: 'Clubs', item: 'https://clubin.co.in/clubs' },
+                    { '@type': 'ListItem', position: 3, name: club.location, item: `https://clubin.co.in/clubs/${encodeURIComponent(club.location)}` },
+                    { '@type': 'ListItem', position: 4, name: club.name },
+                ],
+            },
+        ] : undefined,
     });
 
     const handleShare = async () => {
@@ -296,9 +317,10 @@ export function ClubDetailPage() {
                                     <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-3">Promoters</h3>
                                     <div className="space-y-3">
                                         {club.promoterClubs.map((pc) => (
-                                            <div
+                                            <Link
                                                 key={pc.id}
-                                                className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl"
+                                                to={`/promoters/${pc.promoter.id}`}
+                                                className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 hover:border-purple-500/20 transition-colors"
                                             >
                                                 {pc.promoter.logoUrl ? (
                                                     <img
@@ -318,16 +340,14 @@ export function ClubDetailPage() {
                                                     )}
                                                 </div>
                                                 {pc.promoter.instagramUrl && (
-                                                    <a
-                                                        href={pc.promoter.instagramUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                    <span
+                                                        onClick={(e) => { e.preventDefault(); window.open(pc.promoter.instagramUrl!, '_blank'); }}
                                                         className="p-2 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
                                                     >
                                                         <Instagram className="w-4 h-4" />
-                                                    </a>
+                                                    </span>
                                                 )}
-                                            </div>
+                                            </Link>
                                         ))}
                                     </div>
                                 </div>
@@ -533,9 +553,10 @@ export function ClubDetailPage() {
                                 </h2>
                                 <div className="space-y-3">
                                     {club.promoterClubs.map((pc) => (
-                                        <div
+                                        <Link
                                             key={pc.id}
-                                            className="flex items-center gap-3 p-3 bg-[#1e1b2e] border border-white/5 rounded-xl"
+                                            to={`/promoters/${pc.promoter.id}`}
+                                            className="flex items-center gap-3 p-3 bg-[#1e1b2e] border border-white/5 rounded-xl hover:bg-[#252139] transition-colors"
                                         >
                                             {pc.promoter.logoUrl ? (
                                                 <img
@@ -555,16 +576,14 @@ export function ClubDetailPage() {
                                                 )}
                                             </div>
                                             {pc.promoter.instagramUrl && (
-                                                <a
-                                                    href={pc.promoter.instagramUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                <span
+                                                    onClick={(e) => { e.preventDefault(); window.open(pc.promoter.instagramUrl!, '_blank'); }}
                                                     className="p-2 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
                                                 >
                                                     <Instagram className="w-4 h-4" />
-                                                </a>
+                                                </span>
                                             )}
-                                        </div>
+                                        </Link>
                                     ))}
                                 </div>
                             </section>

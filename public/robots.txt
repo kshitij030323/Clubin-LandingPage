@@ -3,14 +3,12 @@
 
 User-agent: *
 Allow: /
+Disallow: /api/
 
 # Sitemap
 Sitemap: https://clubin.co.in/sitemap.xml
 
-# Optimize crawl rate
-Crawl-delay: 1
-
-# Allow all search engines
+# Allow all major search engines
 User-agent: Googlebot
 Allow: /
 
@@ -21,4 +19,16 @@ User-agent: Yandex
 Allow: /
 
 User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
 Allow: /

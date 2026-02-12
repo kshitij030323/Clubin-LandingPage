@@ -4,21 +4,20 @@ interface SEOProps {
     title: string;
     description?: string;
     image?: string;
+    url?: string;
     type?: 'website' | 'article';
-    structuredData?: object;
+    structuredData?: object | object[];
 }
 
 /**
- * Simple SEO hook for React 19 (replaces react-helmet-async)
- * Updates document title and meta tags
+ * SEO hook for React 19 — updates document title, meta tags,
+ * Open Graph, Twitter Cards, canonical URL, and JSON-LD structured data.
  */
-export function useSEO({ title, description, image, type = 'website', structuredData }: SEOProps) {
+export function useSEO({ title, description, image, url, type = 'website', structuredData }: SEOProps) {
     useEffect(() => {
-        // Update title
         const previousTitle = document.title;
         document.title = title;
 
-        // Helper to update or create meta tag
         const setMetaTag = (property: string, content: string, isOG = false) => {
             const attr = isOG ? 'property' : 'name';
             let meta = document.querySelector(`meta[${attr}="${property}"]`) as HTMLMetaElement | null;
@@ -30,34 +29,59 @@ export function useSEO({ title, description, image, type = 'website', structured
             meta.content = content;
         };
 
-        // Set description
+        // Description
         if (description) {
             setMetaTag('description', description);
             setMetaTag('og:description', description, true);
+            setMetaTag('twitter:description', description);
         }
 
-        // Set Open Graph tags
+        // Open Graph
         setMetaTag('og:title', title, true);
         setMetaTag('og:type', type, true);
+        setMetaTag('og:site_name', 'Clubin', true);
         if (image) {
             setMetaTag('og:image', image, true);
+            setMetaTag('twitter:image', image);
         }
 
-        // Add structured data
-        let scriptTag: HTMLScriptElement | null = null;
+        // Twitter Cards
+        setMetaTag('twitter:card', image ? 'summary_large_image' : 'summary');
+        setMetaTag('twitter:title', title);
+
+        // Canonical URL & OG URL
+        const pageUrl = url || `https://clubin.co.in${window.location.pathname}`;
+        setMetaTag('og:url', pageUrl, true);
+        setMetaTag('twitter:url', pageUrl);
+
+        let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+        if (!canonicalLink) {
+            canonicalLink = document.createElement('link');
+            canonicalLink.rel = 'canonical';
+            document.head.appendChild(canonicalLink);
+        }
+        canonicalLink.href = pageUrl;
+
+        // Structured data (JSON-LD) — supports single object or array of objects
+        const scriptTags: HTMLScriptElement[] = [];
         if (structuredData) {
-            scriptTag = document.createElement('script');
-            scriptTag.type = 'application/ld+json';
-            scriptTag.text = JSON.stringify(structuredData);
-            document.head.appendChild(scriptTag);
+            const items = Array.isArray(structuredData) ? structuredData : [structuredData];
+            for (const item of items) {
+                const scriptTag = document.createElement('script');
+                scriptTag.type = 'application/ld+json';
+                scriptTag.text = JSON.stringify(item);
+                scriptTag.setAttribute('data-seo-hook', 'true');
+                document.head.appendChild(scriptTag);
+                scriptTags.push(scriptTag);
+            }
         }
 
         // Cleanup
         return () => {
             document.title = previousTitle;
-            if (scriptTag) {
-                document.head.removeChild(scriptTag);
+            for (const tag of scriptTags) {
+                document.head.removeChild(tag);
             }
         };
-    }, [title, description, image, type, structuredData]);
+    }, [title, description, image, url, type, structuredData]);
 }
