@@ -125,17 +125,17 @@ export interface ShortLinkCreateResponse {
 export interface City {
     id: string;
     label: string;
-    icon: string; // Emoji or icon name
+    icon: string; // Icon name for Lucide
 }
 
 export const CITIES: City[] = [
-    { id: 'Bengaluru', label: 'Bengaluru', icon: '🏛️' },
-    { id: 'Delhi NCR', label: 'Delhi/NCR', icon: '🏢' },
-    { id: 'Goa', label: 'Goa', icon: '🏖️' },
-    { id: 'Mumbai', label: 'Mumbai', icon: '🌆' },
-    { id: 'Pune', label: 'Pune', icon: '🏰' },
-    { id: 'Hyderabad', label: 'Hyderabad', icon: '🕌' },
-    { id: 'Chandigarh', label: 'Chandigarh', icon: '🌳' },
-    { id: 'Jaipur', label: 'Jaipur', icon: '👑' },
-    { id: 'Chennai', label: 'Chennai', icon: '🛕' },
+    { id: 'Bengaluru', label: 'Bengaluru', icon: 'building-2' },
+    { id: 'Delhi NCR', label: 'Delhi/NCR', icon: 'landmark' },
+    { id: 'Goa', label: 'Goa', icon: 'palmtree' },
+    { id: 'Mumbai', label: 'Mumbai', icon: 'building' },
+    { id: 'Pune', label: 'Pune', icon: 'castle' },
+    { id: 'Hyderabad', label: 'Hyderabad', icon: 'circle-dot' },
+    { id: 'Chandigarh', label: 'Chandigarh', icon: 'tree-pine' },
+    { id: 'Jaipur', label: 'Jaipur', icon: 'crown' },
+    { id: 'Chennai', label: 'Chennai', icon: 'waves' },
 ];
