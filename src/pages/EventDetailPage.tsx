@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, ArrowLeft, Calendar, Clock, Loader2, Share2, Ticket, Users, Check, Copy, ExternalLink } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, Clock, Loader2, Share2, Ticket, Users, Check, Copy, ExternalLink, Instagram, User, Music } from 'lucide-react';
 
 export function EventDetailPage() {
     const { eventId, code } = useParams<{ eventId?: string; code?: string }>();
@@ -266,6 +266,100 @@ export function EventDetailPage() {
                                 <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
                                     {event.rules}
                                 </p>
+                            </div>
+                        )}
+
+                        {/* Promoter Section */}
+                        {event.promoterRef && (
+                            <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
+                                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                    <User className="w-4 h-4 text-purple-400" />
+                                    Promoted by
+                                </h2>
+                                <div className="flex items-center gap-3">
+                                    {event.promoterRef.logoUrl ? (
+                                        <img
+                                            src={event.promoterRef.logoUrl}
+                                            alt={event.promoterRef.name}
+                                            className="w-12 h-12 rounded-full object-cover border-2 border-purple-500/30 flex-shrink-0"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-full bg-purple-600/20 border-2 border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                                            <Music className="w-5 h-5 text-purple-400" />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold">{event.promoterRef.name}</p>
+                                        {event.promoterRef.region && (
+                                            <p className="text-xs text-white/40">{event.promoterRef.region}</p>
+                                        )}
+                                    </div>
+                                    {event.promoterRef.instagramUrl && (
+                                        <a
+                                            href={event.promoterRef.instagramUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2.5 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
+                                        >
+                                            <Instagram className="w-4 h-4" />
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Venue Section */}
+                        {event.clubRef && (
+                            <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
+                                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-purple-400" />
+                                    Venue
+                                </h2>
+                                <div className="flex items-start gap-3">
+                                    {event.clubRef.imageUrl ? (
+                                        <img
+                                            src={event.clubRef.imageUrl}
+                                            alt={event.clubRef.name}
+                                            className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border border-purple-500/20 flex-shrink-0"
+                                        />
+                                    ) : (
+                                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                            <MapPin className="w-6 h-6 text-purple-400" />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold mb-0.5">{event.clubRef.name}</p>
+                                        <p className="text-xs text-white/50 mb-2">
+                                            {event.clubRef.address || event.location}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {event.clubRef.mapUrl && (
+                                                <a
+                                                    href={event.clubRef.mapUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                                                >
+                                                    <MapPin className="w-3 h-3" />
+                                                    Directions
+                                                    <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            )}
+                                            {event.clubRef.instagramUrl && (
+                                                <a
+                                                    href={event.clubRef.instagramUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                                                >
+                                                    <Instagram className="w-3 h-3" />
+                                                    Instagram
+                                                    <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>

@@ -1,6 +1,6 @@
 // API client for fetching clubs and events from the backend
 
-import type { Club, Event, ShortLinkResponse, ShortLinkCreateResponse } from './types';
+import type { Club, Event, ShortLinkResponse, ShortLinkCreateResponse, PromoterPublicResponse } from './types';
 
 const API_BASE = 'https://api.clubin.info/api';
 
@@ -66,6 +66,17 @@ export async function fetchEventDetails(id: string): Promise<Event> {
     const response = await fetch(`${API_BASE}/events/${id}`);
     if (!response.ok) {
         throw new Error('Failed to fetch event details');
+    }
+    return response.json();
+}
+
+/**
+ * Fetch public promoter info + upcoming events
+ */
+export async function fetchPromoterPublic(promoterId: string): Promise<PromoterPublicResponse> {
+    const response = await fetch(`${API_BASE}/promoter/public/${promoterId}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch promoter info');
     }
     return response.json();
 }

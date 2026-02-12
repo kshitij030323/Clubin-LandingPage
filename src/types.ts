@@ -1,5 +1,20 @@
 // Club and Event types matching the API response format
 
+export interface Promoter {
+    id: string;
+    name: string;
+    logoUrl?: string | null;
+    instagramUrl?: string | null;
+    region?: string;
+}
+
+export interface PromoterClub {
+    id: string;
+    promoterId: string;
+    clubId: string;
+    promoter: Promoter;
+}
+
 export interface Club {
     id: string;
     name: string;
@@ -8,13 +23,17 @@ export interface Club {
     mapUrl?: string;
     description?: string;
     imageUrl: string;
+    instagramUrl?: string | null;
     floorplanUrl?: string;
     createdAt: string;
     updatedAt: string;
     events?: Event[];
     tables?: ClubTable[];
+    promoterClubs?: PromoterClub[];
     _count?: {
         events: number;
+        promoterClubs?: number;
+        scannerUsers?: number;
     };
 }
 
@@ -23,6 +42,7 @@ export interface Event {
     title: string;
     club: string;
     clubId?: string;
+    promoterId?: string | null;
     location: string;
     description: string;
     rules?: string;
@@ -55,7 +75,10 @@ export interface Event {
         address?: string;
         mapUrl?: string;
         floorplanUrl?: string;
+        imageUrl?: string;
+        instagramUrl?: string | null;
     };
+    promoterRef?: Promoter | null;
     eventTables?: EventTable[];
     spotsRemaining?: number;
     _count?: {
@@ -80,6 +103,11 @@ export interface EventTable {
     originalPrice?: number | null;
     available: boolean;
     clubTable?: ClubTable;
+}
+
+export interface PromoterPublicResponse {
+    promoter: Promoter;
+    events: Pick<Event, 'id' | 'title' | 'club' | 'location' | 'imageUrl' | 'date' | 'startTime' | 'endTime' | 'genre' | 'price' | 'priceLabel' | 'guestlistStatus'>[];
 }
 
 export interface ShortLinkResponse {
