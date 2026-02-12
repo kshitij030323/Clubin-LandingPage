@@ -35,6 +35,21 @@ export function ClubsListPage() {
     useSEO({
         title: `Best Nightclubs in ${displayCity} | Clubin`,
         description: `Discover the hottest nightclubs and party venues in ${displayCity}. Book guestlists and get VIP table reservations on Clubin.`,
+        structuredData: {
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: `Best Nightclubs in ${displayCity}`,
+            description: `Discover the hottest nightclubs and party venues in ${displayCity}.`,
+            url: `https://clubin.co.in/clubs/${cityParam}`,
+            breadcrumb: {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
+                    { '@type': 'ListItem', position: 2, name: 'Clubs', item: 'https://clubin.co.in/clubs' },
+                    { '@type': 'ListItem', position: 3, name: displayCity, item: `https://clubin.co.in/clubs/${cityParam}` },
+                ],
+            },
+        },
     });
 
     useEffect(() => {
