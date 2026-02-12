@@ -653,7 +653,7 @@ export function EventDetailPage() {
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
-                                                    window.open(event.promoterRef!.instagramUrl, '_blank');
+                                                    window.open(event.promoterRef!.instagramUrl || '', '_blank');
                                                 }}
                                                 className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-purple-500/20 transition-colors z-10"
                                             >
