@@ -570,54 +570,6 @@ export function ClubDetailPage() {
                             </section>
                         )}
 
-                        {/* Venue Section (Mobile) */}
-                        <section className="pb-4">
-                            <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-purple-400" />
-                                Venue
-                            </h2>
-                            <div className="bg-[#1e1b2e] border border-white/5 rounded-xl p-4">
-                                <div className="flex items-start gap-3">
-                                    <img
-                                        src={club.imageUrl}
-                                        alt={club.name}
-                                        className="w-14 h-14 rounded-xl object-cover border border-purple-500/20 flex-shrink-0"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-sm font-semibold mb-0.5">{club.name}</h3>
-                                        <p className="text-xs text-white/50 mb-2">
-                                            {club.address || club.location}
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {club.mapUrl && (
-                                                <a
-                                                    href={club.mapUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
-                                                >
-                                                    <MapPin className="w-3 h-3" />
-                                                    Directions
-                                                    <ExternalLink className="w-3 h-3" />
-                                                </a>
-                                            )}
-                                            {club.instagramUrl && (
-                                                <a
-                                                    href={club.instagramUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
-                                                >
-                                                    <Instagram className="w-3 h-3" />
-                                                    Instagram
-                                                    <ExternalLink className="w-3 h-3" />
-                                                </a>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
                     </div>
                 </div>
             )}
