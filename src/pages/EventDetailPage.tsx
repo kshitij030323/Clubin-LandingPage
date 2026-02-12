@@ -4,12 +4,14 @@ import { Skeleton } from '../components/Skeleton';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink, Instagram, User, Music } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink, Instagram, User, Music, Image, Play, Volume2, VolumeX } from 'lucide-react';
 
 export function EventDetailPage() {
     const { eventId, code } = useParams<{ eventId?: string; code?: string }>();
     const navigate = useNavigate();
     const [event, setEvent] = useState<Event | null>(null);
+    const [viewBanner, setViewBanner] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
 
     const handleBackAction = () => {
         // Check if there is history to go back to
@@ -190,7 +192,7 @@ export function EventDetailPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-[#0f0a1e] min-h-screen">
+                    <div className="bg-[#0a0a0a] min-h-screen">
                         <Skeleton className="h-[55vh] w-full" />
                         <div className="px-4 -mt-16 relative z-10 space-y-6">
                             <Skeleton className="h-72 w-full rounded-2xl bg-[#120f1d]/95 border border-purple-500/20" />
@@ -221,9 +223,9 @@ export function EventDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0f0a1e] md:bg-[#0a0a0a] text-white font-manrope">
+        <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope selection:bg-purple-500/30">
             {isDesktop ? (
-                /* Desktop Layout - 35% Left (Media) / 65% Right (Content) */
+                /* Desktop Layout - Reverted to Old Split Design */
                 <div className="h-screen overflow-hidden flex animate-in fade-in duration-500">
                     {/* Left Column: Media (35%) */}
                     <div className="w-[35%] h-full relative border-r border-white/5 bg-black">
@@ -306,23 +308,14 @@ export function EventDetailPage() {
                                         <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Stags</p>
                                             <p className="text-2xl font-bold text-green-400">₹{event.stagPrice}</p>
-                                            {event.originalStagPrice && event.originalStagPrice > event.stagPrice && (
-                                                <p className="text-xs line-through text-white/20 mt-0.5">₹{event.originalStagPrice}</p>
-                                            )}
                                         </div>
                                         <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Couples</p>
                                             <p className="text-2xl font-bold text-green-400">₹{event.couplePrice}</p>
-                                            {event.originalCouplePrice && event.originalCouplePrice > event.couplePrice && (
-                                                <p className="text-xs line-through text-white/20 mt-0.5">₹{event.originalCouplePrice}</p>
-                                            )}
                                         </div>
                                         <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
                                             <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">Ladies</p>
                                             <p className="text-2xl font-bold text-green-400">₹{event.ladiesPrice}</p>
-                                            {event.originalLadiesPrice && event.originalLadiesPrice > event.ladiesPrice && (
-                                                <p className="text-xs line-through text-white/20 mt-0.5">₹{event.originalLadiesPrice}</p>
-                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -469,16 +462,43 @@ export function EventDetailPage() {
                     </div>
                 </div>
             ) : (
-                /* Mobile Layout - Conserved EXACTLY as before */
-                <div className="pb-24 animate-in fade-in duration-500">
-                    {/* Hero Image/Video */}
-                    <div className="relative h-[55vh]">
-                        {event.videoUrl ? (
+                /* Mobile Layout - New Immersive Design with Smaller Text */
+                <div className="pb-24 pt-[4.5rem]">
+                    {/* Top Navigation - Fixed with Fade */}
+                    <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top">
+                        <button
+                            onClick={handleBackAction}
+                            className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95 group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </button>
+
+                        {/* Center Logo */}
+                        <div className="flex items-center justify-center">
+                            <img src="/clubin-header-logo.png" alt="Clubin" className="h-14 w-auto object-contain" />
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleShare}
+                                className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
+                            >
+                                <Share2 className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Bottom Fade Gradient */}
+                        <div className="absolute bottom-0 left-0 right-0 translate-y-full h-6 bg-gradient-to-b from-[#0a0a0a] to-transparent pointer-events-none" />
+                    </div>
+
+                    {/* Hero Section */}
+                    <div className="relative h-[60vh] w-full overflow-hidden">
+                        {event.videoUrl && !viewBanner ? (
                             <video
                                 src={event.videoUrl}
                                 autoPlay
                                 loop
-                                muted
+                                muted={isMuted}
                                 playsInline
                                 className="w-full h-full object-cover"
                             />
@@ -489,229 +509,207 @@ export function EventDetailPage() {
                                 className="w-full h-full object-cover"
                             />
                         )}
-                        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
 
-                        {/* Top Bar */}
-                        <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
-                            <button
-                                onClick={handleBackAction}
-                                className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={handleShare}
-                                className="p-2.5 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors"
-                            >
-                                <Share2 className="w-5 h-5" />
-                            </button>
+                        {/* Gradient Overlays */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-transparent pointer-events-none h-40" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent pointer-events-none" />
+
+                        {/* Floating Media Actions (Gallery/Video) */}
+                        <div className="absolute top-4 right-4 flex items-center gap-3 z-50">
+                            {/* Volume Toggle */}
+                            {event.videoUrl && !viewBanner && (
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setIsMuted(!isMuted);
+                                    }}
+                                    className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-lg border border-white/10 text-white hover:bg-white/10 transition-all shadow-lg active:scale-95"
+                                >
+                                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                </button>
+                            )}
+
+                            {/* Banner/Video Toggle */}
+                            {event.videoUrl && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setViewBanner(!viewBanner);
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-black/40 backdrop-blur-lg border border-white/10 text-sm font-bold hover:bg-white/10 transition-all shadow-lg active:scale-95 text-white"
+                                >
+                                    {viewBanner ? <Play className="w-4 h-4 fill-white" /> : <Image className="w-4 h-4" />}
+                                    {viewBanner ? 'Video' : 'Banner'}
+                                </button>
+                            )}
                         </div>
-                    </div>
 
-                    {/* Event Info - two column on large screens */}
-                    <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-20 relative z-10">
-                        <div className="lg:grid lg:grid-cols-[1fr,340px] lg:gap-6">
+                        {/* Main Event Info Overlay */}
+                        <div className="absolute bottom-0 left-0 right-0 px-4 pt-4 pb-4 z-40 flex flex-col items-center text-center">
+                            {/* Date Badge */}
+                            <div className="mb-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 shadow-lg">
+                                <Calendar className="w-2.5 h-2.5 text-white/80" />
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-white/90">
+                                    {formatDate(event.date)}
+                                </span>
+                            </div>
 
-                            {/* Left column - main info */}
-                            <div>
-                                {/* Main Info Card */}
-                                <div className="bg-[#120f1d]/95 backdrop-blur-2xl border border-purple-500/20 rounded-2xl p-5 sm:p-8 lg:p-10 mb-6 shadow-2xl">
-                                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight">{event.title}</h1>
+                            {/* Title - Significantly Reduced Size */}
+                            <h1 className="text-2xl font-black tracking-tight leading-none mb-1 drop-shadow-2xl">
+                                {event.title}
+                            </h1>
 
-                                    {/* Date & Time */}
-                                    <div className="flex flex-wrap gap-4 sm:gap-6 mb-5 sm:mb-6 text-white/80">
-                                        <div className="flex items-center gap-2 sm:gap-2.5">
-                                            <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10">
-                                                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-                                            </div>
-                                            <span className="font-semibold text-xs sm:text-base">{formatDate(event.date)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 sm:gap-2.5">
-                                            <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10">
-                                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-                                            </div>
-                                            <span className="font-medium text-xs sm:text-base">{formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Club & Location */}
-                                    <div className="flex items-start gap-2.5 sm:gap-3 text-white/70 mb-6 sm:mb-8 p-0.5">
-                                        <MapPin className="w-5 h-5 sm:w-6 sm:h-6 mt-0.5 text-purple-400 flex-shrink-0" />
-                                        <div>
-                                            <p className="font-bold text-white text-sm sm:text-lg mb-0.5">{event.club}</p>
-                                            <p className="text-xs sm:text-base font-medium opacity-80">{event.location}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Price Info */}
-                                    <div className="grid grid-cols-3 gap-2 sm:gap-4 p-3 sm:p-5 bg-white/[0.03] rounded-2xl border border-white/5">
-                                        <div className="text-center flex flex-col justify-between h-full">
-                                            <p className="text-[9px] sm:text-[10px] text-white/40 mb-2 uppercase tracking-[0.1em] sm:tracking-[0.2em] font-bold">Stags</p>
-                                            <div className="flex flex-col justify-end h-full">
-                                                {event.originalStagPrice && event.originalStagPrice > event.stagPrice && (
-                                                    <span className="text-white/20 line-through text-[9px] sm:text-sm block mb-0.5">
-                                                        ₹{event.originalStagPrice}
-                                                    </span>
-                                                )}
-                                                <span className="font-bold text-sm sm:text-lg text-green-400">₹{event.stagPrice}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="text-center border-x border-white/10 flex flex-col justify-between h-full">
-                                            <p className="text-[9px] sm:text-[10px] text-white/40 mb-2 uppercase tracking-[0.1em] sm:tracking-[0.2em] font-bold">Couples</p>
-                                            <div className="flex flex-col justify-end h-full">
-                                                {event.originalCouplePrice && event.originalCouplePrice > event.couplePrice && (
-                                                    <span className="text-white/20 line-through text-[9px] sm:text-sm block mb-0.5">
-                                                        ₹{event.originalCouplePrice}
-                                                    </span>
-                                                )}
-                                                <span className="font-bold text-sm sm:text-lg text-green-400">₹{event.couplePrice}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="text-center flex flex-col justify-between h-full">
-                                            <p className="text-[9px] sm:text-[10px] text-white/40 mb-2 uppercase tracking-[0.1em] sm:tracking-[0.2em] font-bold">Ladies</p>
-                                            <div className="flex flex-col justify-end h-full">
-                                                {event.originalLadiesPrice && event.originalLadiesPrice > event.ladiesPrice && (
-                                                    <span className="text-white/20 line-through text-[9px] sm:text-sm block mb-0.5">
-                                                        ₹{event.originalLadiesPrice}
-                                                    </span>
-                                                )}
-                                                <span className="font-bold text-sm sm:text-lg text-green-400">₹{event.ladiesPrice}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Description */}
-                                {event.description && (
-                                    <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
-                                        <h2 className="text-lg font-semibold mb-3">About This Event</h2>
-                                        <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                                            {event.description}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* Rules */}
-                                {event.rules && (
-                                    <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
-                                        <h2 className="text-lg font-semibold mb-3">Entry Rules</h2>
-                                        <p className="text-white/60 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                                            {event.rules}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* Promoter Section (Mobile) */}
-                                {event.promoterRef && (
-                                    <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
-                                        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                                            <User className="w-4 h-4 text-purple-400" />
-                                            Promoted by
-                                        </h2>
-                                        <Link to={`/promoters/${event.promoterRef.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                                            {event.promoterRef.logoUrl ? (
-                                                <img
-                                                    src={event.promoterRef.logoUrl}
-                                                    alt={event.promoterRef.name}
-                                                    className="w-12 h-12 rounded-full object-cover border-2 border-purple-500/30 flex-shrink-0"
-                                                />
-                                            ) : (
-                                                <div className="w-12 h-12 rounded-full bg-purple-600/20 border-2 border-purple-500/30 flex items-center justify-center flex-shrink-0">
-                                                    <Music className="w-5 h-5 text-purple-400" />
-                                                </div>
-                                            )}
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold">{event.promoterRef.name}</p>
-                                                {event.promoterRef.region && (
-                                                    <p className="text-xs text-white/40">{event.promoterRef.region}</p>
-                                                )}
-                                            </div>
-                                            {event.promoterRef.instagramUrl && (
-                                                <span
-                                                    onClick={(e) => { e.preventDefault(); window.open(event.promoterRef!.instagramUrl!, '_blank'); }}
-                                                    className="p-2.5 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
-                                                >
-                                                    <Instagram className="w-4 h-4" />
-                                                </span>
-                                            )}
-                                        </Link>
-                                    </div>
-                                )}
-
-                                {/* Venue Section (Mobile) */}
-                                {event.clubRef && (
-                                    <div className="mb-6 bg-[#120f1d]/50 backdrop-blur-xl border border-purple-500/10 rounded-2xl p-5 sm:p-6">
-                                        <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                                            <MapPin className="w-4 h-4 text-purple-400" />
-                                            Venue
-                                        </h2>
-                                        <div className="flex items-start gap-3">
-                                            {event.clubRef.imageUrl ? (
-                                                <img
-                                                    src={event.clubRef.imageUrl}
-                                                    alt={event.clubRef.name}
-                                                    className="w-14 h-14 rounded-xl object-cover border border-purple-500/20 flex-shrink-0"
-                                                />
-                                            ) : (
-                                                <div className="w-14 h-14 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
-                                                    <MapPin className="w-6 h-6 text-purple-400" />
-                                                </div>
-                                            )}
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold mb-0.5">{event.clubRef.name}</p>
-                                                <p className="text-xs text-white/50 mb-2">
-                                                    {event.clubRef.address || event.location}
-                                                </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {event.clubRef.mapUrl && (
-                                                        <a
-                                                            href={event.clubRef.mapUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
-                                                        >
-                                                            <MapPin className="w-3 h-3" />
-                                                            Directions
-                                                            <ExternalLink className="w-3 h-3" />
-                                                        </a>
-                                                    )}
-                                                    {event.clubRef.instagramUrl && (
-                                                        <a
-                                                            href={event.clubRef.instagramUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
-                                                        >
-                                                            <Instagram className="w-3 h-3" />
-                                                            Instagram
-                                                            <ExternalLink className="w-3 h-3" />
-                                                        </a>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                            {/* Location Pill - Reduced Size */}
+                            <div className="flex items-center gap-1.5 text-white/90 mb-3 backdrop-blur-md px-3 py-1.5 rounded-full bg-white/5 border border-white/10 shadow-lg cursor-pointer hover:bg-white/10 transition-colors">
+                                <MapPin className="w-3 h-3 text-purple-400" />
+                                <span className="text-xs font-bold">{event.club}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Fixed Bottom CTA (mobile / tablet) */}
-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#0f0a1e]/95 backdrop-blur-xl border-t border-white/5 z-40">
-                        <div className="max-w-5xl mx-auto">
+                    {/* Stats Row - Glassy Card (Smaller Text) */}
+                    <div className="px-4 mt-4 w-full max-w-4xl mx-auto">
+                        <div className="bg-[#121212]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl grid grid-cols-4 gap-0 divide-x divide-white/5">
+                            <div className="text-center px-1 py-1">
+                                <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold mb-1.5">Date</p>
+                                <p className="text-[10px] font-bold text-white whitespace-nowrap">{formatDate(event.date).split(',')[0]} {formatDate(event.date).split(',')[1]}</p>
+                            </div>
+                            <div className="text-center px-1 py-1">
+                                <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold mb-1.5">Time</p>
+                                <p className="text-[10px] font-bold text-white whitespace-nowrap">{formatTime(event.startTime)}</p>
+                            </div>
+                            <div className="text-center px-1 py-1">
+                                <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold mb-1.5">Entry</p>
+                                <p className={`text-[10px] font-bold whitespace-nowrap ${event.price === 0 ? 'text-green-400' : 'text-white'}`}>
+                                    {event.price === 0 ? 'Free Entry' : `₹${event.price}`}
+                                </p>
+                            </div>
+                            <div className="text-center px-1 py-1">
+                                <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold mb-1.5">Spots</p>
+                                <p className="text-[10px] font-bold text-white whitespace-nowrap">
+                                    {event.spotsRemaining ? event.spotsRemaining : '∞'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="max-w-3xl mx-auto px-6 py-8 space-y-10 pb-32">
+                        {/* Ticket Pricing Breakdown - Smaller Text */}
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 pl-1">Entry & Cover</h3>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="p-3 rounded-xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 text-center">
+                                    <p className="text-[9px] uppercase tracking-widest text-white/30 mb-1 font-bold">Stags</p>
+                                    <p className="text-base font-bold text-white">₹{event.stagPrice}</p>
+                                    {event.stagPrice === 0 && <p className="text-[9px] text-green-400 font-bold mt-0.5">FREE</p>}
+                                </div>
+                                <div className="p-3 rounded-xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 text-center">
+                                    <p className="text-[9px] uppercase tracking-widest text-white/30 mb-1 font-bold">Couples</p>
+                                    <p className="text-base font-bold text-white">₹{event.couplePrice}</p>
+                                    {event.couplePrice === 0 && <p className="text-[9px] text-green-400 font-bold mt-0.5">FREE</p>}
+                                </div>
+                                <div className="p-3 rounded-xl bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 text-center">
+                                    <p className="text-[9px] uppercase tracking-widest text-white/30 mb-1 font-bold">Ladies</p>
+                                    <p className="text-base font-bold text-white">₹{event.ladiesPrice}</p>
+                                    {event.ladiesPrice === 0 && <p className="text-[9px] text-green-400 font-bold mt-0.5">FREE</p>}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Collaboration Section - Smaller Text */}
+                        {event.promoterRef && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 pl-1">In Collaboration With</h3>
+                                <Link
+                                    to={`/promoters/${event.promoterRef.id}`}
+                                    className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-white/[0.05] to-transparent border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer group relative overflow-hidden"
+                                >
+                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-black/40 border border-white/10 shadow-lg flex-shrink-0">
+                                        {event.promoterRef.logoUrl ? (
+                                            <img src={event.promoterRef.logoUrl} alt={event.promoterRef.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-white/40 font-bold text-base bg-purple-900/20">
+                                                {event.promoterRef.name.charAt(0)}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0 pr-8">
+                                        <h4 className="text-base font-bold text-white group-hover:text-purple-400 transition-colors truncate">
+                                            {event.promoterRef.name}
+                                        </h4>
+                                        <div className="flex items-center gap-1.5 text-white/50">
+                                            <p className="text-[10px] truncate">Official Event Partner</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center gap-2">
+                                        {event.promoterRef.instagramUrl && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    window.open(event.promoterRef!.instagramUrl, '_blank');
+                                                }}
+                                                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-purple-500/20 transition-colors z-10"
+                                            >
+                                                <Instagram className="w-4 h-4 text-white/70 hover:text-purple-400 transition-colors" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </Link>
+                            </div>
+                        )}
+
+                        {/* Description - Smaller Text */}
+                        {event.description && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 pl-1">The Vibe</h3>
+                                <div className="text-white/80 leading-relaxed text-sm font-light tracking-wide whitespace-pre-line">
+                                    {event.description}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Rules - Smaller Text */}
+                        {event.rules && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
+                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 pl-1">Important Info</h3>
+                                <div className="p-5 rounded-2xl bg-[#121212] border border-white/5 shadow-inner">
+                                    <h4 className="text-xs font-bold text-white mb-3 flex items-center gap-2">
+                                        <Check className="w-3.5 h-3.5 text-green-500" />
+                                        Club Rules
+                                    </h4>
+                                    <div className="text-white/60 leading-relaxed text-xs whitespace-pre-line space-y-2 font-medium">
+                                        {event.rules}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Sticky Footer CTA - Slightly Smaller */}
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/95 to-transparent z-50 pb-8 pt-12">
+                        <div className="max-w-3xl mx-auto">
                             <button
                                 onClick={handleGetTickets}
                                 disabled={!isGuestlistOpen}
-                                className={`w-full py-3.5 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-all ${isGuestlistOpen
-                                    ? 'bg-white text-black hover:bg-white/90 shadow-lg shadow-white/5'
-                                    : 'bg-white/5 text-white/40 cursor-not-allowed'
+                                className={`w-full py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] ${isGuestlistOpen
+                                    ? 'bg-white text-black hover:bg-gray-100 shadow-[0_0_50px_rgba(255,255,255,0.15)] border border-white/20'
+                                    : 'bg-white/10 text-white/30 cursor-not-allowed'
                                     }`}
                             >
-                                <Ticket className="w-5 h-5" />
-                                {isGuestlistOpen ? 'Get Tickets on App' : 'Guestlist Closed'}
+                                <Ticket className="w-4 h-4" />
+                                {isGuestlistOpen ? 'Get on Guestlist' : 'Guestlist Closed'}
                             </button>
+                            <p className="text-center text-[9px] text-white/30 mt-2 font-medium uppercase tracking-widest flex items-center justify-center gap-1">
+                                <span className="w-1 h-1 rounded-full bg-green-500"></span>
+                                Secure booking via Clubin App
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -720,10 +718,10 @@ export function EventDetailPage() {
             {/* Share / Download Modal (Common) */}
             {showShareModal && (
                 <div
-                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
                     onClick={(e) => { if (e.target === e.currentTarget) setShowShareModal(false); }}
                 >
-                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm">
+                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
                         <h3 className="text-xl font-semibold mb-4 text-center">
                             {isMobileDevice() ? 'Share Event' : 'Download Clubin App'}
                         </h3>
@@ -782,12 +780,6 @@ export function EventDetailPage() {
                     </div>
                 </div>
             )}
-
-            {/* Background decorations (Common) */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 md:hidden">
-                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-900/30 rounded-full blur-[120px] -translate-x-1/3 -translate-y-1/3 mix-blend-screen" />
-                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-900/30 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 mix-blend-screen" />
-            </div>
         </div>
     );
 }

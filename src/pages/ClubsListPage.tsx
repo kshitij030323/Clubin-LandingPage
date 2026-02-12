@@ -5,7 +5,7 @@ import type { Club } from '../types';
 import { CITIES } from '../types';
 import { fetchClubs, APP_STORE_URL, PLAY_STORE_URL, isMobileDevice } from '../api';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, Calendar, ArrowLeft, Search, X } from 'lucide-react';
+import { MapPin, Calendar, ArrowLeft, Search, X, Download } from 'lucide-react';
 
 export function ClubsListPage() {
     const { city } = useParams<{ city: string }>();
@@ -76,61 +76,70 @@ export function ClubsListPage() {
     );
 
     return (
-        <div className="min-h-screen bg-[#0f0a1e] md:bg-[#0a0a0a] text-white font-manrope">
+        <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope">
 
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-[#0f0a1e]/80 md:bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
-                <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/clubs')}
-                        className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-lg font-semibold truncate">Clubs in {displayCity}</h1>
-                        <p className="text-sm text-white/50">
-                            {loading ? 'Loading...' : `${filteredClubs.length} ${filteredClubs.length === 1 ? 'club' : 'clubs'} found`}
-                        </p>
-                    </div>
-                    <a
-                        href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : APP_STORE_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2.5 px-4 py-2 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-100 transition-all hover:scale-105 shadow-lg shadow-white/10 flex-shrink-0"
-                    >
-                        <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center overflow-hidden">
-                            <img src="/app-logo.png" alt="Clubin" className="w-full h-full object-cover" />
-                        </div>
-                        <span className="whitespace-nowrap">Download App</span>
-                    </a>
+            {/* Header - Fixed & Styled */}
+            <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top">
+                <button
+                    onClick={() => navigate('/clubs')}
+                    className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95 group"
+                >
+                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                </button>
+
+                <div className="flex items-center justify-center">
+                    <img src="/clubin-header-logo.png" alt="Clubin" className="h-14 w-auto object-contain" />
                 </div>
 
-                {/* Search Bar */}
-                <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 pb-4">
-                    <div className="relative">
+                <a
+                    href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : APP_STORE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
+                >
+                    <Download className="w-5 h-5" />
+                </a>
+
+                {/* Bottom Fade Gradient - Reduced Height */}
+                <div className="absolute bottom-0 left-0 right-0 translate-y-full h-6 bg-gradient-to-b from-[#0a0a0a] to-transparent pointer-events-none" />
+            </div>
+
+            {/* Content */}
+            <main className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-28">
+                {/* Title & Search Section */}
+                <div className="mb-8 space-y-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <MapPin className="w-5 h-5 text-purple-400" />
+                            <span className="text-xs font-bold uppercase tracking-widest text-white/50">{displayCity}</span>
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Clubs</h1>
+                        <p className="text-white/50 text-sm mt-1">
+                            {loading ? 'Loading venues...' : `${filteredClubs.length} ${filteredClubs.length === 1 ? 'venue' : 'venues'} found in ${displayCity}`}
+                        </p>
+                    </div>
+
+                    <div className="relative max-w-xl">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                         <input
                             type="text"
                             placeholder="Search clubs..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-10 py-3 bg-[#120f1d]/80 backdrop-blur-xl border border-purple-500/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/40 transition-colors text-sm"
+                            className="w-full pl-12 pr-10 py-3.5 bg-[#120f1d] border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/40 transition-colors text-sm shadow-inner"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-white/10 transition-colors"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-white/10 transition-colors"
                             >
                                 <X className="w-4 h-4 text-white/40" />
                             </button>
                         )}
                     </div>
                 </div>
-            </header>
 
-            {/* Content */}
-            <main className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
                         {[...Array(10)].map((_, i) => (
