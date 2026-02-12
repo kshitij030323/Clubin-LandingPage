@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Club, Event } from '../types';
 import { fetchClubDetails, fetchEventsByClubId, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, ArrowLeft, Calendar, Clock, ExternalLink, Share2, Check, Copy, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, Clock, ExternalLink, Share2, Check, Copy, ChevronDown, ChevronUp, Instagram, User, Music } from 'lucide-react';
 
 function getTodayDateString(): string {
     const now = new Date();
@@ -269,12 +269,68 @@ export function ClubDetailPage() {
                                     href={club.mapUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium transition-all w-full justify-center"
+                                    className="flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium transition-all w-full justify-center mb-4"
                                 >
                                     <MapPin className="w-4 h-4 text-purple-400" />
                                     View on Google Maps
                                     <ExternalLink className="w-4 h-4 ml-auto opacity-50" />
                                 </a>
+                            )}
+
+                            {club.instagramUrl && (
+                                <a
+                                    href={club.instagramUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium transition-all w-full justify-center mb-6"
+                                >
+                                    <Instagram className="w-4 h-4 text-purple-400" />
+                                    Instagram
+                                    <ExternalLink className="w-4 h-4 ml-auto opacity-50" />
+                                </a>
+                            )}
+
+                            {/* Promoters in Sidebar (Desktop) */}
+                            {club.promoterClubs && club.promoterClubs.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-3">Promoters</h3>
+                                    <div className="space-y-3">
+                                        {club.promoterClubs.map((pc) => (
+                                            <div
+                                                key={pc.id}
+                                                className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl"
+                                            >
+                                                {pc.promoter.logoUrl ? (
+                                                    <img
+                                                        src={pc.promoter.logoUrl}
+                                                        alt={pc.promoter.name}
+                                                        className="w-10 h-10 rounded-full object-cover border border-purple-500/30 flex-shrink-0"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                                                        <Music className="w-4 h-4 text-purple-400" />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold truncate">{pc.promoter.name}</p>
+                                                    {pc.promoter.region && (
+                                                        <p className="text-xs text-white/40">{pc.promoter.region}</p>
+                                                    )}
+                                                </div>
+                                                {pc.promoter.instagramUrl && (
+                                                    <a
+                                                        href={pc.promoter.instagramUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
+                                                    >
+                                                        <Instagram className="w-4 h-4" />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -467,6 +523,101 @@ export function ClubDetailPage() {
                                 )}
                             </div>
                         )}
+
+                        {/* Promoters Section (Mobile) */}
+                        {club.promoterClubs && club.promoterClubs.length > 0 && (
+                            <section>
+                                <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2">
+                                    <User className="w-4 h-4 text-purple-400" />
+                                    Promoters
+                                </h2>
+                                <div className="space-y-3">
+                                    {club.promoterClubs.map((pc) => (
+                                        <div
+                                            key={pc.id}
+                                            className="flex items-center gap-3 p-3 bg-[#1e1b2e] border border-white/5 rounded-xl"
+                                        >
+                                            {pc.promoter.logoUrl ? (
+                                                <img
+                                                    src={pc.promoter.logoUrl}
+                                                    alt={pc.promoter.name}
+                                                    className="w-10 h-10 rounded-full object-cover border border-purple-500/30 flex-shrink-0"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                                                    <Music className="w-4 h-4 text-purple-400" />
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold truncate">{pc.promoter.name}</p>
+                                                {pc.promoter.region && (
+                                                    <p className="text-xs text-white/40">{pc.promoter.region}</p>
+                                                )}
+                                            </div>
+                                            {pc.promoter.instagramUrl && (
+                                                <a
+                                                    href={pc.promoter.instagramUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 rounded-full bg-purple-600/15 hover:bg-purple-600/30 text-purple-400 transition-colors flex-shrink-0"
+                                                >
+                                                    <Instagram className="w-4 h-4" />
+                                                </a>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* Venue Section (Mobile) */}
+                        <section className="pb-4">
+                            <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-purple-400" />
+                                Venue
+                            </h2>
+                            <div className="bg-[#1e1b2e] border border-white/5 rounded-xl p-4">
+                                <div className="flex items-start gap-3">
+                                    <img
+                                        src={club.imageUrl}
+                                        alt={club.name}
+                                        className="w-14 h-14 rounded-xl object-cover border border-purple-500/20 flex-shrink-0"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="text-sm font-semibold mb-0.5">{club.name}</h3>
+                                        <p className="text-xs text-white/50 mb-2">
+                                            {club.address || club.location}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {club.mapUrl && (
+                                                <a
+                                                    href={club.mapUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                                                >
+                                                    <MapPin className="w-3 h-3" />
+                                                    Directions
+                                                    <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            )}
+                                            {club.instagramUrl && (
+                                                <a
+                                                    href={club.instagramUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/20 rounded-lg text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                                                >
+                                                    <Instagram className="w-3 h-3" />
+                                                    Instagram
+                                                    <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             )}
