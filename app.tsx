@@ -36,8 +36,8 @@ const BackgroundVideo = () => {
     const videoRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
-    const videoSrc = "https://customer-cbeadsgr09pnsezs.cloudflarestream.com/257c7359efd4b4aaebcc03aa8fc78a36/manifest/video.m3u8";
-    const posterSrc = "https://customer-cbeadsgr09pnsezs.cloudflarestream.com/257c7359efd4b4aaebcc03aa8fc78a36/thumbnails/thumbnail.jpg";
+    const videoSrc = "https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/AI%20Upscaler-2K-abstract_objects_new.mp4";
+    const posterSrc = "https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/Abstract_objects.png";
 
     useEffect(() => {
         const initVideo = () => {
