@@ -465,7 +465,7 @@ export function EventDetailPage() {
                 /* Mobile Layout - New Immersive Design with Smaller Text */
                 <div className="pb-24 pt-[4.5rem]">
                     {/* Top Navigation - Fixed with Fade */}
-                    <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top">
+                    <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top border-b border-white/10">
                         <button
                             onClick={handleBackAction}
                             className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95 group"
@@ -486,9 +486,6 @@ export function EventDetailPage() {
                                 <Share2 className="w-5 h-5" />
                             </button>
                         </div>
-
-                        {/* Bottom Fade Gradient */}
-                        <div className="absolute bottom-0 left-0 right-0 translate-y-full h-6 bg-gradient-to-b from-[#0a0a0a] to-transparent pointer-events-none" />
                     </div>
 
                     {/* Hero Section */}
@@ -511,8 +508,8 @@ export function EventDetailPage() {
                         )}
 
                         {/* Gradient Overlays */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-transparent pointer-events-none h-40" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent pointer-events-none h-32" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent pointer-events-none" />
 
                         {/* Floating Media Actions (Gallery/Video) */}
                         <div className="absolute top-4 right-4 flex items-center gap-3 z-50">

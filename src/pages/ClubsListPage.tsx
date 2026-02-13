@@ -79,7 +79,7 @@ export function ClubsListPage() {
         <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope">
 
             {/* Header - Fixed & Styled */}
-            <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top">
+            <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top border-b border-white/10">
                 <button
                     onClick={() => navigate('/clubs')}
                     className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95 group"
@@ -99,9 +99,6 @@ export function ClubsListPage() {
                 >
                     <Download className="w-5 h-5" />
                 </a>
-
-                {/* Bottom Fade Gradient - Reduced Height */}
-                <div className="absolute bottom-0 left-0 right-0 translate-y-full h-6 bg-gradient-to-b from-[#0a0a0a] to-transparent pointer-events-none" />
             </div>
 
             {/* Content */}

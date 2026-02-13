@@ -433,7 +433,7 @@ export function ClubDetailPage() {
                 /* Mobile Layout (Redesigned) */
                 <div className="pb-12 animate-in fade-in duration-500 bg-[#0a0a0a] pt-[4.5rem]">
                     {/* Fixed Header */}
-                    <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top">
+                    <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top border-b border-white/10">
                         <button
                             onClick={handleBackAction}
                             className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95 group"
@@ -451,9 +451,6 @@ export function ClubDetailPage() {
                         >
                             <Share2 className="w-5 h-5" />
                         </button>
-
-                        {/* Bottom Fade Gradient - Reduced Height */}
-                        <div className="absolute bottom-0 left-0 right-0 translate-y-full h-6 bg-gradient-to-b from-[#0a0a0a] to-transparent pointer-events-none" />
                     </div>
 
                     {/* Hero Image Section */}
