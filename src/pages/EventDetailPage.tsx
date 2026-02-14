@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Skeleton } from '../components/Skeleton';
+import { VenueImageSlideshow } from '../components/VenueImageSlideshow';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
@@ -390,6 +391,12 @@ export function EventDetailPage() {
                                                 <MapPin className="w-5 h-5 text-purple-400" />
                                                 Venue
                                             </h3>
+                                            {/* Venue Image Slideshow */}
+                                            {event.clubRef.venueImages && event.clubRef.venueImages.length > 0 && (
+                                                <div className="mb-4">
+                                                    <VenueImageSlideshow images={event.clubRef.venueImages} venueName={event.clubRef.name} />
+                                                </div>
+                                            )}
                                             <div className="flex items-start gap-3">
                                                 {event.clubRef.imageUrl ? (
                                                     <img
@@ -647,6 +654,12 @@ export function EventDetailPage() {
                                             <MapPin className="w-4 h-4 text-purple-400" />
                                             Venue
                                         </h2>
+                                        {/* Venue Image Slideshow */}
+                                        {event.clubRef.venueImages && event.clubRef.venueImages.length > 0 && (
+                                            <div className="mb-4">
+                                                <VenueImageSlideshow images={event.clubRef.venueImages} venueName={event.clubRef.name} />
+                                            </div>
+                                        )}
                                         <div className="flex items-start gap-3">
                                             {event.clubRef.imageUrl ? (
                                                 <img

@@ -23,6 +23,7 @@ export interface Club {
     mapUrl?: string;
     description?: string;
     imageUrl: string;
+    venueImages?: string[];
     instagramUrl?: string | null;
     floorplanUrl?: string;
     createdAt: string;
@@ -76,6 +77,7 @@ export interface Event {
         mapUrl?: string;
         floorplanUrl?: string;
         imageUrl?: string;
+        venueImages?: string[];
         instagramUrl?: string | null;
     };
     promoterRef?: Promoter | null;

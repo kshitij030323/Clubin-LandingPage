@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Skeleton } from '../components/Skeleton';
+import { VenueImageSlideshow } from '../components/VenueImageSlideshow';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Club, Event } from '../types';
 import { fetchClubDetails, fetchEventsByClubId, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
@@ -285,6 +286,14 @@ export function ClubDetailPage() {
                                 </div>
                             )}
 
+                            {/* Venue Images Slideshow */}
+                            {club.venueImages && club.venueImages.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-3">Venue Photos</h3>
+                                    <VenueImageSlideshow images={club.venueImages} venueName={club.name} />
+                                </div>
+                            )}
+
                             {club.mapUrl && (
                                 <a
                                     href={club.mapUrl}
@@ -464,6 +473,14 @@ export function ClubDetailPage() {
 
                     {/* Content Container */}
                     <div className="px-5 -mt-2 relative z-10 space-y-6">
+                        {/* Venue Images Slideshow */}
+                        {club.venueImages && club.venueImages.length > 0 && (
+                            <section>
+                                <h2 className="text-base font-bold text-white mb-3">Venue Photos</h2>
+                                <VenueImageSlideshow images={club.venueImages} venueName={club.name} />
+                            </section>
+                        )}
+
                         {/* Upcoming Events */}
                         <section>
                             <h2 className="text-base font-bold text-white mb-3">Upcoming Events</h2>
