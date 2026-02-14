@@ -1,21 +1,6 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
-// --- Extend Window for HLS.js ---
-declare global {
-    interface Window {
-        Hls: {
-            isSupported(): boolean;
-            Events: { MANIFEST_PARSED: string };
-            new(): {
-                loadSource(src: string): void;
-                attachMedia(video: HTMLVideoElement): void;
-                on(event: string, callback: () => void): void;
-            };
-        };
-    }
-}
-
 // --- Icons (Inline SVGs) ---
 
 const AppleIcon = ({ className }: { className?: string }) => (
@@ -81,29 +66,7 @@ const Star = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?
 // --- Components ---
 
 /**
- * Utility Component to load external scripts (HLS.js) and Fonts
- */
-const ResourceLoader = () => {
-    useEffect(() => {
-        // Load HLS.js (Google Fonts moved to index.html for faster loading)
-        const script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js";
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-
-        return () => {
-            if (script.parentNode) {
-                document.head.removeChild(script);
-            }
-        };
-    }, []);
-
-    return null;
-};
-
-/**
- * Background Video Component using HLS
+ * Background Video Component
  */
 const BackgroundVideo = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -113,40 +76,13 @@ const BackgroundVideo = () => {
     const posterSrc = "https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/Abstract_objects.png";
 
     useEffect(() => {
-        const initVideo = () => {
-            const video = videoRef.current;
-            if (!video) return;
+        const video = videoRef.current;
+        if (!video) return;
 
-            if (videoSrc.endsWith('.mp4')) {
-                video.src = videoSrc;
-                video.play().then(() => setIsPlaying(true)).catch((e: unknown) => console.log("Autoplay blocked", e));
-                return;
-            }
-
-            if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = videoSrc;
-                video.play().then(() => setIsPlaying(true)).catch(() => { });
-            }
-            else if (window.Hls && window.Hls.isSupported()) {
-                const hls = new window.Hls();
-                hls.loadSource(videoSrc);
-                hls.attachMedia(video);
-                hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-                    video.play().then(() => setIsPlaying(true)).catch(() => { });
-                });
-            }
-        };
-
-        if (videoSrc.endsWith('.mp4') || window.Hls) {
-            initVideo();
-        } else {
-            const checkHls = setInterval(() => {
-                if (window.Hls) {
-                    clearInterval(checkHls);
-                    initVideo();
-                }
-            }, 100);
-        }
+        video.src = videoSrc;
+        video.play()
+            .then(() => setIsPlaying(true))
+            .catch(() => { });
     }, []);
 
     return (
@@ -159,6 +95,7 @@ const BackgroundVideo = () => {
             <video
                 ref={videoRef}
                 className="absolute inset-0 z-0 w-full h-full object-cover"
+                poster={posterSrc}
                 playsInline
                 muted
                 loop
@@ -223,7 +160,7 @@ const ScrollReveal = ({ children, delay = 0 }: { children: ReactNode; delay?: nu
             ref={ref}
             className={`transition-all duration-700 ease-out transform-gpu ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'
                 }`}
-            style={{ transitionDelay: `${delay}ms`, willChange: 'opacity, transform' }}
+            style={{ transitionDelay: `${delay}ms`, willChange: isVisible ? 'auto' : 'opacity, transform' }}
         >
             {children}
         </div>
@@ -473,7 +410,6 @@ const MorphingFeatureSection = () => {
 const App = () => {
     return (
         <div className="min-h-screen font-manrope bg-black text-white selection:bg-[#7b39fc] selection:text-white">
-            <ResourceLoader />
             <BackgroundVideo />
 
             {/* Navbar */}

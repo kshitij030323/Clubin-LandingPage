@@ -4,33 +4,7 @@ import { Apple, Play, Smartphone, Music, CheckCircle, ArrowRight, Star } from 'l
 // --- Components ---
 
 /**
- * Utility Component to load external scripts (HLS.js) and Fonts
- */
-const ResourceLoader = () => {
-    useEffect(() => {
-        // Load Google Fonts
-        const link = document.createElement('link');
-        link.href = "https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap";
-        link.rel = "stylesheet";
-        document.head.appendChild(link);
-
-        // Load HLS.js
-        const script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/hls.js@1.4.0/dist/hls.min.js";
-        script.async = true;
-        document.head.appendChild(script);
-
-        return () => {
-            document.head.removeChild(link);
-            document.head.removeChild(script);
-        };
-    }, []);
-
-    return null;
-};
-
-/**
- * Background Video Component using HLS
+ * Background Video Component
  */
 const BackgroundVideo = () => {
     const videoRef = useRef(null);
@@ -40,40 +14,13 @@ const BackgroundVideo = () => {
     const posterSrc = "https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/Abstract_objects.png";
 
     useEffect(() => {
-        const initVideo = () => {
-            const video = videoRef.current;
-            if (!video) return;
+        const video = videoRef.current;
+        if (!video) return;
 
-            if (videoSrc.endsWith('.mp4')) {
-                video.src = videoSrc;
-                video.play().then(() => setIsPlaying(true)).catch(e => console.log("Autoplay blocked", e));
-                return;
-            }
-
-            if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = videoSrc;
-                video.play().then(() => setIsPlaying(true)).catch(() => { });
-            }
-            else if (window.Hls && window.Hls.isSupported()) {
-                const hls = new window.Hls();
-                hls.loadSource(videoSrc);
-                hls.attachMedia(video);
-                hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-                    video.play().then(() => setIsPlaying(true)).catch(() => { });
-                });
-            }
-        };
-
-        if (videoSrc.endsWith('.mp4') || window.Hls) {
-            initVideo();
-        } else {
-            const checkHls = setInterval(() => {
-                if (window.Hls) {
-                    clearInterval(checkHls);
-                    initVideo();
-                }
-            }, 100);
-        }
+        video.src = videoSrc;
+        video.play()
+            .then(() => setIsPlaying(true))
+            .catch(() => { });
     }, []);
 
     return (
@@ -86,6 +33,7 @@ const BackgroundVideo = () => {
             <video
                 ref={videoRef}
                 className="absolute inset-0 z-0 w-full h-full object-cover"
+                poster={posterSrc}
                 playsInline
                 muted
                 loop
@@ -334,7 +282,6 @@ const MorphingFeatureSection = () => {
 const App = () => {
     return (
         <div className="min-h-screen font-manrope bg-black text-white selection:bg-[#7b39fc] selection:text-white">
-            <ResourceLoader />
             <BackgroundVideo />
 
             {/* Navbar */}

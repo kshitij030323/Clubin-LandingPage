@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Skeleton } from '../components/Skeleton';
+import { VenueImageSlideshow } from '../components/VenueImageSlideshow';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { useSEO } from '../hooks/useSEO';
@@ -383,6 +384,12 @@ export function EventDetailPage() {
                                                 <MapPin className="w-5 h-5 text-purple-400" />
                                                 Venue
                                             </h3>
+                                            {/* Venue Image Slideshow */}
+                                            {event.clubRef.venueImages && event.clubRef.venueImages.length > 0 && (
+                                                <div className="mb-4">
+                                                    <VenueImageSlideshow images={event.clubRef.venueImages} venueName={event.clubRef.name} />
+                                                </div>
+                                            )}
                                             <div className="flex items-start gap-3">
                                                 {event.clubRef.imageUrl ? (
                                                     <img
@@ -659,6 +666,58 @@ export function EventDetailPage() {
                                         )}
                                     </div>
                                 </Link>
+                            </div>
+                        )}
+
+                        {/* Venue Section (Mobile) */}
+                        {event.clubRef && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-250">
+                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 pl-1">Venue</h3>
+                                {/* Venue Image Slideshow */}
+                                {event.clubRef.venueImages && event.clubRef.venueImages.length > 0 && (
+                                    <div className="mb-3">
+                                        <VenueImageSlideshow images={event.clubRef.venueImages} venueName={event.clubRef.name} />
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-white/[0.05] to-transparent border border-white/5">
+                                    {event.clubRef.imageUrl ? (
+                                        <img
+                                            src={event.clubRef.imageUrl}
+                                            alt={event.clubRef.name}
+                                            className="w-12 h-12 rounded-full object-cover border border-white/10 shadow-lg flex-shrink-0"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-full bg-purple-900/20 border border-white/10 flex items-center justify-center flex-shrink-0">
+                                            <MapPin className="w-5 h-5 text-white/40" />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-base font-bold text-white truncate">{event.clubRef.name}</p>
+                                        <p className="text-[10px] text-white/50 truncate">{event.clubRef.address || event.location}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {event.clubRef.mapUrl && (
+                                            <a
+                                                href={event.clubRef.mapUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-purple-500/20 transition-colors"
+                                            >
+                                                <MapPin className="w-4 h-4 text-white/70" />
+                                            </a>
+                                        )}
+                                        {event.clubRef.instagramUrl && (
+                                            <a
+                                                href={event.clubRef.instagramUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-purple-500/20 transition-colors"
+                                            >
+                                                <Instagram className="w-4 h-4 text-white/70" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
 
