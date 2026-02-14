@@ -83,6 +83,7 @@ export interface Event {
     promoterRef?: Promoter | null;
     eventTables?: EventTable[];
     spotsRemaining?: number;
+
     _count?: {
         bookings: number;
     };

@@ -158,7 +158,7 @@ export function ClubDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0f0a1e] md:bg-[#0a0a0a] text-white font-manrope">
+            <div className="min-h-screen bg-[#0a0a0a] md:bg-[#0a0a0a] text-white font-manrope">
                 {isDesktop ? (
                     <div className="h-screen overflow-hidden flex">
                         {/* Left Skeleton */}
@@ -184,7 +184,7 @@ export function ClubDetailPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="pb-12 bg-[#0f0a1e]">
+                    <div className="pb-12 bg-[#0a0a0a]">
                         {/* Hero Skeleton (45vh) */}
                         <div className="relative h-[45vh] w-full">
                             <Skeleton className="h-full w-full rounded-none" />
@@ -238,7 +238,7 @@ export function ClubDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0f0a1e] md:bg-[#0a0a0a] text-white font-manrope">
+        <div className="min-h-screen bg-[#0a0a0a] md:bg-[#0a0a0a] text-white font-manrope">
             {isDesktop ? (
                 /* Desktop Layout - Split View */
                 <div className="h-screen overflow-hidden flex animate-in fade-in duration-500">
@@ -440,7 +440,28 @@ export function ClubDetailPage() {
                 </div>
             ) : (
                 /* Mobile Layout (Redesigned) */
-                <div className="pb-12 animate-in fade-in duration-500 bg-[#0f0a1e]">
+                <div className="pb-12 animate-in fade-in duration-500 bg-[#0a0a0a] pt-[4.5rem]">
+                    {/* Fixed Header */}
+                    <div className="fixed top-0 left-0 right-0 bg-[#0a0a0a] z-[60] flex justify-between items-center px-4 py-2 safe-top border-b border-white/10">
+                        <button
+                            onClick={handleBackAction}
+                            className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95 group"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </button>
+
+                        <div className="flex items-center justify-center">
+                            <img src="/clubin-header-logo.png" alt="Clubin" className="h-14 w-auto object-contain" />
+                        </div>
+
+                        <button
+                            onClick={handleShare}
+                            className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
+                        >
+                            <Share2 className="w-5 h-5" />
+                        </button>
+                    </div>
+
                     {/* Hero Image Section */}
                     <div className="relative h-[45vh] w-full">
                         <img
@@ -449,17 +470,7 @@ export function ClubDetailPage() {
                             className="w-full h-full object-cover"
                         />
                         {/* Gradient Overlay for Text Readability - Taller and darker at bottom */}
-                        <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#0f0a1e] via-[#0f0a1e]/80 to-transparent" />
-
-                        {/* Top Bar - Back Button Only */}
-                        <div className="absolute top-0 left-0 right-0 p-4 safe-top flex items-center justify-between z-20">
-                            <button
-                                onClick={handleBackAction}
-                                className="p-3 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-black/60 transition-colors border border-white/5"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                        </div>
+                        <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
 
                         {/* Club Info Overlay (Bottom Left) */}
                         <div className="absolute bottom-6 left-5 right-5 z-20">
