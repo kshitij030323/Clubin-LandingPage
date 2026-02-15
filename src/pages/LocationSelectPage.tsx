@@ -74,9 +74,11 @@ export function LocationSelectPage() {
                     </button>
 
                     <img
-                        src="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
+                        src="/clubin-logo-header.webp"
                         alt="Clubin"
                         className="h-14 w-auto md:h-16 object-contain"
+                        width="192"
+                        height="128"
                     />
 
                     <div className="w-10" /> {/* Spacer */}

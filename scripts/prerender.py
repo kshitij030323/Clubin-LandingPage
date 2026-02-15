@@ -23,7 +23,7 @@ from urllib.parse import quote
 API_BASE = 'https://api.clubin.info/api'
 SITE_URL = 'https://clubin.co.in'
 DIST_DIR = Path(__file__).resolve().parent.parent / 'dist'
-OG_IMAGE = 'https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png'
+OG_IMAGE = 'https://clubin.co.in/clubin-logo-og.png'
 
 CITIES = ['Bengaluru', 'Delhi NCR', 'Goa', 'Mumbai', 'Pune', 'Hyderabad', 'Chandigarh', 'Jaipur', 'Chennai']
 
