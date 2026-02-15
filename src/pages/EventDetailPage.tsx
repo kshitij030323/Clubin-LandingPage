@@ -482,7 +482,7 @@ export function EventDetailPage() {
 
                         {/* Center Logo */}
                         <div className="flex items-center justify-center">
-                            <img src="/clubin-header-logo.png" alt="Clubin" className="h-14 w-auto object-contain" />
+                            <img src="/clubin-logo-header.webp" alt="Clubin" className="h-14 w-auto object-contain" width="192" height="128" />
                         </div>
 
                         <div className="flex gap-3">

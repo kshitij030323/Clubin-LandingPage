@@ -73,7 +73,7 @@ const BackgroundVideo = () => {
     const [isPlaying, setIsPlaying] = useState(false);
 
     const videoSrc = "https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/AI%20Upscaler-2K-abstract_objects_new.mp4";
-    const posterSrc = "https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/Abstract_objects.png";
+    const posterSrc = "/poster.webp";
 
     useEffect(() => {
         const video = videoRef.current;
@@ -103,7 +103,9 @@ const BackgroundVideo = () => {
                 preload="metadata"
                 width="1920"
                 height="1080"
-            />
+            >
+                <track kind="captions" />
+            </video>
         </div>
     );
 };
@@ -177,8 +179,10 @@ const featuresData = [
         text: "Skip the chaos. Clubin makes events simple and effortless. No more uncertainty at the door.",
         icon: CheckCircle,
         accentColor: "#a484d7",
-        mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(4).png?raw=true",
+        mockupSrc: "/mockups/iphone-4.webp",
+        mockupSrcMobile: "/mockups/iphone-4-mobile.webp",
         mockupSrc2: undefined as string | undefined,
+        mockupSrc2Mobile: undefined as string | undefined,
         layoutType: "zoomed"
     },
     {
@@ -188,8 +192,10 @@ const featuresData = [
         text: "From techno to hip-hop, find the right vibe instantly. Curated events just for you.",
         icon: Music,
         accentColor: "#f87b52",
-        mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(5).png?raw=true",
-        mockupSrc2: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(6).png?raw=true",
+        mockupSrc: "/mockups/iphone-5.webp",
+        mockupSrcMobile: "/mockups/iphone-5-mobile.webp",
+        mockupSrc2: "/mockups/iphone-6.webp" as string | undefined,
+        mockupSrc2Mobile: "/mockups/iphone-6-mobile.webp" as string | undefined,
         layoutType: "double"
     },
     {
@@ -199,8 +205,10 @@ const featuresData = [
         text: "Join in seconds and walk in with confidence. Your digital pass is all you need.",
         icon: Star,
         accentColor: "#7b39fc",
-        mockupSrc: "https://github.com/kshitij030323/Clubin/blob/claude/fix-navigation-blank-screen-9zoc1/Phone%20mockups/iPhone%20(2).png?raw=true",
+        mockupSrc: "/mockups/iphone-2.webp",
+        mockupSrcMobile: "/mockups/iphone-2-mobile.webp",
         mockupSrc2: undefined as string | undefined,
+        mockupSrc2Mobile: undefined as string | undefined,
         layoutType: "fit"
     }
 ];
@@ -273,10 +281,10 @@ const MorphingFeatureSection = () => {
                                                 </div>
                                             </div>
 
-                                            <h3 className="text-4xl xl:text-5xl font-inter font-bold text-white mb-6 leading-[1.1]">
+                                            <h2 className="text-4xl xl:text-5xl font-inter font-bold text-white mb-6 leading-[1.1]">
                                                 {feature.titlePrefix} <br />
                                                 <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
-                                            </h3>
+                                            </h2>
                                             <p className="text-lg font-manrope text-white/70 leading-relaxed font-light max-w-md">
                                                 {feature.text}
                                             </p>
@@ -349,10 +357,10 @@ const MorphingFeatureSection = () => {
                                         <feature.icon className="w-6 h-6 text-white" strokeWidth={1.5} />
                                     </div>
                                 </div>
-                                <h3 className="text-2xl font-inter font-bold text-white mb-2 leading-tight">
+                                <h2 className="text-2xl font-inter font-bold text-white mb-2 leading-tight">
                                     {feature.titlePrefix}{' '}
                                     <span className="font-instrument italic font-normal" style={{ color: feature.accentColor }}>{feature.titleSuffix}</span>
-                                </h3>
+                                </h2>
                                 <p className="text-sm font-manrope text-white/60 leading-relaxed font-light">
                                     {feature.text}
                                 </p>
@@ -366,7 +374,7 @@ const MorphingFeatureSection = () => {
                                 {feature.layoutType === "double" ? (
                                     <div className="relative w-full h-full overflow-hidden">
                                         <img
-                                            src={feature.mockupSrc}
+                                            src={feature.mockupSrcMobile}
                                             alt="Screen 1"
                                             className="absolute left-[10%] bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-20 -rotate-3"
                                             width="200"
@@ -375,7 +383,7 @@ const MorphingFeatureSection = () => {
                                             decoding="async"
                                         />
                                         <img
-                                            src={feature.mockupSrc2}
+                                            src={feature.mockupSrc2Mobile}
                                             alt="Screen 2"
                                             className="absolute right-[5%] top-[-5%] h-[60%] w-auto object-contain drop-shadow-2xl z-10 rotate-6"
                                             width="200"
@@ -386,7 +394,7 @@ const MorphingFeatureSection = () => {
                                     </div>
                                 ) : (
                                     <img
-                                        src={feature.mockupSrc}
+                                        src={feature.mockupSrcMobile}
                                         alt="App Screen"
                                         className="absolute bottom-[-15px] h-[105%] w-auto object-contain drop-shadow-2xl z-10"
                                         width="200"
@@ -417,11 +425,11 @@ const App = () => {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
                 <div className="relative z-10 flex items-center gap-3">
                     <img
-                        src="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
+                        src="/clubin-logo-header.webp"
                         alt="Clubin Logo"
                         className="h-14 w-auto md:h-16 object-contain drop-shadow-lg"
-                        width="64"
-                        height="64"
+                        width="192"
+                        height="128"
                         fetchPriority="high"
                     />
                 </div>
@@ -434,7 +442,7 @@ const App = () => {
             </nav>
 
             {/* Main Content Scroll Wrapper */}
-            <div className="relative z-30 pt-32 pb-20">
+            <main className="relative z-30 pt-32 pb-20">
 
                 {/* Hero Section */}
                 <div className="px-6 md:px-12 min-h-[85vh] flex flex-col justify-center items-center text-center max-w-5xl mx-auto mb-20">
@@ -485,7 +493,7 @@ const App = () => {
                     </ScrollReveal>
                 </div>
 
-            </div>
+            </main>
 
             <style>{`
         .font-manrope { font-family: 'Manrope', sans-serif; }

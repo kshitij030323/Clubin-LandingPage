@@ -289,9 +289,11 @@ const App = () => {
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
                 <div className="relative z-10 flex items-center gap-3">
                     <img
-                        src="https://raw.githubusercontent.com/kshitij030323/Clubin/9b47f8e7c0bb79125c6b8ba6272000859d3dd0dc/admin/public/clubin-logo.png"
+                        src="/clubin-logo-header.webp"
                         alt="Clubin Logo"
                         className="h-10 w-auto md:h-12 object-contain drop-shadow-lg"
+                        width="192"
+                        height="128"
                     />
                 </div>
                 <div className="relative z-10 hidden md:block">
