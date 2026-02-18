@@ -39,6 +39,21 @@ def fetch_json(url):
         return None
 
 
+def post_json(url, payload):
+    """POST JSON to URL and return parsed response."""
+    try:
+        data = json.dumps(payload).encode('utf-8')
+        req = Request(url, data=data, headers={
+            'User-Agent': 'Clubin-Prerender/1.0',
+            'Content-Type': 'application/json',
+        }, method='POST')
+        with urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read())
+    except Exception as e:
+        print(f'  Warning: POST {url} failed: {e}')
+        return None
+
+
 def fetch_json_cached(url, cache_path):
     """Fetch JSON, using cache if --cached flag is set."""
     if '--cached' in sys.argv and os.path.exists(cache_path):
@@ -84,6 +99,10 @@ def inject_meta(html, title, description, image=None, url=None, structured_data=
         html = re.sub(r'<meta property="og:url" content="[^"]*"\s*/?>', f'<meta property="og:url" content="{esc(url)}" />', html, count=1)
     if image:
         html = re.sub(r'<meta property="og:image"\s+content="[^"]*"\s*/?>', f'<meta property="og:image" content="{esc(image)}" />', html, count=1)
+        # Remove default og:image dimensions when using a custom image (crawlers auto-detect)
+        if image != OG_IMAGE:
+            html = re.sub(r'\s*<meta property="og:image:width"\s+content="[^"]*"\s*/?>', '', html, count=1)
+            html = re.sub(r'\s*<meta property="og:image:height"\s+content="[^"]*"\s*/?>', '', html, count=1)
 
     # Replace Twitter tags
     html = re.sub(r'<meta name="twitter:title" content="[^"]*"\s*/?>', f'<meta name="twitter:title" content="{esc(title)}" />', html, count=1)
@@ -178,27 +197,35 @@ def main():
         write_route(f'/clubs/{slug}', html)
         count += 1
 
-    # 3. Club detail pages
+    # 3. Club detail pages (+ short link pages /c/:code)
     for club in clubs:
         city_slug = club.get('location', 'india').lower().replace(' ', '-').replace(',', '')
+        club_url = f'{SITE_URL}/clubs/{quote(club.get("location", ""))}/{club["id"]}'
         html = inject_meta(template,
             title=f'{club["name"]} - Nightclub in {club.get("location", "")} | Clubin',
             description=f'{club["name"]} in {club.get("location", "")}. {club.get("description", "Book guestlists and VIP tables on Clubin.")[:160]}',
             image=club.get('imageUrl', OG_IMAGE),
-            url=f'{SITE_URL}/clubs/{quote(club.get("location", ""))}/{club["id"]}',
+            url=club_url,
             structured_data={
                 '@context': 'https://schema.org',
                 '@type': 'NightClub',
                 'name': club['name'],
                 'image': club.get('imageUrl'),
                 'address': {'@type': 'PostalAddress', 'addressLocality': club.get('location', ''), 'addressCountry': 'IN'},
-                'url': f'{SITE_URL}/clubs/{quote(club.get("location", ""))}/{club["id"]}',
+                'url': club_url,
             }
         )
         write_route(f'/clubs/{quote(club.get("location", ""))}/{club["id"]}', html)
         count += 1
 
-    # 4. Event pages
+        # Also create a short link and pre-render /c/:code for club sharing
+        result = post_json(f'{API_BASE}/shortlinks', {'type': 'club', 'targetId': club['id']})
+        if result and result.get('code'):
+            write_route(f'/c/{result["code"]}', html)
+            count += 1
+
+    # 4. Event pages (+ short link pages /e/:code)
+    shortlink_count = 0
     for event in events:
         date_str = event.get('date', '')[:10]
         html = inject_meta(template,
@@ -219,6 +246,14 @@ def main():
         )
         write_route(f'/events/{event["id"]}', html)
         count += 1
+
+        # Also create a short link and pre-render /e/:code so social media crawlers
+        # see OG tags when short links are shared (crawlers don't execute JS)
+        result = post_json(f'{API_BASE}/shortlinks', {'type': 'event', 'targetId': event['id']})
+        if result and result.get('code'):
+            write_route(f'/e/{result["code"]}', html)
+            shortlink_count += 1
+            count += 1
 
     # 5. Promoter pages
     for pid, promoter in promoter_map.items():
@@ -242,6 +277,7 @@ def main():
 
     print(f'Pre-rendered {count} pages into {DIST_DIR}/')
     print(f'  Cities: {len(CITIES)}, Clubs: {len(clubs)}, Events: {len(events)}, Promoters: {len(promoter_map)}')
+    print(f'  Short links (events): {shortlink_count}')
 
 
 if __name__ == '__main__':
