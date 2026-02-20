@@ -11,6 +11,12 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://clubin.co.in/list-your-club</loc>
+    <lastmod>2026-02-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://clubin.co.in/clubs</loc>
     <lastmod>2026-02-12</lastmod>
     <changefreq>weekly</changefreq>

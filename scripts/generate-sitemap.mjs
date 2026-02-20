@@ -73,6 +73,7 @@ async function generateSitemap() {
 
     // 1. Static pages
     urls.push({ loc: `${SITE_URL}/`, changefreq: 'weekly', priority: '1.0', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/list-your-club`, changefreq: 'monthly', priority: '0.8', lastmod: today });
     urls.push({ loc: `${SITE_URL}/clubs`, changefreq: 'weekly', priority: '0.9', lastmod: today });
 
     // 2. City pages — use lowercase slugs matching React routes
