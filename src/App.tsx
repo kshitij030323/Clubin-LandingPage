@@ -433,12 +433,20 @@ const App = () => {
                         fetchPriority="high"
                     />
                 </div>
-                <Link
-                    to="/clubs"
-                    className="relative z-10 px-5 py-2.5 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-sm font-semibold rounded-xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/20"
-                >
-                    Browse Clubs
-                </Link>
+                <div className="relative z-10 flex items-center gap-2 sm:gap-3">
+                    <Link
+                        to="/list-your-club"
+                        className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white text-xs sm:text-sm font-semibold rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-sm hidden sm:block"
+                    >
+                        List your Club
+                    </Link>
+                    <Link
+                        to="/clubs"
+                        className="px-5 py-2.5 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-xs sm:text-sm font-semibold rounded-xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/20"
+                    >
+                        Browse Clubs
+                    </Link>
+                </div>
             </nav>
 
             {/* Main Content Scroll Wrapper */}

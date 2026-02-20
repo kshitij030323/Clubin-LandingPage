@@ -179,6 +179,32 @@ def main():
 
     count = 0
 
+    # 0. /list-your-club (static page)
+    html = inject_meta(template,
+        title='List Your Club on Clubin - Partner With Us | Clubin',
+        description='Partner with Clubin to list your nightclub, manage guestlists, table bookings, and reach a young nightlife audience across India. Lowest platform fees. Schedule a meeting today.',
+        url=f'{SITE_URL}/list-your-club',
+        structured_data=[
+            {
+                '@context': 'https://schema.org',
+                '@type': 'WebPage',
+                'name': 'List Your Club on Clubin',
+                'description': 'Partner with Clubin to list your nightclub and manage events, guestlists, and table bookings.',
+                'url': f'{SITE_URL}/list-your-club',
+            },
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                'itemListElement': [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'List Your Club'},
+                ],
+            },
+        ]
+    )
+    write_route('/list-your-club', html)
+    count += 1
+
     # 1. /clubs (city select)
     html = inject_meta(template,
         title='Nightclubs & Party Venues in India - Browse by City | Clubin',
