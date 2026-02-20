@@ -1,13 +1,26 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
+import {
+    CalendarCheck,
+    MonitorCog,
+    Rocket,
+    LineChart,
+    Share2,
+    ScanLine,
+    BellRing,
+    IndianRupee,
+    WalletCards,
+    Users,
+    TrendingUp
+} from 'lucide-react';
+import { Footer } from '../components/Footer';
 
-// ─── Background Video with Fluted Glass Strips ────────────────────────────────
-// Same video as the landing page, with vertical frosted-glass "fluted" strips
-// layered over it to create a reeded/ridged glass texture.
+// ─── Background Video with Scratch-Built Fluted Glass ──────────────────────────
 
 const VIDEO_SRC = 'https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/AI%20Upscaler-2K-abstract_objects_new.mp4';
-const FLUTE_COUNT = 14;
+const FLUTE_COUNT_DESKTOP = 24;
+const FLUTE_COUNT_MOBILE = 8; // Wider strips on mobile
 
 function PageVideo() {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -20,6 +33,15 @@ function PageVideo() {
         video.play().then(() => setIsPlaying(true)).catch(() => { });
     }, []);
 
+    const FlutedStrip = ({ i }: { i: number }) => (
+        <div className="flex-1 h-full relative" style={{ marginRight: '-1px' }}>
+            <div className={`absolute inset-0 backdrop-blur-md ${i % 2 === 0 ? 'bg-white/[0.005]' : 'bg-transparent'}`} />
+            {/* Creating gradient blur using a mask over a heavily blurred layer */}
+            <div className="absolute inset-0 backdrop-blur-2xl [mask-image:linear-gradient(to_right,transparent_0%,black_100%)] [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_100%)] flex-1 h-full z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/[0.015] via-transparent to-black/[0.1] border-r border-white/5 shadow-[inset_1px_0_1px_rgba(255,255,255,0.03),inset_-1px_0_2px_rgba(0,0,0,0.2)] z-20 pointer-events-none" />
+        </div>
+    );
+
     return (
         <div className="fixed inset-0 z-0 overflow-hidden bg-black">
             {/* Poster while video loads */}
@@ -30,7 +52,7 @@ function PageVideo() {
             {/* Video */}
             <video
                 ref={videoRef}
-                className="absolute inset-0 z-0 w-full h-full object-cover"
+                className="absolute inset-0 z-0 w-full h-full object-cover scale-[1.02]"
                 poster="/poster.webp"
                 playsInline
                 muted
@@ -42,23 +64,21 @@ function PageVideo() {
             >
                 <track kind="captions" />
             </video>
-            {/* Dark overlay – same depth as landing page */}
-            <div className="absolute inset-0 bg-black/62 z-20 pointer-events-none" />
-            {/* Fluted glass strips – alternating blur/opacity for ridged glass look */}
-            <div className="absolute inset-0 z-30 flex pointer-events-none">
-                {Array.from({ length: FLUTE_COUNT }).map((_, i) => (
-                    <div
-                        key={i}
-                        className="flex-1 h-full"
-                        style={{
-                            borderRight: '1px solid rgba(255,255,255,0.045)',
-                            backdropFilter: i % 2 === 0 ? 'blur(3px)' : 'blur(0.6px)',
-                            background: i % 2 === 0
-                                ? 'linear-gradient(180deg, rgba(255,255,255,0.022) 0%, rgba(255,255,255,0.005) 100%)'
-                                : 'transparent',
-                        }}
-                    />
-                ))}
+
+            {/* Dark overlay for a premium moody look deeper than before */}
+            <div className="absolute inset-0 bg-black/70 z-20 pointer-events-none" />
+
+            {/* Ambient Multi-colored Glows matching landing page */}
+            <div className="absolute top-[-15%] right-[-10%] w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[160px] pointer-events-none z-30" />
+            <div className="absolute bottom-[-15%] left-[-10%] w-[800px] h-[800px] bg-indigo-900/10 rounded-full blur-[160px] pointer-events-none z-30" />
+            <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-orange-900/10 rounded-full blur-[120px] pointer-events-none z-30" />
+
+            {/* Completely reimagined fluted glass from scratch */}
+            <div className="absolute inset-0 z-30 hidden md:flex pointer-events-none scale-[1.01]">
+                {Array.from({ length: FLUTE_COUNT_DESKTOP }).map((_, i) => <FlutedStrip key={i} i={i} />)}
+            </div>
+            <div className="absolute inset-0 z-30 flex md:hidden pointer-events-none scale-[1.01]">
+                {Array.from({ length: FLUTE_COUNT_MOBILE }).map((_, i) => <FlutedStrip key={i} i={i} />)}
             </div>
         </div>
     );
@@ -66,7 +86,7 @@ function PageVideo() {
 
 // ─── ScrollReveal ─────────────────────────────────────────────────────────────
 
-function ScrollReveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+function ScrollReveal({ children, delay = 0, className = '' }: { children: ReactNode; delay?: number; className?: string }) {
     const ref = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
     useEffect(() => {
@@ -82,7 +102,7 @@ function ScrollReveal({ children, delay = 0 }: { children: ReactNode; delay?: nu
     return (
         <div
             ref={ref}
-            className={`transition-all duration-700 ease-out transform-gpu ${visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}
+            className={`transition-all duration-1000 ease-out transform-gpu ${visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-16 scale-95'} ${className}`}
             style={{ transitionDelay: `${delay}ms`, willChange: visible ? 'auto' : 'transform, opacity' }}
         >
             {children}
@@ -90,89 +110,75 @@ function ScrollReveal({ children, delay = 0 }: { children: ReactNode; delay?: nu
     );
 }
 
-// ─── Lordicon animated icon CDN URLs ─────────────────────────────────────────
-// Icons from lordicon.com – free tier with attribution
+// ─── Custom Animated Lucide Icons ────────────────────────────────────────────
 
-const ICON = {
-    calendar:  'https://cdn.lordicon.com/abfverha.json',
-    checklist: 'https://cdn.lordicon.com/oqdmuxru.json',
-    rocket:    'https://cdn.lordicon.com/ujmbgxhm.json',
-    barChart:  'https://cdn.lordicon.com/tyvtvbcy.json',
-    share:     'https://cdn.lordicon.com/ftngahli.json',
-    qrCode:    'https://cdn.lordicon.com/qrbcugnv.json',
-    bell:      'https://cdn.lordicon.com/lyjmfxtw.json',
-    wallet:    'https://cdn.lordicon.com/qhgmphtg.json',
-    money:     'https://cdn.lordicon.com/qsdqfzml.json',
-    growth:    'https://cdn.lordicon.com/dxjqoygy.json',
-} as const;
+function AnimatedIcon({ Icon, color }: { Icon: any; color: string }) {
+    return (
+        <div className="relative group w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/[0.06] flex items-center justify-center transition-all duration-700 hover:border-white/20 hover:scale-[1.12] hover:-translate-y-1 shadow-xl overflow-hidden mb-6 z-10">
+            {/* Soft background glow on hover */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700 blur-xl" style={{ backgroundColor: color }} />
+            {/* Shiny gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-// Consistent purple colour palette passed to every lord-icon
-const LORD_COLORS = 'primary:#a484d7,secondary:#7b39fc';
-const LORD_SIZE   = { width: '44px', height: '44px' } as const;
+            {/* The icon itself with a drop shadow */}
+            <Icon
+                className="w-7 h-7 relative z-10 transition-all duration-700 group-hover:scale-[1.15]"
+                color={color}
+                strokeWidth={1.5}
+                style={{ filter: `drop-shadow(0 0 10px ${color}80)` }}
+            />
+        </div>
+    );
+}
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const STEPS = [
-    {
-        lordSrc: ICON.calendar,
-        title:   'Schedule a Meeting',
-        desc:    "Book a quick call with our partnerships team via Google Calendar. We'll understand your venue and goals.",
-        accent:  '#a484d7',
-    },
-    {
-        lordSrc: ICON.checklist,
-        title:   'Onboard to Clubin',
-        desc:    'We set up your club dashboard, configure pricing, and train your team — all within 48 hours.',
-        accent:  '#7b39fc',
-    },
-    {
-        lordSrc: ICON.rocket,
-        title:   'Go Live on Clubin',
-        desc:    'Your club and events are live on the Clubin app, instantly visible to thousands of nightlife enthusiasts.',
-        accent:  '#f87b52',
-    },
+    { Icon: CalendarCheck, title: 'Schedule a Meeting', desc: 'Book a quick call with our partnerships team via Google Calendar. We\'ll understand your venue and goals.', accent: '#a484d7' },
+    { Icon: MonitorCog, title: 'Onboard to Clubin', desc: 'We set up your club dashboard, configure pricing, and train your team — all within 48 hours.', accent: '#7b39fc' },
+    { Icon: Rocket, title: 'Go Live on Clubin', desc: 'Your club and events are live on the Clubin app, instantly visible to thousands of nightlife enthusiasts.', accent: '#f87b52' },
 ];
 
 const FEATURES = [
-    { lordSrc: ICON.barChart,  title: 'Revenue Metrics Dashboard', desc: 'Track bookings, revenue, footfall, and growth trends in real time with a clean analytics dashboard.', accent: '#7b39fc' },
-    { lordSrc: ICON.share,     title: 'Social Media Share Links',  desc: 'Generate beautiful share links for your events. One tap to post on Instagram, WhatsApp, or anywhere.',    accent: '#a484d7' },
-    { lordSrc: ICON.qrCode,    title: 'Scanner Portal',            desc: 'Secure QR-based entry system. Your door team scans tickets in seconds — no paper lists, no confusion.',    accent: '#22c55e' },
-    { lordSrc: ICON.bell,      title: 'Push Notifications',        desc: 'Send targeted notifications to nightlife lovers in your area. Fill your venue before doors even open.',    accent: '#f87b52' },
-    { lordSrc: ICON.money,     title: 'Dynamic Table Pricing',     desc: 'Our algorithm adjusts table prices based on demand, maximising your revenue on peak nights.',             accent: '#6366f1' },
-    { lordSrc: ICON.wallet,    title: 'Instant Payouts',           desc: 'Ticket and booking payments land directly in your account via our payment aggregator. No delays.',          accent: '#22c55e' },
+    { Icon: LineChart, title: 'Revenue Metrics', desc: 'Track bookings, revenue, footfall, and growth trends in real time with a clean analytics dashboard.', accent: '#7b39fc' },
+    { Icon: Share2, title: 'Social Share Links', desc: 'Generate beautiful share links for your events. One tap to post on Instagram, WhatsApp, or anywhere.', accent: '#a484d7' },
+    { Icon: ScanLine, title: 'Scanner Portal', desc: 'Secure QR-based entry system. Your door team scans tickets in seconds — no paper lists, no confusion.', accent: '#22c55e' },
+    { Icon: BellRing, title: 'Push Notifications', desc: 'Send targeted notifications to nightlife lovers in your area. Fill your venue before doors even open.', accent: '#f87b52' },
+    { Icon: TrendingUp, title: 'Dynamic Pricing', desc: 'Our algorithm adjusts table prices based on demand, maximising your revenue on peak nights.', accent: '#6366f1' },
+    { Icon: WalletCards, title: 'Instant Payouts', desc: 'Ticket and booking payments land directly in your account via our payment aggregator. No delays.', accent: '#22c55e' },
 ];
 
 const WHY = [
-    { lordSrc: ICON.growth,  title: 'Reach a Young Audience',  desc: 'Connect with the next generation of nightlife lovers. Our user base is 18–30, digitally native, and ready to party.', accent: '#a484d7' },
-    { lordSrc: ICON.money,   title: 'Dynamic Table Pricing',   desc: 'Our algorithm adjusts table prices based on demand, day of week, and event hype — so you never leave money on the table.', accent: '#7b39fc' },
-    { lordSrc: ICON.wallet,  title: 'Instant Settlements',     desc: 'No waiting for payouts. Every booking goes directly to your account minus our small fee. Powered by leading payment aggregators.', accent: '#f87b52' },
+    { Icon: Users, title: 'Reach a Young Audience', desc: 'Connect with the next generation of nightlife lovers. Our user base is 18–30, digitally native, and ready to party.', accent: '#a484d7' },
+    { Icon: TrendingUp, title: 'Maximize Revenue', desc: 'Our algorithm adjusts table prices based on demand, day of week, and event hype — so you never leave money on the table.', accent: '#7b39fc' },
+    { Icon: IndianRupee, title: 'Instant Settlements', desc: 'No waiting for payouts. Every booking goes directly to your account minus our small fee. Powered by reliable payment tech.', accent: '#f87b52' },
 ];
 
 const MEETING_URL = 'https://calendar.google.com/calendar/u/0/r/eventedit?text=Clubin+Club+Partnership+Meeting&details=Meeting+to+discuss+listing+your+club+on+Clubin+app.&location=Google+Meet';
 
 // ─── Glass card class helpers ─────────────────────────────────────────────────
 
-const glass      = 'bg-[rgba(12,10,22,0.72)] backdrop-blur-2xl border border-white/[0.08]';
-const glassHover = 'hover:border-[#a484d7]/30 hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-500';
+const glass = 'bg-[rgba(12,10,22,0.65)] backdrop-blur-[40px] border border-white/[0.06]';
+const glassHover = 'hover:border-white/[0.12] hover:bg-[rgba(18,15,30,0.75)] hover:shadow-2xl hover:shadow-[#a484d7]/10 hover:-translate-y-2 transition-all duration-700 ease-out';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ListYourClubPage() {
     useSEO({
-        title:       'List Your Club on Clubin - Partner With Us | Clubin',
+        title: 'List Your Club on Clubin - Partner With Us | Clubin',
         description: 'Partner with Clubin to list your nightclub, manage guestlists, table bookings, and reach a young nightlife audience across India. Lowest platform fees. Schedule a meeting today.',
-        url:         'https://clubin.co.in/list-your-club',
+        url: 'https://clubin.co.in/list-your-club',
         structuredData: [
             {
                 '@context': 'https://schema.org',
-                '@type':    'WebPage',
-                name:        'List Your Club on Clubin',
+                '@type': 'WebPage',
+                name: 'List Your Club on Clubin',
                 description: 'Partner with Clubin to list your nightclub and manage events, guestlists, and table bookings.',
-                url:         'https://clubin.co.in/list-your-club',
+                url: 'https://clubin.co.in/list-your-club',
             },
             {
                 '@context': 'https://schema.org',
-                '@type':    'BreadcrumbList',
+                '@type': 'BreadcrumbList',
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
                     { '@type': 'ListItem', position: 2, name: 'List Your Club' },
@@ -197,6 +203,13 @@ export function ListYourClubPage() {
 
     return (
         <>
+            {/* Global style injections to ensure fonts load exactly like the App.tsx landing page */}
+            <style>{`
+                .font-manrope { font-family: 'Manrope', sans-serif; }
+                .font-inter { font-family: 'Inter', sans-serif; }
+                .font-instrument { font-family: 'Instrument Serif', serif; }
+            `}</style>
+
             {/* Fixed video + fluted glass background */}
             <PageVideo />
 
@@ -204,15 +217,22 @@ export function ListYourClubPage() {
             <div className="relative z-10 min-h-screen text-white font-manrope selection:bg-[#7b39fc] selection:text-white overflow-x-hidden">
 
                 {/* ── Navbar ───────────────────────────────────────────── */}
-                <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 md:px-12 md:py-5">
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none" />
+                <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 md:py-6 transition-all duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
                     <Link to="/" className="relative z-10 flex items-center gap-3">
-                        <img src="/clubin-logo-header.webp" alt="Clubin" className="h-12 md:h-14 w-auto object-contain" width="192" height="128" />
+                        <img
+                            src="/clubin-logo-header.webp"
+                            alt="Clubin"
+                            className="h-14 w-auto md:h-16 object-contain drop-shadow-lg"
+                            width="192"
+                            height="128"
+                            fetchPriority="high"
+                        />
                     </Link>
-                    <div className="relative z-10 flex items-center gap-2 sm:gap-3">
+                    <div className="relative z-10 flex items-center gap-2 sm:gap-4">
                         <Link
                             to="/clubs"
-                            className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs sm:text-sm font-semibold rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-sm"
+                            className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white text-xs sm:text-sm font-semibold rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-sm hidden sm:block shadow-sm"
                         >
                             Browse Clubs
                         </Link>
@@ -220,7 +240,7 @@ export function ListYourClubPage() {
                             href={MEETING_URL}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-4 py-2 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-xs sm:text-sm font-semibold rounded-xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/20"
+                            className="px-5 py-2.5 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-xs sm:text-sm font-semibold rounded-xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/20"
                         >
                             Schedule Meeting
                         </a>
@@ -228,95 +248,85 @@ export function ListYourClubPage() {
                 </nav>
 
                 {/* ── Hero ─────────────────────────────────────────────── */}
-                <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-5 pt-28 pb-16">
+                {/* Removed extra pt padding, matched landing page min-h and flex layout */}
+                <section className="relative px-6 md:px-12 min-h-[95vh] flex flex-col justify-center items-center text-center max-w-5xl mx-auto mb-20 pt-20">
                     <ScrollReveal>
-                        <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest text-white/60 mb-6 backdrop-blur-sm">
-                            <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />
+                        <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest text-[#a484d7] mb-8 backdrop-blur-md shadow-sm">
+                            <span className="w-2 h-2 rounded-full bg-[#a484d7] animate-pulse drop-shadow-[0_0_8px_rgba(164,132,215,0.8)]" />
                             Now Onboarding Clubs
                         </span>
                     </ScrollReveal>
 
-                    <ScrollReveal delay={100}>
-                        <h1 className="font-inter font-extrabold text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[0.95] mb-6 max-w-5xl">
-                            List Your Club
-                            <br />
-                            {/* Instrument Serif italic = the "No Lines No Stress" font from the landing page */}
-                            <span className="font-instrument italic font-normal text-[#a484d7]">on </span>
-                            <span className="font-inter font-extrabold text-[#a484d7]">Clubin</span>
+                    <ScrollReveal delay={150}>
+                        {/* Matching exact typography from the landing page H1 */}
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-inter font-extrabold tracking-tighter text-white mb-6 drop-shadow-2xl leading-[1.05]">
+                            List Your Club<br />
+                            <span className="font-instrument italic font-normal text-[#a484d7]">on</span>{' '}
+                            <span className="text-[#a484d7]">Clubin.</span>
                         </h1>
                     </ScrollReveal>
 
-                    <ScrollReveal delay={200}>
-                        <p className="text-white/55 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed mb-10 font-manrope font-light">
-                            Reach thousands of nightlife lovers. Manage guestlists, table bookings, and events — all from one dashboard. Lowest platform fees in the industry.
+                    <ScrollReveal delay={300}>
+                        <p className="text-xl md:text-2xl font-manrope text-gray-200 max-w-2xl mx-auto mb-10 leading-relaxed font-light drop-shadow-md">
+                            Reach thousands of nightlife lovers. Manage guestlists, table bookings, and events — all from one dashboard.
                         </p>
                     </ScrollReveal>
 
-                    <ScrollReveal delay={300}>
+                    <ScrollReveal delay={450}>
                         <a
                             href={MEETING_URL}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-3 px-8 py-4 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-base sm:text-lg font-bold rounded-2xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-purple-500/25"
+                            className="group inline-flex items-center gap-3 px-8 py-4 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-base sm:text-lg font-bold rounded-2xl border border-purple-400/40 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-purple-500/25"
                         >
-                            {/* Inline calendar icon as CTA icon */}
-                            <svg className="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-                            </svg>
+                            <CalendarCheck className="w-5 h-5 text-white/90" strokeWidth={2.5} />
                             Schedule a Meeting
                         </a>
                     </ScrollReveal>
 
-                    {/* Scroll hint */}
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/20 animate-pulse">
-                        <span className="text-[10px] uppercase tracking-widest font-bold font-manrope">Scroll to explore</span>
-                        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M8 2v10m0 0l4-4m-4 4L4 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    {/* Scroll hint aligned with landing page */}
+                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/40 animate-pulse">
+                        <span className="text-[11px] uppercase tracking-[0.2em] font-bold font-manrope">Scroll to explore</span>
+                        <svg className="w-4 h-4 text-white/60" viewBox="0 0 16 16" fill="none"><path d="M8 2v10m0 0l4-4m-4 4L4 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     </div>
                 </section>
 
                 {/* ── How It Works ─────────────────────────────────────── */}
-                <section className="relative px-5 py-20 md:py-32">
+                <section className="relative px-6 py-24 md:py-32">
                     <div className="max-w-6xl mx-auto">
                         <ScrollReveal>
-                            <div className="text-center mb-16">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">How It Works</span>
-                                <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
-                                    Three steps to <span className="text-[#f87b52]">go live</span>
+                            <div className="text-center mb-20">
+                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#f87b52] font-manrope">How It Works</span>
+                                {/* Exact typography match for sections */}
+                                <h2 className="text-4xl md:text-6xl font-inter font-bold tracking-tight mt-4">
+                                    Three steps to <span className="font-instrument italic font-normal text-[#f87b52]">go live.</span>
                                 </h2>
                             </div>
                         </ScrollReveal>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                             {STEPS.map((step, i) => (
-                                <ScrollReveal key={i} delay={i * 150}>
+                                <ScrollReveal key={i} delay={i * 150} className="h-full">
                                     <div className="relative group h-full">
-                                        {/* Desktop connector */}
+                                        {/* Desktop connector line */}
                                         {i < STEPS.length - 1 && (
-                                            <div className="hidden md:block absolute top-[4.5rem] -right-4 w-8 h-px bg-gradient-to-r from-white/20 to-transparent z-10" />
+                                            <div className="hidden md:block absolute top-[5rem] -right-4 w-8 h-px bg-gradient-to-r from-white/20 to-transparent z-10" />
                                         )}
-                                        <div className={`relative h-full p-8 rounded-[2rem] ${glass} ${glassHover} overflow-hidden`}>
-                                            {/* Top glass edge highlight */}
-                                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-                                            {/* Accent glow */}
-                                            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: `${step.accent}18` }} />
+                                        <div className={`relative h-full p-8 rounded-[2.5rem] ${glass} ${glassHover} overflow-hidden group`}>
+                                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                                            {/* Accent glow on hover */}
+                                            <div className="absolute top-0 right-0 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" style={{ backgroundColor: `${step.accent}25` }} />
 
                                             <div className="relative flex items-center gap-4 mb-6">
-                                                {/* Step number badge */}
-                                                <span className="flex items-center justify-center w-9 h-9 rounded-full text-sm font-extrabold font-inter shrink-0" style={{ backgroundColor: `${step.accent}20`, color: step.accent }}>
+                                                <span className="flex items-center justify-center w-10 h-10 rounded-full text-base font-extrabold font-inter shrink-0 bg-white/5 border border-white/10" style={{ color: step.accent }}>
                                                     {i + 1}
                                                 </span>
-                                                {/* Lordicon animated icon */}
-                                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/[0.06] flex items-center justify-center group-hover:border-white/15 transition-all duration-500">
-                                                    <lord-icon
-                                                        src={step.lordSrc}
-                                                        trigger="loop-on-hover"
-                                                        colors={LORD_COLORS}
-                                                        style={LORD_SIZE}
-                                                    />
-                                                </div>
                                             </div>
-                                            <h3 className="text-xl font-bold font-inter mb-2">{step.title}</h3>
-                                            <p className="text-white/40 text-sm leading-relaxed font-manrope">{step.desc}</p>
+
+                                            <AnimatedIcon Icon={step.Icon} color={step.accent} />
+
+                                            <h3 className="text-2xl font-bold font-inter mb-3 leading-tight">{step.title}</h3>
+                                            <p className="text-white/50 text-base leading-relaxed font-manrope font-light">{step.desc}</p>
                                         </div>
                                     </div>
                                 </ScrollReveal>
@@ -326,39 +336,32 @@ export function ListYourClubPage() {
                 </section>
 
                 {/* ── Dashboard Features ───────────────────────────────── */}
-                <section className="relative px-5 py-20 md:py-32">
+                <section className="relative px-6 py-24 md:py-32 bg-gradient-to-b from-transparent via-[#0a0812]/50 to-transparent">
                     <div className="max-w-6xl mx-auto">
                         <ScrollReveal>
-                            <div className="text-center mb-16">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">Your Dashboard</span>
-                                <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
+                            <div className="text-center mb-20">
+                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#a484d7] font-manrope">Your Dashboard</span>
+                                <h2 className="text-4xl md:text-6xl font-inter font-bold tracking-tight mt-4">
                                     Everything you need to{' '}
-                                    <span className="font-instrument italic font-normal text-[#a484d7]">run your club</span>
+                                    <span className="font-instrument italic font-normal text-[#a484d7]">run your club.</span>
                                 </h2>
-                                <p className="text-white/40 mt-4 max-w-xl mx-auto text-sm sm:text-base font-manrope font-light">
+                                <p className="text-xl font-manrope text-white/50 max-w-2xl mx-auto mt-6 leading-relaxed font-light">
                                     A powerful promoter panel to manage events, pricing, guestlists, and more — all from one place.
                                 </p>
                             </div>
                         </ScrollReveal>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {FEATURES.map((feat, i) => (
-                                <ScrollReveal key={i} delay={i * 100}>
-                                    <div className={`group h-full p-7 rounded-[1.75rem] ${glass} ${glassHover} relative overflow-hidden`}>
+                                <ScrollReveal key={i} delay={(i % 3) * 100} className="h-full">
+                                    <div className={`group h-full p-8 rounded-[2rem] ${glass} ${glassHover} relative overflow-hidden flex flex-col`}>
                                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                                        <div className="absolute top-0 right-0 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: `${feat.accent}14` }} />
-                                        <div className="relative">
-                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/[0.06] flex items-center justify-center mb-5 group-hover:border-white/15 transition-all duration-500">
-                                                <lord-icon
-                                                    src={feat.lordSrc}
-                                                    trigger="loop-on-hover"
-                                                    colors={LORD_COLORS}
-                                                    style={LORD_SIZE}
-                                                />
-                                            </div>
-                                            <h3 className="text-lg font-bold font-inter mb-2 group-hover:text-[#a484d7] transition-colors duration-300">{feat.title}</h3>
-                                            <p className="text-white/35 text-sm leading-relaxed font-manrope">{feat.desc}</p>
-                                        </div>
+                                        <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: `${feat.accent}20` }} />
+
+                                        <AnimatedIcon Icon={feat.Icon} color={feat.accent} />
+
+                                        <h3 className="text-xl font-bold font-inter mb-3 mt-auto group-hover:text-white transition-colors duration-300 relative z-10">{feat.title}</h3>
+                                        <p className="text-white/50 text-sm leading-relaxed font-manrope font-light relative z-10">{feat.desc}</p>
                                     </div>
                                 </ScrollReveal>
                             ))}
@@ -367,71 +370,94 @@ export function ListYourClubPage() {
                 </section>
 
                 {/* ── Pricing / Fees ───────────────────────────────────── */}
-                <section className="relative px-5 py-20 md:py-32">
+                <section className="relative px-6 py-24 md:py-32">
                     <div className="max-w-5xl mx-auto">
                         <ScrollReveal>
-                            <div className="text-center mb-16">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">Transparent Pricing</span>
-                                <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
-                                    Lowest fees. <span className="text-[#22c55e]">Your revenue, your way.</span>
+                            <div className="text-center mb-20">
+                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#22c55e] font-manrope">Transparent Pricing</span>
+                                <h2 className="text-4xl md:text-6xl font-inter font-bold tracking-tight mt-4">
+                                    Lowest fees. <span className="font-instrument italic font-normal text-[#22c55e]">Your revenue.</span>
                                 </h2>
-                                <p className="text-white/40 mt-4 max-w-xl mx-auto text-sm sm:text-base font-manrope font-light">
-                                    We use a payment aggregator so bookings hit your account instantly. Our cut is the lowest in the industry.
+                                <p className="text-xl font-manrope text-white/50 max-w-2xl mx-auto mt-6 leading-relaxed font-light">
+                                    We use a reliable payment aggregator so bookings hit your account instantly. Our cut is the lowest in the industry.
                                 </p>
                             </div>
                         </ScrollReveal>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Guest List card */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <ScrollReveal delay={0}>
-                                <div className={`relative overflow-hidden p-8 sm:p-10 rounded-[2rem] ${glass} ${glassHover}`}>
-                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a484d7]/25 to-transparent" />
-                                    <div className="absolute top-0 right-0 w-40 h-40 bg-[#7b39fc]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                                    <div className="relative">
-                                        <span className="text-xs font-bold uppercase tracking-widest text-[#a484d7] font-manrope">Guest List</span>
-                                        <div className="flex items-baseline gap-2 mt-3 mb-4">
-                                            <span className="font-inter font-extrabold text-5xl sm:text-6xl tracking-tight">₹50</span>
-                                            <span className="text-white/30 text-sm font-medium font-manrope">per booking</span>
+                                <div className={`relative overflow-hidden p-10 md:p-12 rounded-[2.5rem] bg-gradient-to-b from-[rgba(12,10,22,0.8)] to-[rgba(18,15,30,0.9)] backdrop-blur-3xl border border-white/[0.08] hover:border-[#a484d7]/30 transition-all duration-700 hover:shadow-2xl hover:shadow-[#a484d7]/10 hover:-translate-y-2`}>
+                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a484d7]/50 to-transparent" />
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#7b39fc]/15 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+
+                                    <div className="relative z-10">
+                                        <span className="inline-block px-4 py-2 rounded-full border border-[#a484d7]/30 bg-[#a484d7]/10 text-xs font-bold uppercase tracking-widest text-[#a484d7] font-manrope mb-8">Guest List</span>
+                                        <div className="flex items-baseline gap-2 mb-6">
+                                            <span className="font-inter font-extrabold text-6xl tracking-tighter text-white">₹50</span>
+                                            <span className="text-white/40 text-base font-medium font-manrope">per booking</span>
                                         </div>
-                                        <p className="text-white/40 text-sm leading-relaxed mb-6 font-manrope">
+                                        <p className="text-white/60 text-base leading-relaxed mb-8 font-manrope font-light">
                                             A flat ₹50 convenience fee per guestlist booking. The rest goes directly to your account. No hidden charges.
                                         </p>
-                                        <div className="flex items-center gap-2 text-[#22c55e] text-sm font-semibold font-manrope">
-                                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                            Instant payout to your account
-                                        </div>
+                                        <ul className="space-y-4">
+                                            {[
+                                                'Instant payout to your account',
+                                                'Unlimited events & guests',
+                                                'Free scanner app included'
+                                            ].map((feature, idx) => (
+                                                <li key={idx} className="flex items-center gap-3 text-white/80 text-sm font-medium font-manrope">
+                                                    <div className="w-6 h-6 rounded-full bg-[#22c55e]/10 flex items-center justify-center">
+                                                        <svg className="w-3.5 h-3.5 text-[#22c55e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                    </div>
+                                                    {feature}
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 </div>
                             </ScrollReveal>
 
-                            {/* Table Bookings card */}
                             <ScrollReveal delay={150}>
-                                <div className={`relative overflow-hidden p-8 sm:p-10 rounded-[2rem] ${glass} ${glassHover}`}>
-                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f87b52]/25 to-transparent" />
-                                    <div className="absolute top-0 right-0 w-40 h-40 bg-[#f87b52]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                                    <div className="relative">
-                                        <span className="text-xs font-bold uppercase tracking-widest text-[#f87b52] font-manrope">Table Bookings</span>
-                                        <div className="flex items-baseline gap-2 mt-3 mb-4">
-                                            <span className="font-inter font-extrabold text-5xl sm:text-6xl tracking-tight">5%</span>
-                                            <span className="text-white/30 text-sm font-medium font-manrope">per booking</span>
+                                <div className={`relative overflow-hidden p-10 md:p-12 rounded-[2.5rem] bg-gradient-to-b from-[rgba(12,10,22,0.8)] to-[rgba(18,15,30,0.9)] backdrop-blur-3xl border border-white/[0.08] hover:border-[#f87b52]/30 transition-all duration-700 hover:shadow-2xl hover:shadow-[#f87b52]/10 hover:-translate-y-2`}>
+                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f87b52]/50 to-transparent" />
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#f87b52]/15 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+
+                                    <div className="relative z-10">
+                                        <span className="inline-block px-4 py-2 rounded-full border border-[#f87b52]/30 bg-[#f87b52]/10 text-xs font-bold uppercase tracking-widest text-[#f87b52] font-manrope mb-8">Table Bookings</span>
+                                        <div className="flex items-baseline gap-2 mb-6">
+                                            <span className="font-inter font-extrabold text-6xl tracking-tighter text-white">5%</span>
+                                            <span className="text-white/40 text-base font-medium font-manrope">per booking</span>
                                         </div>
-                                        <p className="text-white/40 text-sm leading-relaxed mb-6 font-manrope">
+                                        <p className="text-white/60 text-base leading-relaxed mb-8 font-manrope font-light">
                                             Just 5% on table bookings. Our dynamic pricing algorithm maximises your table revenue — you earn more than you pay.
                                         </p>
-                                        <div className="flex items-center gap-2 text-[#22c55e] text-sm font-semibold font-manrope">
-                                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                            Dynamic pricing included free
-                                        </div>
+                                        <ul className="space-y-4">
+                                            {[
+                                                'Dynamic pricing included free',
+                                                'Automated inventory tracking',
+                                                'Direct VIP customer support'
+                                            ].map((feature, idx) => (
+                                                <li key={idx} className="flex items-center gap-3 text-white/80 text-sm font-medium font-manrope">
+                                                    <div className="w-6 h-6 rounded-full bg-[#f87b52]/10 flex items-center justify-center">
+                                                        <svg className="w-3.5 h-3.5 text-[#f87b52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                    </div>
+                                                    {feature}
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 </div>
                             </ScrollReveal>
                         </div>
 
-                        <ScrollReveal delay={200}>
-                            <div className="mt-8 p-6 rounded-2xl bg-[rgba(12,10,22,0.60)] backdrop-blur-xl border border-white/[0.06] text-center">
-                                <p className="text-white/50 text-sm font-manrope">
+                        <ScrollReveal delay={300}>
+                            <div className="mt-8 p-6 md:p-8 rounded-[2rem] bg-gradient-to-r from-white/[0.03] to-white/[0.01] backdrop-blur-xl border border-white/[0.06] text-center flex flex-col md:flex-row items-center justify-center gap-4">
+                                <div className="p-3 rounded-full bg-white/5 border border-white/10 shrink-0">
+                                    <TrendingUp className="w-6 h-6 text-white" />
+                                </div>
+                                <p className="text-white/60 text-base font-manrope font-light md:text-left">
                                     <span className="text-white font-semibold">Lowest platform fees in India.</span>{' '}
-                                    Competitors charge 10–15% on every booking. We believe in growing together — our fees are designed so you always come out ahead.
+                                    Competitors charge 10–15% on every booking. We believe in growing together.
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -439,61 +465,55 @@ export function ListYourClubPage() {
                 </section>
 
                 {/* ── Why Clubin ───────────────────────────────────────── */}
-                <section className="relative px-5 py-20 md:py-32" ref={statsRef}>
+                <section className="relative px-6 py-24 md:py-32" ref={statsRef}>
                     <div className="max-w-6xl mx-auto">
                         <ScrollReveal>
-                            <div className="text-center mb-16">
-                                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">Why Clubin</span>
-                                <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
-                                    Boost your club's <span className="text-[#f87b52]">potential</span>
+                            <div className="text-center mb-20">
+                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-white/40 font-manrope">Growth Partner</span>
+                                <h2 className="text-4xl md:text-6xl font-inter font-bold tracking-tight mt-4">
+                                    Boost your club's <span className="font-instrument italic font-normal text-white">potential.</span>
                                 </h2>
                             </div>
                         </ScrollReveal>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {WHY.map((item, i) => (
-                                <ScrollReveal key={i} delay={i * 150}>
-                                    <div className={`group h-full p-8 rounded-[2rem] bg-gradient-to-b from-[rgba(12,10,22,0.72)] to-[rgba(8,6,18,0.85)] backdrop-blur-2xl border border-white/[0.08] ${glassHover} relative overflow-hidden`}>
+                                <ScrollReveal key={i} delay={i * 150} className="h-full">
+                                    <div className={`group h-full p-8 rounded-[2rem] ${glass} ${glassHover} relative overflow-hidden flex flex-col`}>
                                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                                        <div className="absolute bottom-0 left-0 w-36 h-36 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: `${item.accent}12` }} />
-                                        <div className="relative">
-                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/[0.06] flex items-center justify-center mb-6 group-hover:border-white/15 transition-all duration-500">
-                                                <lord-icon
-                                                    src={item.lordSrc}
-                                                    trigger="loop-on-hover"
-                                                    colors={LORD_COLORS}
-                                                    style={LORD_SIZE}
-                                                />
-                                            </div>
-                                            <h3 className="text-xl font-bold font-inter mb-3" style={{ color: item.accent }}>{item.title}</h3>
-                                            <p className="text-white/35 text-sm leading-relaxed font-manrope">{item.desc}</p>
-                                        </div>
+                                        <div className="absolute bottom-0 right-0 w-32 h-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: `${item.accent}20` }} />
+
+                                        <AnimatedIcon Icon={item.Icon} color={item.accent} />
+
+                                        <h3 className="text-2xl font-bold font-inter mb-3 mt-auto" style={{ color: item.accent }}>{item.title}</h3>
+                                        <p className="text-white/50 text-base leading-relaxed font-manrope font-light relative z-10">{item.desc}</p>
                                     </div>
                                 </ScrollReveal>
                             ))}
                         </div>
 
                         {/* Stats row */}
-                        <ScrollReveal delay={200}>
-                            <div className="mt-16 grid grid-cols-3 gap-4">
+                        <ScrollReveal delay={300}>
+                            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
                                 {[
-                                    { value: '9',  label: 'Cities',          suffix: '+',  prefix: false },
-                                    { value: '50', label: 'Convenience Fee', suffix: '₹',  prefix: true  },
-                                    { value: '5',  label: 'Table Fee',       suffix: '%',  prefix: false },
+                                    { value: '9', label: 'Cities Live', suffix: '+', prefix: false },
+                                    { value: '50', label: 'Flat Booking Fee', suffix: '₹', prefix: true },
+                                    { value: '5', label: 'Max Table Fee', suffix: '%', prefix: false },
                                 ].map((stat, i) => (
-                                    <div key={i} className="text-center p-6 rounded-2xl bg-[rgba(12,10,22,0.60)] backdrop-blur-xl border border-white/[0.06]">
-                                        <div className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white">
+                                    <div key={i} className={`p-8 rounded-[2rem] ${glass} text-center flex flex-col items-center justify-center relative overflow-hidden group hover:-translate-y-1 transition-transform`}>
+                                        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="font-inter font-extrabold text-5xl md:text-6xl tracking-tighter text-white mb-2">
                                             {countUp ? (
                                                 <>
-                                                    {stat.prefix && stat.suffix}
-                                                    <CountUpNumber target={parseInt(stat.value)} duration={1500} />
-                                                    {!stat.prefix && stat.suffix}
+                                                    {stat.prefix && <span className="text-3xl font-bold text-white/50 mr-1">{stat.suffix}</span>}
+                                                    <CountUpNumber target={parseInt(stat.value)} duration={2000} />
+                                                    {!stat.prefix && <span className="text-3xl font-bold text-[#f87b52] ml-1">{stat.suffix}</span>}
                                                 </>
                                             ) : (
                                                 <span className="text-white/10">—</span>
                                             )}
                                         </div>
-                                        <span className="text-white/30 text-xs sm:text-sm font-medium mt-1 block font-manrope">{stat.label}</span>
+                                        <span className="text-white/50 text-sm font-semibold uppercase tracking-wider font-manrope">{stat.label}</span>
                                     </div>
                                 ))}
                             </div>
@@ -502,46 +522,41 @@ export function ListYourClubPage() {
                 </section>
 
                 {/* ── Final CTA ────────────────────────────────────────── */}
-                <section className="relative px-5 py-20 md:py-32">
+                <section className="relative px-6 py-24 md:py-32 mb-10">
                     <ScrollReveal>
-                        <div className="max-w-3xl mx-auto text-center relative overflow-hidden p-10 sm:p-14 rounded-[2.5rem] bg-gradient-to-b from-[rgba(85,60,130,0.45)] to-[rgba(8,6,18,0.85)] border border-[rgba(164,132,215,0.22)] backdrop-blur-2xl">
-                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a484d7]/35 to-transparent" />
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[280px] h-[180px] bg-[#7b39fc]/12 rounded-full blur-[80px] pointer-events-none" />
-                            <div className="relative">
-                                <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mb-4">
-                                    Let's <span className="font-instrument italic font-normal text-[#a484d7]">grow</span> together
+                        <div className="max-w-4xl mx-auto text-center relative overflow-hidden py-16 px-8 sm:p-20 rounded-[3rem] bg-gradient-to-b from-[#1b152e]/80 to-[rgba(8,6,18,0.95)] border border-[rgba(164,132,215,0.2)] backdrop-blur-3xl shadow-2xl">
+                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a484d7]/50 to-transparent" />
+                            {/* Inner ambient glows purely for the CTA */}
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+                            <div className="absolute bottom-[-20%] right-[-10%] w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+                            <div className="relative z-10">
+                                <h2 className="text-5xl md:text-7xl font-inter font-extrabold tracking-tighter mb-6 text-white drop-shadow-lg">
+                                    Let's <span className="font-instrument italic font-normal text-[#a484d7]">grow</span> together.
                                 </h2>
-                                <p className="text-white/40 text-sm sm:text-base max-w-lg mx-auto mb-8 leading-relaxed font-manrope font-light">
-                                    Join the growing network of clubs on Clubin. Schedule a quick meeting and we'll have you live within 48 hours.
+                                <p className="text-white/50 text-lg md:text-xl max-w-xl mx-auto mb-10 leading-relaxed font-manrope font-light">
+                                    Join the premium network of clubs on Clubin. Schedule a quick meeting and we'll have you live within 48 hours.
                                 </p>
                                 <a
                                     href={MEETING_URL}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group inline-flex items-center gap-3 px-8 py-4 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-base sm:text-lg font-bold rounded-2xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-purple-500/25"
+                                    className="group inline-flex items-center gap-3 px-10 py-5 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-lg font-bold rounded-2xl border border-purple-400/40 transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-purple-500/30"
                                 >
-                                    <svg className="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-                                    </svg>
+                                    <CalendarCheck className="w-6 h-6 text-white/90" strokeWidth={2.5} />
                                     Schedule a Meeting
                                 </a>
-                                <p className="text-white/20 text-xs mt-6 font-manrope">Free to get started. No commitment required.</p>
+                                <p className="text-white/40 text-sm mt-8 font-manrope flex items-center justify-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                                    Free to get started. No commitment required.
+                                </p>
                             </div>
                         </div>
                     </ScrollReveal>
                 </section>
 
                 {/* ── Footer ───────────────────────────────────────────── */}
-                <footer className="border-t border-white/5 px-5 py-8 text-center">
-                    <Link to="/" className="inline-block mb-4">
-                        <img src="/clubin-logo-header.webp" alt="Clubin" className="h-10 w-auto mx-auto opacity-60 hover:opacity-100 transition-opacity" />
-                    </Link>
-                    <p className="text-white/20 text-xs font-manrope">© {new Date().getFullYear()} Clubin. All rights reserved.</p>
-                    {/* Lordicon attribution (required for free tier) */}
-                    <a href="https://lordicon.com" target="_blank" rel="noopener noreferrer" className="text-white/10 text-[10px] font-manrope mt-1 inline-block hover:text-white/20 transition-colors">
-                        Icons by Lordicon
-                    </a>
-                </footer>
+                <Footer />
             </div>
         </>
     );
@@ -552,14 +567,19 @@ export function ListYourClubPage() {
 function CountUpNumber({ target, duration }: { target: number; duration: number }) {
     const [value, setValue] = useState(0);
     useEffect(() => {
+        let frame: number;
         const start = performance.now();
         function tick(now: number) {
             const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+            // ease-out expo
+            const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
             setValue(Math.round(eased * target));
-            if (progress < 1) requestAnimationFrame(tick);
+            if (progress < 1) {
+                frame = requestAnimationFrame(tick);
+            }
         }
-        requestAnimationFrame(tick);
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
     }, [target, duration]);
     return <>{value}</>;
 }

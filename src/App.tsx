@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { Footer } from './components/Footer';
 
 // --- Icons (Inline SVGs) ---
 
@@ -502,6 +503,8 @@ const App = () => {
                 </div>
 
             </main>
+
+            <Footer />
 
             <style>{`
         .font-manrope { font-family: 'Manrope', sans-serif; }
