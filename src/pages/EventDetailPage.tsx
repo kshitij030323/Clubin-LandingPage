@@ -110,8 +110,9 @@ export function EventDetailPage() {
                 '@type': 'BreadcrumbList',
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
-                    { '@type': 'ListItem', position: 2, name: 'Events' },
-                    { '@type': 'ListItem', position: 3, name: event.title },
+                    { '@type': 'ListItem', position: 2, name: 'Clubs', item: 'https://clubin.co.in/clubs' },
+                    { '@type': 'ListItem', position: 3, name: event.club, item: `https://clubin.co.in/clubs/${event.location.toLowerCase().replace(/\s+/g, '-')}` },
+                    { '@type': 'ListItem', position: 4, name: event.title },
                 ],
             },
         ] : undefined,

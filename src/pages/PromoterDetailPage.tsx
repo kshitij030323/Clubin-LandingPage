@@ -51,19 +51,31 @@ export function PromoterDetailPage() {
         title: data ? `${data.promoter.name} - Event Promoter${data.promoter.region ? ` in ${data.promoter.region}` : ''} | Clubin` : 'Promoter | Clubin',
         description: data ? `${data.promoter.name} is an event promoter${data.promoter.region ? ` based in ${data.promoter.region}` : ''}. Browse their upcoming nightclub events and parties on Clubin.` : undefined,
         image: data?.promoter.logoUrl || undefined,
-        structuredData: data ? {
-            '@context': 'https://schema.org',
-            '@type': 'Organization',
-            name: data.promoter.name,
-            description: `Event promoter${data.promoter.region ? ` in ${data.promoter.region}` : ''}`,
-            image: data.promoter.logoUrl || undefined,
-            url: `https://clubin.co.in/promoters/${data.promoter.id}`,
-            sameAs: data.promoter.instagramUrl ? [data.promoter.instagramUrl] : undefined,
-            areaServed: data.promoter.region ? {
-                '@type': 'City',
-                name: data.promoter.region,
-            } : undefined,
-        } : undefined,
+        url: data ? `https://clubin.co.in/promoters/${data.promoter.id}` : undefined,
+        structuredData: data ? [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: data.promoter.name,
+                description: `Event promoter${data.promoter.region ? ` in ${data.promoter.region}` : ''}`,
+                image: data.promoter.logoUrl || undefined,
+                url: `https://clubin.co.in/promoters/${data.promoter.id}`,
+                sameAs: data.promoter.instagramUrl ? [data.promoter.instagramUrl] : undefined,
+                areaServed: data.promoter.region ? {
+                    '@type': 'City',
+                    name: data.promoter.region,
+                } : undefined,
+            },
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
+                    { '@type': 'ListItem', position: 2, name: 'Clubs', item: 'https://clubin.co.in/clubs' },
+                    { '@type': 'ListItem', position: 3, name: data.promoter.name },
+                ],
+            },
+        ] : undefined,
     });
 
     if (loading) {

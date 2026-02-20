@@ -40,20 +40,24 @@ export function LocationSelectPage() {
     useSEO({
         title: 'Nightclubs & Party Venues in India - Browse by City | Clubin',
         description: 'Browse nightclubs and party venues across Bengaluru, Mumbai, Delhi NCR, Goa, Pune, Hyderabad, Chennai, Jaipur & Chandigarh. Book guestlists and VIP tables on Clubin.',
-        structuredData: {
-            '@context': 'https://schema.org',
-            '@type': 'CollectionPage',
-            name: 'Browse Nightclubs by City',
-            description: 'Browse nightclubs and party venues across major Indian cities on Clubin.',
-            url: 'https://clubin.co.in/clubs',
-            breadcrumb: {
+        url: 'https://clubin.co.in/clubs',
+        structuredData: [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'CollectionPage',
+                name: 'Browse Nightclubs by City',
+                description: 'Browse nightclubs and party venues across major Indian cities on Clubin.',
+                url: 'https://clubin.co.in/clubs',
+            },
+            {
+                '@context': 'https://schema.org',
                 '@type': 'BreadcrumbList',
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
-                    { '@type': 'ListItem', position: 2, name: 'Clubs', item: 'https://clubin.co.in/clubs' },
+                    { '@type': 'ListItem', position: 2, name: 'Clubs' },
                 ],
             },
-        },
+        ],
     });
 
     const handleCitySelect = (city: City) => {

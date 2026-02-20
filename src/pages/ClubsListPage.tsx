@@ -31,25 +31,30 @@ export function ClubsListPage() {
     const displayCity = cityData?.label || city || 'All Cities';
     const cityParam = cityData?.id || city;
 
-    // SEO
+    // SEO — emit BreadcrumbList as standalone JSON-LD, use URL slug for canonical
+    const citySlug = city || '';
     useSEO({
         title: `Best Nightclubs in ${displayCity} | Clubin`,
         description: `Discover the hottest nightclubs and party venues in ${displayCity}. Book guestlists and get VIP table reservations on Clubin.`,
-        structuredData: {
-            '@context': 'https://schema.org',
-            '@type': 'CollectionPage',
-            name: `Best Nightclubs in ${displayCity}`,
-            description: `Discover the hottest nightclubs and party venues in ${displayCity}.`,
-            url: `https://clubin.co.in/clubs/${cityParam}`,
-            breadcrumb: {
+        url: `https://clubin.co.in/clubs/${citySlug}`,
+        structuredData: [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'CollectionPage',
+                name: `Best Nightclubs in ${displayCity}`,
+                description: `Discover the hottest nightclubs and party venues in ${displayCity}.`,
+                url: `https://clubin.co.in/clubs/${citySlug}`,
+            },
+            {
+                '@context': 'https://schema.org',
                 '@type': 'BreadcrumbList',
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
                     { '@type': 'ListItem', position: 2, name: 'Clubs', item: 'https://clubin.co.in/clubs' },
-                    { '@type': 'ListItem', position: 3, name: displayCity, item: `https://clubin.co.in/clubs/${cityParam}` },
+                    { '@type': 'ListItem', position: 3, name: displayCity },
                 ],
             },
-        },
+        ],
     });
 
     useEffect(() => {
