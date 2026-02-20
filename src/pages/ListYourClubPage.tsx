@@ -230,35 +230,46 @@ const FEATURES = [
         icon: ChartIcon,
         title: 'Revenue Metrics Dashboard',
         desc: 'Track bookings, revenue, footfall, and growth trends in real time with a clean analytics dashboard.',
+        accent: '#7b39fc',
     },
     {
         icon: ShareIcon,
         title: 'Social Media Share Links',
         desc: 'Generate beautiful share links for your events. One tap to post on Instagram, WhatsApp, or anywhere.',
+        accent: '#a484d7',
     },
     {
         icon: ScanIcon,
         title: 'Scanner Portal',
         desc: 'Secure QR-based entry system. Your door team scans tickets in seconds — no paper lists, no confusion.',
+        accent: '#22c55e',
     },
     {
         icon: BellIcon,
         title: 'Push Notifications',
         desc: 'Send targeted notifications to nightlife lovers in your area. Fill your venue before doors even open.',
+        accent: '#f87b52',
     },
     {
         icon: DynamicPriceIcon,
         title: 'Dynamic Table Pricing',
         desc: 'Our algorithm adjusts table prices based on demand, maximizing your revenue on peak nights.',
+        accent: '#6366f1',
     },
     {
         icon: WalletIcon,
         title: 'Instant Payouts',
         desc: 'Ticket and booking payments land directly in your account via our payment aggregator. No delays.',
+        accent: '#22c55e',
     },
 ];
 
 const MEETING_URL = 'https://calendar.google.com/calendar/u/0/r/eventedit?text=Clubin+Club+Partnership+Meeting&details=Meeting+to+discuss+listing+your+club+on+Clubin+app.&location=Google+Meet';
+
+// ─── Glassmorphism card class helpers ────────────────────────────────────────
+
+const glassCard = 'bg-[rgba(17,25,40,0.75)] backdrop-blur-2xl border border-white/[0.08]';
+const glassCardHover = 'hover:border-[#a484d7]/25 hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-500';
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -301,7 +312,7 @@ export function ListYourClubPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope selection:bg-[#7b39fc] selection:text-white">
+        <div className="min-h-screen bg-[#0a0a0a] text-white font-manrope selection:bg-[#7b39fc] selection:text-white overflow-x-hidden">
             {/* ── Navbar ─────────────────────────────────────────────────── */}
             <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 md:px-12 md:py-5">
                 <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/90 to-transparent pointer-events-none" />
@@ -311,7 +322,7 @@ export function ListYourClubPage() {
                 <div className="relative z-10 flex items-center gap-2 sm:gap-3">
                     <Link
                         to="/clubs"
-                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs sm:text-sm font-semibold rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 active:scale-95"
+                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs sm:text-sm font-semibold rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-sm"
                     >
                         Browse Clubs
                     </Link>
@@ -328,10 +339,13 @@ export function ListYourClubPage() {
 
             {/* ── Hero ───────────────────────────────────────────────────── */}
             <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-5 pt-28 pb-16 overflow-hidden">
-                {/* Background glow */}
+                {/* Aurora background */}
                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#7b39fc]/15 rounded-full blur-[120px]" />
-                    <div className="absolute bottom-0 left-1/3 w-[400px] h-[400px] bg-[#f87b52]/10 rounded-full blur-[100px]" />
+                    <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#7b39fc]/20 rounded-full blur-[150px] animate-pulse" style={{ animationDuration: '8s' }} />
+                    <div className="absolute bottom-[10%] left-[20%] w-[500px] h-[400px] bg-[#f87b52]/10 rounded-full blur-[120px]" />
+                    <div className="absolute top-[40%] right-[10%] w-[300px] h-[300px] bg-[#6366f1]/12 rounded-full blur-[100px]" />
+                    {/* Subtle grid overlay */}
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
                 </div>
 
                 <ScrollReveal>
@@ -345,12 +359,13 @@ export function ListYourClubPage() {
                     <h1 className="font-inter font-extrabold text-4xl sm:text-5xl md:text-7xl lg:text-8xl tracking-tighter leading-[0.95] mb-6 max-w-5xl">
                         List Your Club
                         <br />
-                        <span className="font-instrument italic font-normal text-[#a484d7]">on Clubin</span>
+                        <span className="font-instrument italic font-normal text-[#a484d7]">on </span>
+                        <span className="font-inter font-extrabold text-[#a484d7]">Clubin</span>
                     </h1>
                 </ScrollReveal>
 
                 <ScrollReveal delay={200}>
-                    <p className="text-white/50 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed mb-10">
+                    <p className="text-white/50 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed mb-10 font-manrope font-light">
                         Reach thousands of nightlife lovers. Manage guestlists, table bookings, and events — all from one dashboard. Lowest platform fees in the industry.
                     </p>
                 </ScrollReveal>
@@ -369,62 +384,77 @@ export function ListYourClubPage() {
 
                 {/* Scroll hint */}
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/20 animate-pulse">
-                    <span className="text-[10px] uppercase tracking-widest font-bold">Scroll to explore</span>
+                    <span className="text-[10px] uppercase tracking-widest font-bold font-manrope">Scroll to explore</span>
                     <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M8 2v10m0 0l4-4m-4 4L4 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 </div>
             </section>
 
             {/* ── How It Works ───────────────────────────────────────────── */}
-            <section className="relative px-5 py-20 md:py-32 max-w-6xl mx-auto">
-                <ScrollReveal>
-                    <div className="text-center mb-16">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30">How It Works</span>
-                        <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
-                            Three steps to <span className="text-[#f87b52]">go live</span>
-                        </h2>
-                    </div>
-                </ScrollReveal>
+            <section className="relative px-5 py-20 md:py-32 overflow-hidden">
+                {/* Section background */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-0 left-[15%] w-[500px] h-[500px] bg-[#7b39fc]/8 rounded-full blur-[140px]" />
+                    <div className="absolute bottom-0 right-[10%] w-[400px] h-[400px] bg-[#4f46e5]/6 rounded-full blur-[120px]" />
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                    {STEPS.map((step, i) => (
-                        <ScrollReveal key={i} delay={i * 150}>
-                            <div className="relative group h-full">
-                                {/* Connector line (desktop) */}
-                                {i < STEPS.length - 1 && (
-                                    <div className="hidden md:block absolute top-16 -right-4 md:-right-5 w-8 md:w-10 h-0.5 bg-gradient-to-r from-white/20 to-transparent z-10" />
-                                )}
-                                <div className="h-full p-8 rounded-[2rem] bg-[#120f1d]/80 backdrop-blur-2xl border border-white/5 hover:border-white/15 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-purple-500/5 group-hover:-translate-y-1">
-                                    {/* Step number */}
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <span className="flex items-center justify-center w-10 h-10 rounded-full text-sm font-extrabold" style={{ backgroundColor: `${step.accent}20`, color: step.accent }}>
-                                            {i + 1}
-                                        </span>
-                                        <step.icon className="w-10 h-10 text-white/60 group-hover:text-white transition-colors duration-500" />
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <ScrollReveal>
+                        <div className="text-center mb-16">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">How It Works</span>
+                            <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
+                                Three steps to <span className="text-[#f87b52]">go live</span>
+                            </h2>
+                        </div>
+                    </ScrollReveal>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                        {STEPS.map((step, i) => (
+                            <ScrollReveal key={i} delay={i * 150}>
+                                <div className="relative group h-full">
+                                    {/* Connector line (desktop) */}
+                                    {i < STEPS.length - 1 && (
+                                        <div className="hidden md:block absolute top-16 -right-4 md:-right-5 w-8 md:w-10 h-0.5 bg-gradient-to-r from-white/20 to-transparent z-10" />
+                                    )}
+                                    <div className={`h-full p-8 rounded-[2rem] ${glassCard} ${glassCardHover} group-hover:shadow-2xl group-hover:shadow-purple-500/10`}>
+                                        {/* Subtle top highlight for 3D glass effect */}
+                                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-t-[2rem]" />
+                                        {/* Step number + icon */}
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <span className="flex items-center justify-center w-10 h-10 rounded-full text-sm font-extrabold font-inter" style={{ backgroundColor: `${step.accent}20`, color: step.accent }}>
+                                                {i + 1}
+                                            </span>
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/[0.06] flex items-center justify-center">
+                                                <step.icon className="w-8 h-8 text-white/50 group-hover:text-white transition-colors duration-500" />
+                                            </div>
+                                        </div>
+                                        <h3 className="text-xl font-bold font-inter mb-2">{step.title}</h3>
+                                        <p className="text-white/40 text-sm leading-relaxed font-manrope">{step.desc}</p>
                                     </div>
-                                    <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                                    <p className="text-white/40 text-sm leading-relaxed">{step.desc}</p>
                                 </div>
-                            </div>
-                        </ScrollReveal>
-                    ))}
+                            </ScrollReveal>
+                        ))}
+                    </div>
                 </div>
             </section>
 
             {/* ── Club Dashboard Features ────────────────────────────────── */}
-            <section className="relative px-5 py-20 md:py-32">
-                {/* Background glow */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-[#7b39fc]/8 rounded-full blur-[120px]" />
+            <section className="relative px-5 py-20 md:py-32 overflow-hidden">
+                {/* Section background */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-[20%] right-[5%] w-[600px] h-[600px] bg-[#7b39fc]/8 rounded-full blur-[150px]" />
+                    <div className="absolute bottom-[15%] left-[5%] w-[400px] h-[400px] bg-[#f87b52]/5 rounded-full blur-[120px]" />
+                    <div className="absolute top-[50%] left-[40%] w-[350px] h-[350px] bg-[#4338ca]/6 rounded-full blur-[130px]" />
                 </div>
 
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-6xl mx-auto relative z-10">
                     <ScrollReveal>
                         <div className="text-center mb-16">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30">Your Dashboard</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">Your Dashboard</span>
                             <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
-                                Everything you need to <span className="font-instrument italic font-normal text-[#a484d7]">run your club</span>
+                                Everything you need to{' '}
+                                <span className="font-instrument italic font-normal text-[#a484d7]">run your club</span>
                             </h2>
-                            <p className="text-white/40 mt-4 max-w-xl mx-auto text-sm sm:text-base">
+                            <p className="text-white/40 mt-4 max-w-xl mx-auto text-sm sm:text-base font-manrope font-light">
                                 A powerful promoter panel to manage events, pricing, guestlists, and more — all from one place.
                             </p>
                         </div>
@@ -433,12 +463,18 @@ export function ListYourClubPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
                         {FEATURES.map((feat, i) => (
                             <ScrollReveal key={i} delay={i * 100}>
-                                <div className="group h-full p-7 rounded-[1.75rem] bg-[#120f1d]/60 backdrop-blur-xl border border-white/5 hover:border-purple-500/20 transition-all duration-500 hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-1">
-                                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center mb-5 group-hover:bg-white/10 group-hover:border-white/10 transition-all duration-500">
-                                        <feat.icon className="w-8 h-8 text-white/50 group-hover:text-white transition-colors duration-500" />
+                                <div className={`group h-full p-7 rounded-[1.75rem] ${glassCard} ${glassCardHover} relative overflow-hidden`}>
+                                    {/* Top highlight */}
+                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                                    {/* Accent glow on hover */}
+                                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: `${feat.accent}15` }} />
+                                    <div className="relative">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/[0.06] flex items-center justify-center mb-5 group-hover:border-white/15 transition-all duration-500">
+                                            <feat.icon className="w-8 h-8 text-white/50 group-hover:text-white transition-colors duration-500" />
+                                        </div>
+                                        <h3 className="text-lg font-bold font-inter mb-2 group-hover:text-[#a484d7] transition-colors duration-300">{feat.title}</h3>
+                                        <p className="text-white/35 text-sm leading-relaxed font-manrope">{feat.desc}</p>
                                     </div>
-                                    <h3 className="text-lg font-bold mb-2 group-hover:text-purple-300 transition-colors">{feat.title}</h3>
-                                    <p className="text-white/35 text-sm leading-relaxed">{feat.desc}</p>
                                 </div>
                             </ScrollReveal>
                         ))}
@@ -447,154 +483,194 @@ export function ListYourClubPage() {
             </section>
 
             {/* ── Pricing / Fees ─────────────────────────────────────────── */}
-            <section className="relative px-5 py-20 md:py-32 max-w-5xl mx-auto">
-                <ScrollReveal>
-                    <div className="text-center mb-16">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30">Transparent Pricing</span>
-                        <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
-                            Lowest fees. <span className="text-[#22c55e]">Your revenue, your way.</span>
-                        </h2>
-                        <p className="text-white/40 mt-4 max-w-xl mx-auto text-sm sm:text-base">
-                            We use a payment aggregator so bookings hit your account instantly. Our cut is the lowest in the industry.
-                        </p>
-                    </div>
-                </ScrollReveal>
+            <section className="relative px-5 py-20 md:py-32 overflow-hidden">
+                {/* Section background */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-[30%] left-[50%] -translate-x-1/2 w-[700px] h-[500px] bg-[#f87b52]/6 rounded-full blur-[160px]" />
+                    <div className="absolute bottom-[10%] left-[20%] w-[400px] h-[400px] bg-[#7b39fc]/6 rounded-full blur-[120px]" />
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ScrollReveal delay={0}>
-                        <div className="relative overflow-hidden p-8 sm:p-10 rounded-[2rem] bg-[#120f1d]/80 backdrop-blur-2xl border border-white/5 hover:border-purple-500/20 transition-all duration-500">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-[#7b39fc]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                            <div className="relative">
-                                <span className="text-xs font-bold uppercase tracking-widest text-[#a484d7]">Guest List</span>
-                                <div className="flex items-baseline gap-2 mt-3 mb-4">
-                                    <span className="font-inter font-extrabold text-5xl sm:text-6xl tracking-tight">₹50</span>
-                                    <span className="text-white/30 text-sm font-medium">per booking</span>
-                                </div>
-                                <p className="text-white/40 text-sm leading-relaxed mb-6">
-                                    A flat ₹50 convenience fee per guestlist booking. The rest goes directly to your account. No hidden charges.
-                                </p>
-                                <div className="flex items-center gap-2 text-[#22c55e] text-sm font-semibold">
-                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                    Instant payout to your account
-                                </div>
-                            </div>
+                <div className="max-w-5xl mx-auto relative z-10">
+                    <ScrollReveal>
+                        <div className="text-center mb-16">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">Transparent Pricing</span>
+                            <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
+                                Lowest fees. <span className="text-[#22c55e]">Your revenue, your way.</span>
+                            </h2>
+                            <p className="text-white/40 mt-4 max-w-xl mx-auto text-sm sm:text-base font-manrope font-light">
+                                We use a payment aggregator so bookings hit your account instantly. Our cut is the lowest in the industry.
+                            </p>
                         </div>
                     </ScrollReveal>
 
-                    <ScrollReveal delay={150}>
-                        <div className="relative overflow-hidden p-8 sm:p-10 rounded-[2rem] bg-[#120f1d]/80 backdrop-blur-2xl border border-white/5 hover:border-purple-500/20 transition-all duration-500">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-[#f87b52]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                            <div className="relative">
-                                <span className="text-xs font-bold uppercase tracking-widest text-[#f87b52]">Table Bookings</span>
-                                <div className="flex items-baseline gap-2 mt-3 mb-4">
-                                    <span className="font-inter font-extrabold text-5xl sm:text-6xl tracking-tight">5%</span>
-                                    <span className="text-white/30 text-sm font-medium">per booking</span>
-                                </div>
-                                <p className="text-white/40 text-sm leading-relaxed mb-6">
-                                    Just 5% on table bookings. Our dynamic pricing algorithm maximizes your table revenue — you earn more than you pay.
-                                </p>
-                                <div className="flex items-center gap-2 text-[#22c55e] text-sm font-semibold">
-                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                    Dynamic pricing included free
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <ScrollReveal delay={0}>
+                            <div className={`relative overflow-hidden p-8 sm:p-10 rounded-[2rem] ${glassCard} ${glassCardHover}`}>
+                                {/* Top highlight */}
+                                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a484d7]/20 to-transparent" />
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-[#7b39fc]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                <div className="relative">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-[#a484d7] font-manrope">Guest List</span>
+                                    <div className="flex items-baseline gap-2 mt-3 mb-4">
+                                        <span className="font-inter font-extrabold text-5xl sm:text-6xl tracking-tight">₹50</span>
+                                        <span className="text-white/30 text-sm font-medium font-manrope">per booking</span>
+                                    </div>
+                                    <p className="text-white/40 text-sm leading-relaxed mb-6 font-manrope">
+                                        A flat ₹50 convenience fee per guestlist booking. The rest goes directly to your account. No hidden charges.
+                                    </p>
+                                    <div className="flex items-center gap-2 text-[#22c55e] text-sm font-semibold font-manrope">
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                        Instant payout to your account
+                                    </div>
                                 </div>
                             </div>
+                        </ScrollReveal>
+
+                        <ScrollReveal delay={150}>
+                            <div className={`relative overflow-hidden p-8 sm:p-10 rounded-[2rem] ${glassCard} ${glassCardHover}`}>
+                                {/* Top highlight */}
+                                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f87b52]/20 to-transparent" />
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-[#f87b52]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                <div className="relative">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-[#f87b52] font-manrope">Table Bookings</span>
+                                    <div className="flex items-baseline gap-2 mt-3 mb-4">
+                                        <span className="font-inter font-extrabold text-5xl sm:text-6xl tracking-tight">5%</span>
+                                        <span className="text-white/30 text-sm font-medium font-manrope">per booking</span>
+                                    </div>
+                                    <p className="text-white/40 text-sm leading-relaxed mb-6 font-manrope">
+                                        Just 5% on table bookings. Our dynamic pricing algorithm maximizes your table revenue — you earn more than you pay.
+                                    </p>
+                                    <div className="flex items-center gap-2 text-[#22c55e] text-sm font-semibold font-manrope">
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                        Dynamic pricing included free
+                                    </div>
+                                </div>
+                            </div>
+                        </ScrollReveal>
+                    </div>
+
+                    <ScrollReveal delay={200}>
+                        <div className="mt-8 p-6 rounded-2xl bg-[rgba(17,25,40,0.5)] backdrop-blur-xl border border-white/[0.06] text-center">
+                            <p className="text-white/50 text-sm font-manrope">
+                                <span className="text-white font-semibold">Lowest platform fees in India.</span> Competitors charge 10–15% on every booking. We believe in growing together — our fees are designed so you always come out ahead.
+                            </p>
                         </div>
                     </ScrollReveal>
                 </div>
-
-                <ScrollReveal delay={200}>
-                    <div className="mt-8 p-6 rounded-2xl bg-white/[0.03] border border-white/5 text-center">
-                        <p className="text-white/50 text-sm">
-                            <span className="text-white font-semibold">Lowest platform fees in India.</span> Competitors charge 10–15% on every booking. We believe in growing together — our fees are designed so you always come out ahead.
-                        </p>
-                    </div>
-                </ScrollReveal>
             </section>
 
             {/* ── Why Clubin ─────────────────────────────────────────────── */}
-            <section className="relative px-5 py-20 md:py-32 max-w-6xl mx-auto" ref={statsRef}>
-                <ScrollReveal>
-                    <div className="text-center mb-16">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30">Why Clubin</span>
-                        <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
-                            Boost your club's <span className="text-[#f87b52]">potential</span>
-                        </h2>
-                    </div>
-                </ScrollReveal>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
-                        { icon: GrowthIcon, title: 'Reach a Young Audience', desc: 'Connect with the next generation of nightlife lovers. Our user base is 18–30, digitally native, and ready to party.', accent: '#a484d7' },
-                        { icon: DynamicPriceIcon, title: 'Dynamic Table Pricing', desc: 'Our algorithm adjusts table prices based on demand, day of week, and event hype — so you never leave money on the table.', accent: '#7b39fc' },
-                        { icon: WalletIcon, title: 'Instant Settlements', desc: 'No waiting for payouts. Every booking payment goes directly to your account minus our small fee. Powered by leading payment aggregators.', accent: '#f87b52' },
-                    ].map((item, i) => (
-                        <ScrollReveal key={i} delay={i * 150}>
-                            <div className="group h-full p-8 rounded-[2rem] bg-gradient-to-b from-[#120f1d]/80 to-[#0a0a0a] backdrop-blur-2xl border border-white/5 hover:border-white/15 transition-all duration-500 hover:-translate-y-1">
-                                <item.icon className="w-12 h-12 mb-6 text-white/60 group-hover:text-white transition-colors duration-500" />
-                                <h3 className="text-xl font-bold mb-3" style={{ color: item.accent }}>{item.title}</h3>
-                                <p className="text-white/35 text-sm leading-relaxed">{item.desc}</p>
-                            </div>
-                        </ScrollReveal>
-                    ))}
+            <section className="relative px-5 py-20 md:py-32 overflow-hidden" ref={statsRef}>
+                {/* Section background */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-[20%] left-[50%] -translate-x-1/2 w-[700px] h-[600px] bg-[#6366f1]/8 rounded-full blur-[160px]" />
+                    <div className="absolute bottom-[20%] right-[15%] w-[350px] h-[350px] bg-[#f87b52]/5 rounded-full blur-[100px]" />
                 </div>
 
-                {/* Stats row */}
-                <ScrollReveal delay={200}>
-                    <div className="mt-16 grid grid-cols-3 gap-4">
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <ScrollReveal>
+                        <div className="text-center mb-16">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30 font-manrope">Why Clubin</span>
+                            <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mt-3">
+                                Boost your club's <span className="text-[#f87b52]">potential</span>
+                            </h2>
+                        </div>
+                    </ScrollReveal>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {[
-                            { value: '9', label: 'Cities', suffix: '+' },
-                            { value: '50', label: 'Convenience Fee', suffix: '₹', prefix: true },
-                            { value: '5', label: 'Table Fee', suffix: '%' },
-                        ].map((stat, i) => (
-                            <div key={i} className="text-center p-6 rounded-2xl bg-white/[0.03] border border-white/5">
-                                <div className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white">
-                                    {countUp ? (
-                                        <>
-                                            {stat.prefix && stat.suffix}
-                                            <CountUpNumber target={parseInt(stat.value)} duration={1500} />
-                                            {!stat.prefix && stat.suffix}
-                                        </>
-                                    ) : (
-                                        <span className="text-white/10">—</span>
-                                    )}
+                            { icon: GrowthIcon, title: 'Reach a Young Audience', desc: 'Connect with the next generation of nightlife lovers. Our user base is 18–30, digitally native, and ready to party.', accent: '#a484d7' },
+                            { icon: DynamicPriceIcon, title: 'Dynamic Table Pricing', desc: 'Our algorithm adjusts table prices based on demand, day of week, and event hype — so you never leave money on the table.', accent: '#7b39fc' },
+                            { icon: WalletIcon, title: 'Instant Settlements', desc: 'No waiting for payouts. Every booking payment goes directly to your account minus our small fee. Powered by leading payment aggregators.', accent: '#f87b52' },
+                        ].map((item, i) => (
+                            <ScrollReveal key={i} delay={i * 150}>
+                                <div className={`group h-full p-8 rounded-[2rem] bg-gradient-to-b from-[rgba(17,25,40,0.75)] to-[rgba(10,10,10,0.9)] backdrop-blur-2xl border border-white/[0.08] ${glassCardHover} relative overflow-hidden`}>
+                                    {/* Top highlight */}
+                                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-t-[2rem]" />
+                                    {/* Accent glow on hover */}
+                                    <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ backgroundColor: `${item.accent}12` }} />
+                                    <div className="relative">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/[0.02] border border-white/[0.06] flex items-center justify-center mb-6 group-hover:border-white/15 transition-all duration-500">
+                                            <item.icon className="w-9 h-9 text-white/50 group-hover:text-white transition-colors duration-500" />
+                                        </div>
+                                        <h3 className="text-xl font-bold font-inter mb-3" style={{ color: item.accent }}>{item.title}</h3>
+                                        <p className="text-white/35 text-sm leading-relaxed font-manrope">{item.desc}</p>
+                                    </div>
                                 </div>
-                                <span className="text-white/30 text-xs sm:text-sm font-medium mt-1 block">{stat.label}</span>
-                            </div>
+                            </ScrollReveal>
                         ))}
                     </div>
-                </ScrollReveal>
+
+                    {/* Stats row */}
+                    <ScrollReveal delay={200}>
+                        <div className="mt-16 grid grid-cols-3 gap-4">
+                            {[
+                                { value: '9', label: 'Cities', suffix: '+' },
+                                { value: '50', label: 'Convenience Fee', suffix: '₹', prefix: true },
+                                { value: '5', label: 'Table Fee', suffix: '%' },
+                            ].map((stat, i) => (
+                                <div key={i} className="text-center p-6 rounded-2xl bg-[rgba(17,25,40,0.5)] backdrop-blur-xl border border-white/[0.06]">
+                                    <div className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white">
+                                        {countUp ? (
+                                            <>
+                                                {stat.prefix && stat.suffix}
+                                                <CountUpNumber target={parseInt(stat.value)} duration={1500} />
+                                                {!stat.prefix && stat.suffix}
+                                            </>
+                                        ) : (
+                                            <span className="text-white/10">—</span>
+                                        )}
+                                    </div>
+                                    <span className="text-white/30 text-xs sm:text-sm font-medium mt-1 block font-manrope">{stat.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </ScrollReveal>
+                </div>
             </section>
 
             {/* ── Final CTA ──────────────────────────────────────────────── */}
-            <section className="relative px-5 py-20 md:py-32">
+            <section className="relative px-5 py-20 md:py-32 overflow-hidden">
+                {/* Section background */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-[30%] left-[50%] -translate-x-1/2 w-[600px] h-[500px] bg-[#7b39fc]/10 rounded-full blur-[140px]" />
+                </div>
+
                 <ScrollReveal>
-                    <div className="max-w-3xl mx-auto text-center p-10 sm:p-14 rounded-[2.5rem] bg-gradient-to-b from-[rgba(85,80,110,0.4)] to-[#0a0a0a] border border-[rgba(164,132,215,0.3)] backdrop-blur-xl">
-                        <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mb-4">
-                            Let's <span className="font-instrument italic font-normal text-[#a484d7]">grow</span> together
-                        </h2>
-                        <p className="text-white/40 text-sm sm:text-base max-w-lg mx-auto mb-8 leading-relaxed">
-                            Join the growing network of clubs on Clubin. Schedule a quick meeting and we'll have you live within 48 hours.
-                        </p>
-                        <a
-                            href={MEETING_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-3 px-8 py-4 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-base sm:text-lg font-bold rounded-2xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-purple-500/25"
-                        >
-                            <CalendarIcon className="w-6 h-6 text-white/80 group-hover:text-white transition-colors" />
-                            Schedule a Meeting
-                        </a>
-                        <p className="text-white/20 text-xs mt-6">Free to get started. No commitment required.</p>
+                    <div className="max-w-3xl mx-auto text-center relative overflow-hidden p-10 sm:p-14 rounded-[2.5rem] bg-gradient-to-b from-[rgba(85,80,110,0.4)] to-[rgba(10,10,10,0.9)] border border-[rgba(164,132,215,0.25)] backdrop-blur-2xl">
+                        {/* Top highlight */}
+                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a484d7]/30 to-transparent" />
+                        {/* Inner glow */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[200px] bg-[#7b39fc]/15 rounded-full blur-[80px] pointer-events-none" />
+
+                        <div className="relative">
+                            <h2 className="font-inter font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight mb-4">
+                                Let's <span className="font-instrument italic font-normal text-[#a484d7]">grow</span> together
+                            </h2>
+                            <p className="text-white/40 text-sm sm:text-base max-w-lg mx-auto mb-8 leading-relaxed font-manrope font-light">
+                                Join the growing network of clubs on Clubin. Schedule a quick meeting and we'll have you live within 48 hours.
+                            </p>
+                            <a
+                                href={MEETING_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group inline-flex items-center gap-3 px-8 py-4 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-base sm:text-lg font-bold rounded-2xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-purple-500/25"
+                            >
+                                <CalendarIcon className="w-6 h-6 text-white/80 group-hover:text-white transition-colors" />
+                                Schedule a Meeting
+                            </a>
+                            <p className="text-white/20 text-xs mt-6 font-manrope">Free to get started. No commitment required.</p>
+                        </div>
                     </div>
                 </ScrollReveal>
             </section>
 
             {/* ── Footer ─────────────────────────────────────────────────── */}
-            <footer className="border-t border-white/5 px-5 py-8 text-center">
+            <footer className="relative border-t border-white/5 px-5 py-8 text-center">
                 <Link to="/" className="inline-block mb-4">
                     <img src="/clubin-logo-header.webp" alt="Clubin" className="h-10 w-auto mx-auto opacity-60 hover:opacity-100 transition-opacity" />
                 </Link>
-                <p className="text-white/20 text-xs">© {new Date().getFullYear()} Clubin. All rights reserved.</p>
+                <p className="text-white/20 text-xs font-manrope">© {new Date().getFullYear()} Clubin. All rights reserved.</p>
             </footer>
         </div>
     );
