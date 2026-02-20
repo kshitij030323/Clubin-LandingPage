@@ -141,6 +141,19 @@ async function generateSitemap() {
     const outPath = path.join(process.cwd(), 'public', 'sitemap.xml');
     fs.writeFileSync(outPath, xml, 'utf-8');
 
+    // Update robots.txt sitemap version to bust Google's cache on each build
+    const robotsPath = path.join(process.cwd(), 'public', 'robots.txt');
+    if (fs.existsSync(robotsPath)) {
+        let robots = fs.readFileSync(robotsPath, 'utf-8');
+        const version = today.replace(/-/g, '');
+        robots = robots.replace(
+            /Sitemap:\s*https:\/\/clubin\.co\.in\/sitemap\.xml\S*/,
+            `Sitemap: https://clubin.co.in/sitemap.xml?v=${version}`
+        );
+        fs.writeFileSync(robotsPath, robots, 'utf-8');
+        console.log(`Updated robots.txt sitemap version to ?v=${version}`);
+    }
+
     console.log(`Sitemap generated with ${urls.length} URLs -> ${outPath}`);
     console.log(`  - Static: 2`);
     console.log(`  - Cities: ${CITIES.length}`);
