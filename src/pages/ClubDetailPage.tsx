@@ -3,7 +3,16 @@ import { Skeleton } from '../components/Skeleton';
 import { VenueImageSlideshow } from '../components/VenueImageSlideshow';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Club, Event } from '../types';
+import { CITIES } from '../types';
 import { fetchClubDetails, fetchEventsByClubId, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
+
+/** Extract city slug from location like "Malleshwaram, Bengaluru" → "bengaluru" */
+function getCitySlug(location: string): string {
+    const parts = location.split(',');
+    const city = parts[parts.length - 1].trim();
+    const match = CITIES.find(c => c.id.toLowerCase() === city.toLowerCase());
+    return (match ? match.id : city).toLowerCase().replace(/\s+/g, '-');
+}
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, ExternalLink, Share2, Check, Copy, ChevronDown, ChevronUp, Instagram, User, Music } from 'lucide-react';
 
@@ -16,7 +25,7 @@ function getTodayDateString(): string {
 }
 
 export function ClubDetailPage() {
-    const { clubId, code } = useParams<{ city: string; clubId: string; code: string }>();
+    const { city, clubId, code } = useParams<{ city: string; clubId: string; code: string }>();
     const navigate = useNavigate();
     const [club, setClub] = useState<Club | null>(null);
 
@@ -77,12 +86,14 @@ export function ClubDetailPage() {
         loadClub();
     }, [clubId, code]);
 
-    // SEO
+    // SEO — use city slug (from URL param or derived from location) for clean canonical URLs
+    const citySlug = city || (club ? getCitySlug(club.location) : '');
+    const clubUrl = club ? `https://clubin.co.in/clubs/${citySlug}/${club.id}` : undefined;
     useSEO({
         title: club ? `${club.name} - Nightclub in ${club.location} | Clubin` : 'Club | Clubin',
         description: club ? `${club.name} in ${club.location}. ${club.description || 'Book guestlists and VIP tables on Clubin.'}` : undefined,
         image: club?.imageUrl,
-        url: club ? `https://clubin.co.in/clubs/${encodeURIComponent(club.location)}/${club.id}` : undefined,
+        url: clubUrl,
         structuredData: club ? [
             {
                 '@context': 'https://schema.org',
@@ -96,7 +107,7 @@ export function ClubDetailPage() {
                 },
                 image: club.imageUrl,
                 description: club.description,
-                url: `https://clubin.co.in/clubs/${encodeURIComponent(club.location)}/${club.id}`,
+                url: clubUrl,
                 ...(club.mapUrl ? { hasMap: club.mapUrl } : {}),
                 ...(club.instagramUrl ? { sameAs: [club.instagramUrl] } : {}),
             },
@@ -106,7 +117,7 @@ export function ClubDetailPage() {
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://clubin.co.in/' },
                     { '@type': 'ListItem', position: 2, name: 'Clubs', item: 'https://clubin.co.in/clubs' },
-                    { '@type': 'ListItem', position: 3, name: club.location, item: `https://clubin.co.in/clubs/${encodeURIComponent(club.location)}` },
+                    { '@type': 'ListItem', position: 3, name: club.location, item: `https://clubin.co.in/clubs/${citySlug}` },
                     { '@type': 'ListItem', position: 4, name: club.name },
                 ],
             },

@@ -33,6 +33,14 @@ function todayISO() {
     return new Date().toISOString().split('T')[0];
 }
 
+/** Extract city slug from location like "Malleshwaram, Bengaluru" -> "bengaluru" */
+function getCitySlug(location) {
+    const parts = location.split(',');
+    const city = parts[parts.length - 1].trim();
+    const match = CITIES.find(c => c.toLowerCase() === city.toLowerCase());
+    return (match || city).toLowerCase().replace(/\s+/g, '-');
+}
+
 async function generateSitemap() {
     console.log('Fetching data from API...');
 
@@ -67,19 +75,20 @@ async function generateSitemap() {
     urls.push({ loc: `${SITE_URL}/`, changefreq: 'weekly', priority: '1.0', lastmod: today });
     urls.push({ loc: `${SITE_URL}/clubs`, changefreq: 'weekly', priority: '0.9', lastmod: today });
 
-    // 2. City pages
+    // 2. City pages — use lowercase slugs matching React routes
     for (const city of CITIES) {
+        const slug = city.toLowerCase().replace(/\s+/g, '-');
         urls.push({
-            loc: `${SITE_URL}/clubs/${encodeURIComponent(city)}`,
+            loc: `${SITE_URL}/clubs/${slug}`,
             changefreq: 'daily',
             priority: '0.8',
             lastmod: today,
         });
     }
 
-    // 3. Club detail pages
+    // 3. Club detail pages — use city slug, not raw location
     for (const club of clubs) {
-        const citySlug = encodeURIComponent(club.location || 'India');
+        const citySlug = getCitySlug(club.location || 'India');
         urls.push({
             loc: `${SITE_URL}/clubs/${citySlug}/${club.id}`,
             changefreq: 'weekly',
@@ -131,6 +140,19 @@ async function generateSitemap() {
     const path = await import('path');
     const outPath = path.join(process.cwd(), 'public', 'sitemap.xml');
     fs.writeFileSync(outPath, xml, 'utf-8');
+
+    // Update robots.txt sitemap version to bust Google's cache on each build
+    const robotsPath = path.join(process.cwd(), 'public', 'robots.txt');
+    if (fs.existsSync(robotsPath)) {
+        let robots = fs.readFileSync(robotsPath, 'utf-8');
+        const version = today.replace(/-/g, '');
+        robots = robots.replace(
+            /Sitemap:\s*https:\/\/clubin\.co\.in\/sitemap\.xml\S*/,
+            `Sitemap: https://clubin.co.in/sitemap.xml?v=${version}`
+        );
+        fs.writeFileSync(robotsPath, robots, 'utf-8');
+        console.log(`Updated robots.txt sitemap version to ?v=${version}`);
+    }
 
     console.log(`Sitemap generated with ${urls.length} URLs -> ${outPath}`);
     console.log(`  - Static: 2`);

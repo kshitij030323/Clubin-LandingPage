@@ -5,8 +5,8 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-# Sitemap
-Sitemap: https://clubin.co.in/sitemap.xml
+# Sitemap — versioned to avoid Google cache issues
+Sitemap: https://clubin.co.in/sitemap.xml?v=3
 
 # Allow all major search engines
 User-agent: Googlebot
