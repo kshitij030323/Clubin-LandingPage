@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Clubin - Best Nightclub & Party Event Entry App</title>
   <meta name="description" content="Skip the queue at the best clubs in India. Get on the guest list and walk in stress-free. Download Clubin now!" />
+  <meta name="robots" content="noindex, follow" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
@@ -21,16 +22,15 @@
   <meta name="twitter:image" content="https://clubin.co.in/clubin-logo-og.png" />
 
   <script>
-    // GitHub Pages SPA redirect workaround
-    // Stores the original path in sessionStorage, then redirects to index.html
-    // so React Router can handle the route client-side
-    var pathSegmentsToKeep = 0;
-    var l = window.location;
-    sessionStorage.setItem('spa-redirect', l.pathname + l.search + l.hash);
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/'
-    );
+    // GitHub Pages SPA routing: store the intended path then silently swap
+    // the URL back to / so the React app bootstraps, then restores the path
+    // via history.replaceState in index.html — avoids a detectable JS redirect.
+    var dest = window.location.pathname + window.location.search + window.location.hash;
+    sessionStorage.setItem('spa-redirect', dest);
+    // Replace the visible URL with root so the browser fetches index.html assets,
+    // but don't trigger a navigation so crawlers don't see a redirect chain.
+    history.replaceState(null, '', '/');
+    window.location.replace('/');
   </script>
 </head>
 <body>

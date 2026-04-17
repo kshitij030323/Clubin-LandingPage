@@ -6,7 +6,7 @@ Allow: /
 Disallow: /api/
 
 # Sitemap — versioned to avoid Google cache issues
-Sitemap: https://clubin.co.in/sitemap.xml?v=3
+Sitemap: https://clubin.co.in/sitemap.xml?v=20260417
 
 # Allow all major search engines
 User-agent: Googlebot

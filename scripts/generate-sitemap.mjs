@@ -33,12 +33,23 @@ function todayISO() {
     return new Date().toISOString().split('T')[0];
 }
 
+// Aliases for location strings that don't exactly match a CITIES entry
+const CITY_ALIASES = {
+    'new delhi': 'Delhi NCR',
+    'delhi': 'Delhi NCR',
+    'gurugram': 'Delhi NCR',
+    'gurgaon': 'Delhi NCR',
+    'noida': 'Delhi NCR',
+    'faridabad': 'Delhi NCR',
+};
+
 /** Extract city slug from location like "Malleshwaram, Bengaluru" -> "bengaluru" */
 function getCitySlug(location) {
     const parts = location.split(',');
-    const city = parts[parts.length - 1].trim();
-    const match = CITIES.find(c => c.toLowerCase() === city.toLowerCase());
-    return (match || city).toLowerCase().replace(/\s+/g, '-');
+    const city = parts[parts.length - 1].trim().toLowerCase();
+    const alias = CITY_ALIASES[city];
+    const match = CITIES.find(c => c.toLowerCase() === (alias || city).toLowerCase());
+    return (match || alias || city).toLowerCase().replace(/\s+/g, '-');
 }
 
 async function generateSitemap() {
@@ -72,15 +83,18 @@ async function generateSitemap() {
     const urls = [];
 
     // 1. Static pages
+    // Root is the only URL without a trailing slash — all others are pre-rendered
+    // as dist/<path>/index.html so GitHub Pages serves them at <path>/ and
+    // 301-redirects the no-slash form. Sitemap must match the final destination.
     urls.push({ loc: `${SITE_URL}/`, changefreq: 'weekly', priority: '1.0', lastmod: today });
-    urls.push({ loc: `${SITE_URL}/list-your-club`, changefreq: 'monthly', priority: '0.8', lastmod: today });
-    urls.push({ loc: `${SITE_URL}/clubs`, changefreq: 'weekly', priority: '0.9', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/list-your-club/`, changefreq: 'monthly', priority: '0.8', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/clubs/`, changefreq: 'weekly', priority: '0.9', lastmod: today });
 
     // 2. City pages — use lowercase slugs matching React routes
     for (const city of CITIES) {
         const slug = city.toLowerCase().replace(/\s+/g, '-');
         urls.push({
-            loc: `${SITE_URL}/clubs/${slug}`,
+            loc: `${SITE_URL}/clubs/${slug}/`,
             changefreq: 'daily',
             priority: '0.8',
             lastmod: today,
@@ -91,17 +105,19 @@ async function generateSitemap() {
     for (const club of clubs) {
         const citySlug = getCitySlug(club.location || 'India');
         urls.push({
-            loc: `${SITE_URL}/clubs/${citySlug}/${club.id}`,
+            loc: `${SITE_URL}/clubs/${citySlug}/${club.id}/`,
             changefreq: 'weekly',
             priority: '0.7',
             lastmod: club.updatedAt ? club.updatedAt.split('T')[0] : today,
         });
     }
 
-    // 4. Event pages
-    for (const event of events) {
+    // 4. Upcoming event pages only — past events are removed to avoid stale URLs
+    const now = new Date();
+    const upcomingEvents = events.filter(e => new Date(e.date || e.startTime || e.updatedAt) >= now);
+    for (const event of upcomingEvents) {
         urls.push({
-            loc: `${SITE_URL}/events/${event.id}`,
+            loc: `${SITE_URL}/events/${event.id}/`,
             changefreq: 'daily',
             priority: '0.8',
             lastmod: event.updatedAt ? event.updatedAt.split('T')[0] : today,
@@ -111,7 +127,7 @@ async function generateSitemap() {
     // 5. Promoter pages
     for (const id of promoterIds) {
         urls.push({
-            loc: `${SITE_URL}/promoters/${id}`,
+            loc: `${SITE_URL}/promoters/${id}/`,
             changefreq: 'weekly',
             priority: '0.6',
             lastmod: today,
@@ -159,7 +175,7 @@ async function generateSitemap() {
     console.log(`  - Static: 2`);
     console.log(`  - Cities: ${CITIES.length}`);
     console.log(`  - Clubs: ${clubs.length}`);
-    console.log(`  - Events: ${events.length}`);
+    console.log(`  - Events: ${upcomingEvents.length} upcoming (${events.length - upcomingEvents.length} past skipped)`);
     console.log(`  - Promoters: ${promoterIds.size}`);
 }
 

@@ -28,15 +28,25 @@ OG_IMAGE = 'https://clubin.co.in/clubin-logo-og.png'
 
 CITIES = ['Bengaluru', 'Delhi NCR', 'Goa', 'Mumbai', 'Pune', 'Hyderabad', 'Chandigarh', 'Jaipur', 'Chennai']
 
+CITY_ALIASES = {
+    'new delhi': 'Delhi NCR',
+    'delhi': 'Delhi NCR',
+    'gurugram': 'Delhi NCR',
+    'gurgaon': 'Delhi NCR',
+    'noida': 'Delhi NCR',
+    'faridabad': 'Delhi NCR',
+}
+
 
 def get_city_slug(location):
     """Extract city slug from location like 'Malleshwaram, Bengaluru' -> 'bengaluru'."""
     parts = location.split(',')
-    city = parts[-1].strip() if parts else location
+    city = parts[-1].strip().lower() if parts else location.lower()
+    resolved = CITY_ALIASES.get(city, city)
     for known in CITIES:
-        if known.lower() == city.lower():
+        if known.lower() == resolved.lower():
             return known.lower().replace(' ', '-')
-    return city.lower().replace(' ', '-').replace(',', '')
+    return resolved.replace(' ', '-').replace(',', '')
 
 
 def fetch_json(url):
