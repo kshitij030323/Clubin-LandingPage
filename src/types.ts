@@ -129,11 +129,12 @@ export interface City {
     id: string;
     label: string;
     icon: string; // Icon name for Lucide
+    searchKey?: string; // Override for API city filter when it differs from id
 }
 
 export const CITIES: City[] = [
     { id: 'Bengaluru', label: 'Bengaluru', icon: 'building-2' },
-    { id: 'Delhi NCR', label: 'Delhi/NCR', icon: 'landmark' },
+    { id: 'Delhi NCR', label: 'Delhi/NCR', icon: 'landmark', searchKey: 'Delhi' },
     { id: 'Goa', label: 'Goa', icon: 'palmtree' },
     { id: 'Mumbai', label: 'Mumbai', icon: 'building' },
     { id: 'Pune', label: 'Pune', icon: 'castle' },

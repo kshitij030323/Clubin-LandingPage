@@ -29,7 +29,7 @@ export function ClubsListPage() {
         (c) => c.id.toLowerCase().replace(/\s+/g, '-') === city?.toLowerCase()
     );
     const displayCity = cityData?.label || city || 'All Cities';
-    const cityParam = cityData?.id || city;
+    const cityParam = cityData?.searchKey || cityData?.id || city;
 
     // SEO — emit BreadcrumbList as standalone JSON-LD, use URL slug for canonical
     const citySlug = city || '';
