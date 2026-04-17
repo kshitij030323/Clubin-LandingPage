@@ -4,10 +4,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { LocationSelectPage, ClubsListPage, ClubDetailPage, EventDetailPage, PromoterDetailPage, ListYourClubPage, TermsOfServicePage, PrivacyPolicyPage } from './pages'
+import { ScrollToTop } from './components/ScrollToTop.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Home page (existing landing page) */}
         <Route path="/" element={<App />} />

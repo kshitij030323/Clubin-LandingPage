@@ -17,7 +17,7 @@ export function Footer() {
                             Experience nightlife without the hassle. The ultimate platform to manage events, guestlists, and reach thousands of users seamlessly.
                         </p>
                         <div className="flex items-center gap-4">
-                            <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
+                            <a href="https://www.instagram.com/clubin.co.in" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
                                 <Instagram className="w-4 h-4" />
                             </a>
                             <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">

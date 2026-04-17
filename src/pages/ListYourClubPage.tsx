@@ -12,7 +12,8 @@ import {
     IndianRupee,
     WalletCards,
     Users,
-    TrendingUp
+    TrendingUp,
+    Instagram
 } from 'lucide-react';
 import { Footer } from '../components/Footer';
 
@@ -189,6 +190,16 @@ export function ListYourClubPage() {
 
     const [countUp, setCountUp] = useState(false);
     const statsRef = useRef<HTMLDivElement>(null);
+
+    // Load Behold Instagram widget script
+    useEffect(() => {
+        if (document.getElementById('behold-script')) return;
+        const script = document.createElement('script');
+        script.id = 'behold-script';
+        script.src = 'https://w.behold.so/widget.js';
+        script.type = 'module';
+        document.head.appendChild(script);
+    }, []);
 
     useEffect(() => {
         const el = statsRef.current;
@@ -553,6 +564,58 @@ export function ListYourClubPage() {
                             </div>
                         </div>
                     </ScrollReveal>
+                </section>
+
+                {/* ── Instagram Showcase ───────────────────────────────── */}
+                <section className="relative px-6 py-24 md:py-32">
+                    {/* Ambient glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#e1306c]/5 rounded-full blur-[140px] pointer-events-none" />
+
+                    <div className="max-w-6xl mx-auto relative z-10">
+                        {/* Header */}
+                        <ScrollReveal>
+                            <div className="text-center mb-16">
+                                <span
+                                    className="text-xs font-bold uppercase tracking-[0.2em] font-manrope"
+                                    style={{ background: 'linear-gradient(90deg, #f58529, #dd2a7b, #8134af)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                                >
+                                    Follow Us
+                                </span>
+                                <h2 className="text-4xl md:text-6xl font-inter font-bold tracking-tight mt-4">
+                                    We're live{' '}
+                                    <span className="font-instrument italic font-normal" style={{ background: 'linear-gradient(90deg, #f58529, #dd2a7b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                                        on Instagram.
+                                    </span>
+                                </h2>
+                                <p className="text-white/40 text-base md:text-lg font-manrope font-light mt-5 max-w-xl mx-auto leading-relaxed">
+                                    Stay in the loop — event drops, nightlife moments, and exclusive previews.
+                                </p>
+                            </div>
+                        </ScrollReveal>
+
+                        {/* Behold Instagram feed widget — replace YOUR_WIDGET_ID below */}
+                        <div className="mb-12 rounded-[2rem] overflow-hidden">
+                            {/* @ts-expect-error behold widget custom element */}
+                            <behold-widget feed-id="UwwXSRalU3kGAGmBCEdB" />
+                        </div>
+
+                        {/* Follow CTA */}
+                        <ScrollReveal delay={200}>
+                            <div className="flex flex-col items-center gap-4">
+                                <a
+                                    href="https://www.instagram.com/clubin.co.in"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group inline-flex items-center gap-3 px-8 py-4 text-white text-base font-bold rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl"
+                                    style={{ background: 'linear-gradient(135deg, #f58529 0%, #dd2a7b 50%, #8134af 100%)', boxShadow: '0 8px 32px rgba(221,42,123,0.35)' }}
+                                >
+                                    <Instagram className="w-5 h-5 text-white/90" />
+                                    Follow @clubin.co.in
+                                </a>
+                                <p className="text-white/30 text-xs font-manrope tracking-wide">Join us on Instagram for the latest drops</p>
+                            </div>
+                        </ScrollReveal>
+                    </div>
                 </section>
 
                 {/* ── Footer ───────────────────────────────────────────── */}
