@@ -64,6 +64,23 @@ const Star = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?
     </svg>
 );
 
+const InstagramIcon = ({ className, strokeWidth = 2 }: { className?: string; strokeWidth?: number }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+);
+
 // --- Components ---
 
 /**
@@ -417,6 +434,15 @@ const MorphingFeatureSection = () => {
 // --- Main App Component ---
 
 const App = () => {
+    useEffect(() => {
+        if (document.getElementById('behold-script')) return;
+        const script = document.createElement('script');
+        script.id = 'behold-script';
+        script.src = 'https://w.behold.so/widget.js';
+        script.type = 'module';
+        document.head.appendChild(script);
+    }, []);
+
     return (
         <div className="min-h-screen font-manrope bg-black text-white selection:bg-[#7b39fc] selection:text-white">
             <BackgroundVideo />
@@ -480,6 +506,51 @@ const App = () => {
 
                 {/* Morphing Features Section */}
                 <MorphingFeatureSection />
+
+                {/* Instagram Feed — fourth card in the morphing section visual flow */}
+                <div className="relative w-full z-30 px-4 md:px-6 mt-12 lg:mt-20">
+                    <div className="max-w-4xl mx-auto">
+                        <ScrollReveal>
+                            <div className="relative p-6 md:p-10 rounded-3xl bg-gradient-to-b from-[rgba(85,80,110,0.4)] to-black border border-[rgba(164,132,215,0.3)] backdrop-blur-xl shadow-2xl overflow-hidden">
+                                <div className="flex flex-col items-center text-center mb-6 md:mb-8">
+                                    <div className="inline-flex w-11 h-11 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-white/10 to-transparent border border-white/10 items-center justify-center shadow-lg backdrop-blur-md mb-4">
+                                        <InstagramIcon className="w-5 h-5 md:w-6 md:h-6 text-white drop-shadow-md" strokeWidth={1.5} />
+                                    </div>
+                                    <h2 className="text-2xl md:text-4xl font-inter font-bold text-white mb-2 leading-[1.1]">
+                                        Live.{' '}
+                                        <span
+                                            className="font-instrument italic font-normal"
+                                            style={{ background: 'linear-gradient(90deg, #f58529, #dd2a7b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                                        >
+                                            on Instagram.
+                                        </span>
+                                    </h2>
+                                    <p className="text-sm md:text-base font-manrope text-white/60 leading-relaxed font-light max-w-md">
+                                        Event drops, nightlife moments, and exclusive previews.
+                                    </p>
+                                </div>
+
+                                <div className="rounded-2xl overflow-hidden mb-6 max-w-2xl mx-auto">
+                                    {/* @ts-expect-error behold widget custom element */}
+                                    <behold-widget feed-id="UwwXSRalU3kGAGmBCEdB" />
+                                </div>
+
+                                <div className="flex justify-center">
+                                    <a
+                                        href="https://www.instagram.com/clubin.co.in"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2.5 px-6 py-3 text-white text-sm font-bold rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
+                                        style={{ background: 'linear-gradient(135deg, #f58529 0%, #dd2a7b 50%, #8134af 100%)', boxShadow: '0 8px 24px rgba(221,42,123,0.3)' }}
+                                    >
+                                        <InstagramIcon className="w-4 h-4 text-white/95" strokeWidth={2} />
+                                        Follow @clubin.co.in
+                                    </a>
+                                </div>
+                            </div>
+                        </ScrollReveal>
+                    </div>
+                </div>
 
                 {/* Final CTA Section */}
                 <div className="px-6 md:px-12 min-h-[60vh] flex flex-col justify-center items-center text-center max-w-4xl mx-auto mt-20">
