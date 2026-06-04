@@ -172,8 +172,8 @@ export function DeleteAccountPage() {
             setError('Please enter your name.');
             return;
         }
-        if (digits.length < 10) {
-            setError('Please enter a valid phone number.');
+        if (digits.length !== 10) {
+            setError('Please enter a valid 10-digit phone number.');
             return;
         }
 
@@ -257,10 +257,17 @@ export function DeleteAccountPage() {
                                         id="delete-phone"
                                         type="tel"
                                         value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
+                                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                        onKeyDown={(e) => {
+                                            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+                                            if (allowed.includes(e.key) || e.metaKey || e.ctrlKey) return;
+                                            if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+                                        }}
                                         placeholder="10-digit phone number"
                                         autoComplete="tel"
-                                        inputMode="tel"
+                                        inputMode="numeric"
+                                        pattern="[0-9]{10}"
+                                        maxLength={10}
                                         className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 font-manrope text-base focus:outline-none focus:border-[#a484d7]/60 focus:bg-white/[0.07] transition-all duration-300"
                                     />
                                     <p className="text-xs text-white/40 font-manrope mt-1">
