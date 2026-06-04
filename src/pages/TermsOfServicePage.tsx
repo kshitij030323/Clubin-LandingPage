@@ -163,6 +163,25 @@ export function TermsOfServicePage() {
                             <p>If you have any questions about these Terms, please contact us at <a href="mailto:hello@clubin.in">hello@clubin.in</a>.</p>
                         </div>
                     </ScrollReveal>
+
+                    <ScrollReveal delay={250}>
+                        <div className="mt-10 p-6 md:p-8 rounded-[2rem] bg-[rgba(12,10,22,0.65)] backdrop-blur-[40px] border border-white/[0.06] shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                            <div className="absolute -top-10 -right-10 w-48 h-48 bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
+                            <div className="relative z-10">
+                                <h3 className="text-xl md:text-2xl font-inter font-bold text-white mb-1">Want to delete your account?</h3>
+                                <p className="text-white/60 text-sm md:text-base font-manrope font-light leading-relaxed max-w-md">
+                                    Request permanent deletion of your account and data. We'll process it within 30 days as per our retention policy.
+                                </p>
+                            </div>
+                            <Link
+                                to="/delete-account"
+                                className="relative z-10 shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#dc2626] to-[#b91c1c] hover:from-[#ef4444] hover:to-[#dc2626] text-white text-sm font-bold rounded-xl border border-red-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-red-900/30"
+                            >
+                                Delete your account
+                            </Link>
+                        </div>
+                    </ScrollReveal>
                 </main>
 
                 <Footer />
