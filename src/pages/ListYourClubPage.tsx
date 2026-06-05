@@ -155,7 +155,8 @@ const WHY = [
     { Icon: IndianRupee, title: 'Instant Settlements', desc: 'No waiting for payouts. Every booking goes directly to your account minus our small fee. Powered by reliable payment tech.', accent: '#f87b52' },
 ];
 
-const MEETING_URL = 'https://calendar.google.com/calendar/u/0/r/eventedit?text=Clubin+Club+Partnership+Meeting&details=Meeting+to+discuss+listing+your+club+on+Clubin+app.&location=Google+Meet';
+// Internal page embedding the Google Calendar appointment scheduling widget
+const SCHEDULE_PATH = '/list-your-club/schedule';
 
 // ─── Glass card class helpers ─────────────────────────────────────────────────
 
@@ -247,14 +248,12 @@ export function ListYourClubPage() {
                         >
                             Browse Clubs
                         </Link>
-                        <a
-                            href={MEETING_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            to={SCHEDULE_PATH}
                             className="px-5 py-2.5 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-xs sm:text-sm font-semibold rounded-xl border border-purple-400/30 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-purple-500/20"
                         >
                             Schedule Meeting
-                        </a>
+                        </Link>
                     </div>
                 </nav>
 
@@ -284,15 +283,13 @@ export function ListYourClubPage() {
                     </ScrollReveal>
 
                     <ScrollReveal delay={450}>
-                        <a
-                            href={MEETING_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            to={SCHEDULE_PATH}
                             className="group inline-flex items-center gap-3 px-8 py-4 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-base sm:text-lg font-bold rounded-2xl border border-purple-400/40 transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl shadow-purple-500/25"
                         >
                             <CalendarCheck className="w-5 h-5 text-white/90" strokeWidth={2.5} />
                             Schedule a Meeting
-                        </a>
+                        </Link>
                     </ScrollReveal>
 
                     {/* Scroll hint aligned with landing page */}
@@ -548,15 +545,13 @@ export function ListYourClubPage() {
                                 <p className="text-white/50 text-lg md:text-xl max-w-xl mx-auto mb-10 leading-relaxed font-manrope font-light">
                                     Join the premium network of clubs on Clubin. Schedule a quick meeting and we'll have you live within 48 hours.
                                 </p>
-                                <a
-                                    href={MEETING_URL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                <Link
+                                    to={SCHEDULE_PATH}
                                     className="group inline-flex items-center gap-3 px-10 py-5 bg-[#7b39fc] hover:bg-[#8b4afc] text-white text-lg font-bold rounded-2xl border border-purple-400/40 transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl shadow-purple-500/30"
                                 >
                                     <CalendarCheck className="w-6 h-6 text-white/90" strokeWidth={2.5} />
                                     Schedule a Meeting
-                                </a>
+                                </Link>
                                 <p className="text-white/40 text-sm mt-8 font-manrope flex items-center justify-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
                                     Free to get started. No commitment required.

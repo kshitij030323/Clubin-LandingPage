@@ -49,8 +49,11 @@ export function useSEO({ title, description, image, url, type = 'website', struc
         setMetaTag('twitter:card', image ? 'summary_large_image' : 'summary');
         setMetaTag('twitter:title', title);
 
-        // Canonical URL & OG URL
-        const pageUrl = url || `https://clubin.co.in${window.location.pathname}`;
+        // Canonical URL & OG URL — always trailing slash: GitHub Pages serves
+        // pre-rendered pages at <path>/ and 301-redirects the no-slash form,
+        // so the canonical must match the final URL (and the sitemap).
+        const rawUrl = url || `https://clubin.co.in${window.location.pathname}`;
+        const pageUrl = /[?#]/.test(rawUrl) || rawUrl.endsWith('/') ? rawUrl : `${rawUrl}/`;
         setMetaTag('og:url', pageUrl, true);
         setMetaTag('twitter:url', pageUrl);
 

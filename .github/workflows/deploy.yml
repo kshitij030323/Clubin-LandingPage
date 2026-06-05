@@ -4,6 +4,16 @@ on:
   push:
     branches: ['main']
   workflow_dispatch:
+  # Rebuild twice a day so new clubs/events get pre-rendered into static HTML
+  # and added to the sitemap without needing a code push (UTC times = 06:00 and 18:00 IST)
+  schedule:
+    - cron: '30 0 * * *'
+    - cron: '30 12 * * *'
+  # Allow the backend/API to trigger an immediate rebuild when content changes:
+  # curl -X POST https://api.github.com/repos/<owner>/<repo>/dispatches \
+  #   -H "Authorization: Bearer <token>" -d '{"event_type":"content-update"}'
+  repository_dispatch:
+    types: [content-update]
 
 permissions:
   contents: read

@@ -90,7 +90,7 @@ export function ClubDetailPage() {
     const citySlug = city || (club ? getCitySlug(club.location) : '');
     const clubUrl = club ? `https://clubin.co.in/clubs/${citySlug}/${club.id}` : undefined;
     useSEO({
-        title: club ? `${club.name} - Nightclub in ${club.location} | Clubin` : 'Club | Clubin',
+        title: club ? `${club.name} - Nightclub in ${club.location} | Guestlist & Tables | Clubin` : 'Club | Clubin',
         description: club ? `${club.name} in ${club.location}. ${club.description || 'Book guestlists and VIP tables on Clubin.'}` : undefined,
         image: club?.imageUrl,
         url: clubUrl,

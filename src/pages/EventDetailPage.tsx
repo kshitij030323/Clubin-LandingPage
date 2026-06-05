@@ -71,7 +71,7 @@ export function EventDetailPage() {
     // SEO
     const isGuestlistOpen = event?.guestlistStatus === 'open' || event?.guestlistStatus === 'closing';
     useSEO({
-        title: event ? `${event.title} at ${event.club} - ${formatDate(event.date)} | Clubin` : 'Event | Clubin',
+        title: event ? `${event.title} at ${event.club} - ${formatDate(event.date)} | Guestlist & Tickets | Clubin` : 'Event | Clubin',
         description: event ? `${event.title} at ${event.club} on ${formatDate(event.date)}. ${event.description?.substring(0, 150) || 'Book your spot on Clubin!'}` : undefined,
         image: event?.imageUrl,
         url: event ? `https://clubin.co.in/events/${event.id}` : undefined,

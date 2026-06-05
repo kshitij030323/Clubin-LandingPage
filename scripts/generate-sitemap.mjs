@@ -88,7 +88,11 @@ async function generateSitemap() {
     // 301-redirects the no-slash form. Sitemap must match the final destination.
     urls.push({ loc: `${SITE_URL}/`, changefreq: 'weekly', priority: '1.0', lastmod: today });
     urls.push({ loc: `${SITE_URL}/list-your-club/`, changefreq: 'monthly', priority: '0.8', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/list-your-club/schedule/`, changefreq: 'monthly', priority: '0.6', lastmod: today });
     urls.push({ loc: `${SITE_URL}/clubs/`, changefreq: 'weekly', priority: '0.9', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/terms/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/privacy/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/delete-account/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
 
     // 2. City pages — use lowercase slugs matching React routes
     for (const city of CITIES) {
@@ -102,13 +106,16 @@ async function generateSitemap() {
     }
 
     // 3. Club detail pages — use city slug, not raw location
+    //    Include images (image sitemap extension) for Google Images visibility
     for (const club of clubs) {
         const citySlug = getCitySlug(club.location || 'India');
+        const images = [club.imageUrl, ...(club.venueImages || []).slice(0, 3)].filter(Boolean);
         urls.push({
             loc: `${SITE_URL}/clubs/${citySlug}/${club.id}/`,
             changefreq: 'weekly',
             priority: '0.7',
             lastmod: club.updatedAt ? club.updatedAt.split('T')[0] : today,
+            images,
         });
     }
 
@@ -121,6 +128,7 @@ async function generateSitemap() {
             changefreq: 'daily',
             priority: '0.8',
             lastmod: event.updatedAt ? event.updatedAt.split('T')[0] : today,
+            images: [event.imageUrl].filter(Boolean),
         });
     }
 
@@ -137,6 +145,7 @@ async function generateSitemap() {
     // Build XML
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`;
+    xml += `        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"\n`;
     xml += `        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n`;
     xml += `        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9\n`;
     xml += `        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n\n`;
@@ -147,6 +156,9 @@ async function generateSitemap() {
         xml += `    <lastmod>${url.lastmod}</lastmod>\n`;
         xml += `    <changefreq>${url.changefreq}</changefreq>\n`;
         xml += `    <priority>${url.priority}</priority>\n`;
+        for (const img of url.images || []) {
+            xml += `    <image:image><image:loc>${escapeXml(img)}</image:loc></image:image>\n`;
+        }
         xml += `  </url>\n`;
     }
 
@@ -172,7 +184,7 @@ async function generateSitemap() {
     }
 
     console.log(`Sitemap generated with ${urls.length} URLs -> ${outPath}`);
-    console.log(`  - Static: 2`);
+    console.log(`  - Static: 7`);
     console.log(`  - Cities: ${CITIES.length}`);
     console.log(`  - Clubs: ${clubs.length}`);
     console.log(`  - Events: ${upcomingEvents.length} upcoming (${events.length - upcomingEvents.length} past skipped)`);

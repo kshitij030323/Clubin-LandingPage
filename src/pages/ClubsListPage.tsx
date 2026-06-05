@@ -34,7 +34,7 @@ export function ClubsListPage() {
     // SEO — emit BreadcrumbList as standalone JSON-LD, use URL slug for canonical
     const citySlug = city || '';
     useSEO({
-        title: `Best Nightclubs in ${displayCity} | Clubin`,
+        title: `Best Nightclubs in ${displayCity} - Guestlist, Events & VIP Tables | Clubin`,
         description: `Discover the hottest nightclubs and party venues in ${displayCity}. Book guestlists and get VIP table reservations on Clubin.`,
         url: `https://clubin.co.in/clubs/${citySlug}`,
         structuredData: [

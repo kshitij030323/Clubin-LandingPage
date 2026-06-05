@@ -5,7 +5,14 @@ Pre-render script for GitHub Pages SPA.
 After `vite build`, this script:
 1. Fetches all clubs, events, and promoters from the API
 2. Creates index.html files for each route with proper SEO meta tags
+   AND real static HTML content inside #root (crawlers see full content
+   and internal links on the first wave, before any JS executes; React
+   replaces it when it mounts)
 3. Places them in dist/ so GitHub Pages serves 200 (not 404)
+
+Canonical URLs use a trailing slash: GitHub Pages serves
+dist/<path>/index.html at <path>/ and 301-redirects the no-slash form,
+so <path>/ is the real, final URL and must be what canonical/og:url say.
 
 Usage:
   python3 scripts/prerender.py           # fetches from API
@@ -16,10 +23,10 @@ import json
 import os
 import re
 import sys
-import shutil
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.request import urlopen, Request
-from urllib.parse import quote
 
 API_BASE = 'https://api.clubin.info/api'
 SITE_URL = 'https://clubin.co.in'
@@ -37,6 +44,34 @@ CITY_ALIASES = {
     'faridabad': 'Delhi NCR',
 }
 
+# Slim sitewide JSON-LD graph for subpages — the template's full @graph
+# (FAQPage, WebPage about the home page, etc.) only belongs on the home page.
+SLIM_GRAPH = {
+    '@context': 'https://schema.org',
+    '@graph': [
+        {
+            '@type': 'Organization',
+            '@id': f'{SITE_URL}/#organization',
+            'name': 'Clubin',
+            'url': SITE_URL,
+            'logo': {'@type': 'ImageObject', 'url': OG_IMAGE},
+        },
+        {
+            '@type': 'WebSite',
+            '@id': f'{SITE_URL}/#website',
+            'url': SITE_URL,
+            'name': 'Clubin - Best Nightclub & Party Event Entry App in India',
+            'publisher': {'@id': f'{SITE_URL}/#organization'},
+        },
+    ],
+}
+
+
+def page_url(path):
+    """Canonical URL for a route — always trailing slash (except root which is just '/')."""
+    path = path if path.endswith('/') else path + '/'
+    return f'{SITE_URL}{path}'
+
 
 def get_city_slug(location):
     """Extract city slug from location like 'Malleshwaram, Bengaluru' -> 'bengaluru'."""
@@ -47,6 +82,13 @@ def get_city_slug(location):
         if known.lower() == resolved.lower():
             return known.lower().replace(' ', '-')
     return resolved.replace(' ', '-').replace(',', '')
+
+
+def city_name_from_slug(slug):
+    for known in CITIES:
+        if known.lower().replace(' ', '-') == slug:
+            return known
+    return slug.replace('-', ' ').title()
 
 
 def fetch_json(url):
@@ -94,13 +136,20 @@ def read_template():
     if not index_path.exists():
         print(f'Error: {index_path} not found. Run `npm run build` first.')
         sys.exit(1)
-    return index_path.read_text()
+    return index_path.read_text(encoding='utf-8')
+
+
+def esc(s):
+    """Escape HTML entities for attribute values and text."""
+    return str(s).replace('&', '&amp;').replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
 
 
 def inject_meta(html, title, description, image=None, url=None, structured_data=None):
     """
     Replace default meta tags in the HTML template with page-specific ones.
     Supports structured_data as a single dict or a list of dicts.
+    Also swaps the home page's full JSON-LD @graph for a slim Organization
+    + WebSite graph (FAQPage/WebPage markup only belongs on the home page).
     """
     # Replace <title>
     html = re.sub(r'<title>[^<]*</title>', f'<title>{esc(title)}</title>', html, count=1)
@@ -136,6 +185,13 @@ def inject_meta(html, title, description, image=None, url=None, structured_data=
     if url:
         html = re.sub(r'<link rel="canonical" href="[^"]*"\s*/?>', f'<link rel="canonical" href="{esc(url)}" />', html, count=1)
 
+    # Swap the home page's full @graph for the slim sitewide graph
+    html = re.sub(
+        r'<script type="application/ld\+json">.*?</script>',
+        f'<script type="application/ld+json">{json.dumps(SLIM_GRAPH)}</script>',
+        html, count=1, flags=re.S
+    )
+
     # Add route-specific structured data before </head> (supports list of dicts)
     if structured_data:
         items = structured_data if isinstance(structured_data, list) else [structured_data]
@@ -148,23 +204,203 @@ def inject_meta(html, title, description, image=None, url=None, structured_data=
     return html
 
 
-def esc(s):
-    """Escape HTML entities for attribute values."""
-    return str(s).replace('&', '&amp;').replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
+# ─── Static body content (visible to crawlers before JS runs) ────────────────
+
+SEO_STYLE = (
+    '<style>'
+    '.seo-static{font-family:Manrope,Inter,system-ui,-apple-system,sans-serif;background:#0a0812;color:#fff;min-height:100vh;padding:40px 20px;line-height:1.65}'
+    '.seo-static .wrap{max-width:960px;margin:0 auto}'
+    '.seo-static h1{font-size:2rem;margin:0 0 12px;letter-spacing:-.02em}'
+    '.seo-static h2{font-size:1.35rem;margin:32px 0 12px;color:#a484d7}'
+    '.seo-static h3{font-size:1.05rem;margin:18px 0 4px}'
+    '.seo-static a{color:#a484d7}'
+    '.seo-static p{color:rgba(255,255,255,.78);margin:8px 0}'
+    '.seo-static ul{padding-left:20px;color:rgba(255,255,255,.78)}'
+    '.seo-static li{margin:6px 0}'
+    '.seo-static nav{margin-bottom:28px;font-size:.95rem}'
+    '.seo-static .muted{color:rgba(255,255,255,.5);font-size:.9rem}'
+    '.seo-static img{max-width:100%;border-radius:16px;margin:12px 0}'
+    '</style>'
+)
 
 
-def write_route(route_path, html):
+def link(href, text):
+    return f'<a href="{esc(href)}">{esc(text)}</a>'
+
+
+def route_path(path):
+    """Internal href with trailing slash (matches GH Pages canonical form)."""
+    return path if path.endswith('/') else path + '/'
+
+
+def body_wrap(inner, city_slugs_with_clubs=None):
+    """Wrap page content with sitewide nav + footer links (real crawlable <a> tags)."""
+    nav = (
+        '<nav>'
+        + link('/', 'Clubin') + ' &middot; '
+        + link('/clubs/', 'Browse Clubs') + ' &middot; '
+        + link('/list-your-club/', 'List Your Club')
+        + '</nav>'
+    )
+    city_links = ' &middot; '.join(
+        link(f'/clubs/{c.lower().replace(" ", "-")}/', f'Nightclubs in {c}') for c in CITIES
+    )
+    footer = (
+        '<h2>Explore Clubin</h2>'
+        f'<p>{city_links}</p>'
+        f'<p class="muted">{link("/terms/", "Terms of Service")} &middot; {link("/privacy/", "Privacy Policy")} &middot; '
+        f'{link("/list-your-club/", "Partner with Clubin")}</p>'
+    )
+    return SEO_STYLE + f'<div class="seo-static"><div class="wrap">{nav}{inner}{footer}</div></div>'
+
+
+def inject_body(html, body_html):
+    """Inject static content inside #root — React replaces it on mount."""
+    return re.sub(r'<div id="root">\s*</div>', f'<div id="root">{body_html}</div>', html, count=1)
+
+
+def write_route(route_path_str, html):
     """Write an index.html for a given route path."""
-    # route_path like '/clubs/bengaluru' -> dist/clubs/bengaluru/index.html
-    clean = route_path.strip('/')
+    clean = route_path_str.strip('/')
     if not clean:
-        return  # Skip root, already has index.html
-
+        return  # Root is written separately via write_home
     out_dir = DIST_DIR / clean
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_file = out_dir / 'index.html'
-    out_file.write_text(html)
+    (out_dir / 'index.html').write_text(html, encoding='utf-8')
 
+
+def write_home(html):
+    (DIST_DIR / 'index.html').write_text(html, encoding='utf-8')
+
+
+# ─── Data helpers ─────────────────────────────────────────────────────────────
+
+def event_date_str(event):
+    return (event.get('date') or '')[:10]
+
+
+def is_upcoming(event):
+    d = event_date_str(event)
+    if not d:
+        return False
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    return d >= today
+
+
+def fmt_date(iso_date):
+    """'2026-01-17' -> 'Sat, 17 Jan 2026'"""
+    try:
+        return datetime.strptime(iso_date, '%Y-%m-%d').strftime('%a, %d %b %Y')
+    except ValueError:
+        return iso_date
+
+
+def event_city_slug(event):
+    region = event.get('region') or event.get('location') or ''
+    return get_city_slug(region) if region else ''
+
+
+def event_price_text(event):
+    """Human-readable entry pricing for static content + meta descriptions."""
+    parts = []
+    for label, key in [('Stag', 'stagPrice'), ('Couple', 'couplePrice'), ('Ladies', 'ladiesPrice')]:
+        price = event.get(key) or 0
+        if price:
+            parts.append(f'{label} ₹{price}')
+    if parts:
+        return ' · '.join(parts)
+    if event.get('priceLabel'):
+        return event['priceLabel']
+    if event.get('price'):
+        return f'₹{event["price"]} Cover'
+    return 'Free guestlist'
+
+
+def event_times_iso(event):
+    """Build ISO start/end datetimes with IST offset; roll end to next day if it crosses midnight."""
+    date_str = event_date_str(event)
+    start_time = event.get('startTime')
+    end_time = event.get('endTime')
+    start_dt = f'{date_str}T{start_time}:00+05:30' if start_time else date_str
+    end_dt = date_str
+    if end_time:
+        end_date = date_str
+        if start_time and end_time <= start_time:
+            try:
+                end_date = (datetime.strptime(date_str, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
+            except ValueError:
+                pass
+        end_dt = f'{end_date}T{end_time}:00+05:30'
+    return start_dt, end_dt
+
+
+def event_list_html(evts, heading=None, limit=None):
+    """Crawlable list of event links with date/venue/price."""
+    if not evts:
+        return ''
+    evts = sorted(evts, key=event_date_str)
+    if limit:
+        evts = evts[:limit]
+    items = ''.join(
+        f'<li>{link(route_path("/events/" + e["id"]), e["title"])} '
+        f'<span class="muted">at {esc(e.get("club", ""))} — {esc(fmt_date(event_date_str(e)))} · {esc(event_price_text(e))}</span></li>'
+        for e in evts
+    )
+    head = f'<h2>{esc(heading)}</h2>' if heading else ''
+    return f'{head}<ul>{items}</ul>'
+
+
+def club_list_html(club_items, heading=None):
+    """Crawlable list of club links with location + description."""
+    if not club_items:
+        return ''
+    items = ''
+    for c in club_items:
+        slug = get_city_slug(c.get('location', 'india'))
+        desc = (c.get('description') or '').strip()
+        desc_html = f' <span class="muted">— {esc(desc[:140])}</span>' if desc else ''
+        items += (
+            f'<li>{link(route_path("/clubs/" + slug + "/" + c["id"]), c["name"])} '
+            f'<span class="muted">({esc(c.get("location", ""))})</span>{desc_html}</li>'
+        )
+    head = f'<h2>{esc(heading)}</h2>' if heading else ''
+    return f'{head}<ul>{items}</ul>'
+
+
+def city_faq(city, club_names):
+    """City-specific Q&A — rendered visibly AND as FAQPage JSON-LD (must match)."""
+    if not club_names:
+        return []
+    names = ', '.join(club_names[:5])
+    return [
+        (f'Which are the best nightclubs in {city}?',
+         f'Some of the best nightclubs in {city} on Clubin are {names}. You can book free guestlist entry, party tickets and VIP tables for each of them on the Clubin app.'),
+        (f'How do I get guestlist entry to clubs in {city}?',
+         f'Open the club or event page on Clubin, pick your event in {city}, and book your guestlist spot in seconds. Show the QR code at the door and walk in — no queues.'),
+        (f'Can I book a VIP table at nightclubs in {city}?',
+         f'Yes. Clubin lets you reserve VIP tables at top nightclubs in {city} with transparent pricing and instant confirmation.'),
+    ]
+
+
+def faq_html(qa_pairs):
+    if not qa_pairs:
+        return ''
+    items = ''.join(f'<h3>{esc(q)}</h3><p>{esc(a)}</p>' for q, a in qa_pairs)
+    return f'<h2>Frequently Asked Questions</h2>{items}'
+
+
+def faq_schema(qa_pairs):
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': [
+            {'@type': 'Question', 'name': q, 'acceptedAnswer': {'@type': 'Answer', 'text': a}}
+            for q, a in qa_pairs
+        ],
+    }
+
+
+# ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
     print('Pre-rendering pages for GitHub Pages SEO...')
@@ -187,20 +423,66 @@ def main():
             if p.get('id'):
                 promoter_map[p['id']] = p
 
+    # Index data for cross-linking
+    club_by_id = {c['id']: c for c in clubs}
+    upcoming = [e for e in events if is_upcoming(e)]
+    clubs_by_city = defaultdict(list)
+    for c in clubs:
+        clubs_by_city[get_city_slug(c.get('location', 'india'))].append(c)
+    events_by_city = defaultdict(list)
+    events_by_club = defaultdict(list)
+    events_by_promoter = defaultdict(list)
+    for e in upcoming:
+        slug = event_city_slug(e)
+        if slug:
+            events_by_city[slug].append(e)
+        if e.get('clubId'):
+            events_by_club[e['clubId']].append(e)
+        ref = e.get('promoterRef')
+        if ref and ref.get('id'):
+            events_by_promoter[ref['id']].append(e)
+
     count = 0
 
-    # 0. /list-your-club (static page)
+    # 0a. Home page — inject static crawlable content into dist/index.html
+    #     (meta tags in the template are already correct for the home page)
+    home_body = body_wrap(
+        '<h1>Clubin — India’s Nightclub &amp; Party Event Entry App</h1>'
+        '<p>Skip the queue at the best clubs in Bengaluru, Mumbai, Delhi NCR, Pune, Goa, Hyderabad, Chennai, Jaipur and Chandigarh. '
+        'Get free guestlist entry, book VIP tables, and discover the hottest parties near you — all on Clubin.</p>'
+        + event_list_html(upcoming, heading='Trending Parties &amp; Events', limit=10)
+        + club_list_html(clubs[:12], heading='Featured Nightclubs')
+        + f'<p>Own a venue? {link("/list-your-club/", "List your club on Clubin")} and reach thousands of nightlife lovers.</p>'
+    )
+    write_home(inject_body(template, home_body))
+    count += 1
+
+    # 0b. /list-your-club (static page)
+    lyc_url = page_url('/list-your-club')
+    lyc_body = body_wrap(
+        '<h1>List Your Club on Clubin</h1>'
+        '<p>Partner with Clubin to reach thousands of nightlife lovers. Manage guestlists, table bookings and events from one dashboard — with the lowest platform fees in India.</p>'
+        '<h2>How it works</h2>'
+        '<ul>'
+        f'<li><strong>Schedule a meeting</strong> — {link("/list-your-club/schedule/", "book a quick call")} with our partnerships team.</li>'
+        '<li><strong>Onboard to Clubin</strong> — dashboard setup, pricing and team training within 48 hours.</li>'
+        '<li><strong>Go live</strong> — your club and events become instantly visible to thousands of users.</li>'
+        '</ul>'
+        '<h2>Transparent pricing</h2>'
+        '<p>Flat ₹50 convenience fee per guestlist booking and just 5% on table bookings — with instant payouts to your account. Competitors charge 10–15%.</p>'
+        f'<p>{link("/list-your-club/schedule/", "Schedule a meeting")} to get started.</p>'
+    )
     html = inject_meta(template,
         title='List Your Club on Clubin - Partner With Us | Clubin',
         description='Partner with Clubin to list your nightclub, manage guestlists, table bookings, and reach a young nightlife audience across India. Lowest platform fees. Schedule a meeting today.',
-        url=f'{SITE_URL}/list-your-club',
+        url=lyc_url,
         structured_data=[
             {
                 '@context': 'https://schema.org',
                 '@type': 'WebPage',
                 'name': 'List Your Club on Clubin',
                 'description': 'Partner with Clubin to list your nightclub and manage events, guestlists, and table bookings.',
-                'url': f'{SITE_URL}/list-your-club',
+                'url': lyc_url,
             },
             {
                 '@context': 'https://schema.org',
@@ -212,20 +494,89 @@ def main():
             },
         ]
     )
-    write_route('/list-your-club', html)
+    write_route('/list-your-club', inject_body(html, lyc_body))
     count += 1
 
+    # 0c. /list-your-club/schedule (booking page)
+    sched_url = page_url('/list-your-club/schedule')
+    sched_body = body_wrap(
+        '<h1>Schedule a Meeting with Clubin</h1>'
+        '<p>Book a quick call with the Clubin partnerships team. Pick a slot that works for you — we’ll understand your venue and goals, and have you live on Clubin within 48 hours.</p>'
+        f'<p>{link("/list-your-club/", "Learn more about partnering with Clubin")}.</p>'
+    )
+    html = inject_meta(template,
+        title='Schedule a Meeting - Partner With Clubin | Clubin',
+        description='Book a quick call with the Clubin partnerships team. Pick a slot that works for you and we’ll help you list your club on Clubin.',
+        url=sched_url,
+        structured_data=[
+            {
+                '@context': 'https://schema.org',
+                '@type': 'WebPage',
+                'name': 'Schedule a Meeting with Clubin',
+                'description': 'Book a call with the Clubin partnerships team to list your club on Clubin.',
+                'url': sched_url,
+            },
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                'itemListElement': [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'List Your Club', 'item': lyc_url},
+                    {'@type': 'ListItem', 'position': 3, 'name': 'Schedule a Meeting'},
+                ],
+            },
+        ]
+    )
+    write_route('/list-your-club/schedule', inject_body(html, sched_body))
+    count += 1
+
+    # 0d. Legal pages (content is client-rendered; static meta + stub so they index)
+    for path, title, description, h1 in [
+        ('/terms', 'Terms of Service | Clubin',
+         'Read the Terms of Service for Clubin. Learn about our guidelines, rules, and user agreements for the ultimate nightlife platform.',
+         'Terms of Service'),
+        ('/privacy', 'Privacy Policy | Clubin',
+         'Read the Privacy Policy for Clubin to learn how we protect your data. Your privacy and security are our top priorities.',
+         'Privacy Policy'),
+        ('/delete-account', 'Delete Your Account | Clubin',
+         'Request deletion of your Clubin account and personal data. We will process your request within 30 days as per our data retention policy.',
+         'Delete Your Account'),
+    ]:
+        html = inject_meta(template, title=title, description=description, url=page_url(path),
+            structured_data={'@context': 'https://schema.org', '@type': 'WebPage', 'name': h1, 'url': page_url(path)})
+        write_route(path, inject_body(html, body_wrap(f'<h1>{esc(h1)}</h1><p>{esc(description)}</p>')))
+        count += 1
+
     # 1. /clubs (city select)
+    clubs_url = page_url('/clubs')
+    city_items = ''
+    for city in CITIES:
+        slug = city.lower().replace(' ', '-')
+        n_clubs = len(clubs_by_city.get(slug, []))
+        n_events = len(events_by_city.get(slug, []))
+        counts = []
+        if n_clubs:
+            counts.append(f'{n_clubs} club{"s" if n_clubs != 1 else ""}')
+        if n_events:
+            counts.append(f'{n_events} upcoming event{"s" if n_events != 1 else ""}')
+        suffix = f' <span class="muted">({", ".join(counts)})</span>' if counts else ''
+        city_items += f'<li>{link(f"/clubs/{slug}/", f"Best Nightclubs in {city}")}{suffix}</li>'
+    clubs_body = body_wrap(
+        '<h1>Nightclubs &amp; Party Venues in India</h1>'
+        '<p>Browse the best nightclubs, lounges and party venues across India. Book free guestlist entry and VIP tables on Clubin.</p>'
+        f'<h2>Browse by City</h2><ul>{city_items}</ul>'
+        + event_list_html(upcoming, heading='Upcoming Events Across India', limit=12)
+    )
     html = inject_meta(template,
         title='Nightclubs & Party Venues in India - Browse by City | Clubin',
         description='Browse nightclubs and party venues across Bengaluru, Mumbai, Delhi NCR, Goa, Pune, Hyderabad, Chennai, Jaipur & Chandigarh. Book guestlists and VIP tables on Clubin.',
-        url=f'{SITE_URL}/clubs',
+        url=clubs_url,
         structured_data=[
             {
                 '@context': 'https://schema.org',
                 '@type': 'CollectionPage',
                 'name': 'Browse Nightclubs by City',
-                'url': f'{SITE_URL}/clubs',
+                'url': clubs_url,
             },
             {
                 '@context': 'https://schema.org',
@@ -237,73 +588,130 @@ def main():
             },
         ]
     )
-    write_route('/clubs', html)
+    write_route('/clubs', inject_body(html, clubs_body))
     count += 1
 
-    # 2. City pages
+    # 2. City pages — real club + event content, dynamic description, city FAQ
     for city in CITIES:
         slug = city.lower().replace(' ', '-')
-        html = inject_meta(template,
-            title=f'Best Nightclubs in {city} | Clubin',
-            description=f'Discover the hottest nightclubs and party venues in {city}. Book guestlists and get VIP table reservations on Clubin.',
-            url=f'{SITE_URL}/clubs/{slug}',
-            structured_data=[
-                {
-                    '@context': 'https://schema.org',
-                    '@type': 'CollectionPage',
-                    'name': f'Best Nightclubs in {city}',
-                    'url': f'{SITE_URL}/clubs/{slug}',
-                },
-                {
-                    '@context': 'https://schema.org',
-                    '@type': 'BreadcrumbList',
-                    'itemListElement': [
-                        {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
-                        {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': f'{SITE_URL}/clubs'},
-                        {'@type': 'ListItem', 'position': 3, 'name': city},
-                    ],
-                },
-            ]
+        city_url = page_url(f'/clubs/{slug}')
+        city_clubs = clubs_by_city.get(slug, [])
+        city_events = events_by_city.get(slug, [])
+        club_names = [c['name'] for c in city_clubs]
+
+        if club_names:
+            description = (f'Discover the best nightclubs in {city}: {", ".join(club_names[:4])} & more. '
+                           f'Book free guestlist entry, party tickets and VIP tables on Clubin.')[:160]
+        else:
+            description = f'Discover the hottest nightclubs and party venues in {city}. Book guestlists and get VIP table reservations on Clubin.'
+
+        qa = city_faq(city, club_names)
+        city_body = body_wrap(
+            f'<h1>Best Nightclubs in {esc(city)}</h1>'
+            f'<p>Looking for the best nightlife in {esc(city)}? Browse top nightclubs and party venues, '
+            f'check upcoming events, and book free guestlist entry or VIP tables on Clubin.</p>'
+            + club_list_html(city_clubs, heading=f'Nightclubs in {city}')
+            + event_list_html(city_events, heading=f'Upcoming Parties &amp; Events in {city}')
+            + faq_html(qa)
         )
-        write_route(f'/clubs/{slug}', html)
+        structured = [
+            {
+                '@context': 'https://schema.org',
+                '@type': 'CollectionPage',
+                'name': f'Best Nightclubs in {city}',
+                'url': city_url,
+            },
+            {
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                'itemListElement': [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': clubs_url},
+                    {'@type': 'ListItem', 'position': 3, 'name': city},
+                ],
+            },
+        ]
+        if qa:
+            structured.append(faq_schema(qa))
+        html = inject_meta(template,
+            title=f'Best Nightclubs in {city} - Guestlist, Events & VIP Tables | Clubin',
+            description=description,
+            url=city_url,
+            structured_data=structured,
+        )
+        write_route(f'/clubs/{slug}', inject_body(html, city_body))
         count += 1
 
     # 3. Club detail pages (+ short link pages /c/:code)
-    #    Use city slug (e.g. "bengaluru") NOT raw location (e.g. "Malleshwaram, Bengaluru")
     for club in clubs:
         city_slug = get_city_slug(club.get('location', 'india'))
-        club_url = f'{SITE_URL}/clubs/{city_slug}/{club["id"]}'
+        city = city_name_from_slug(city_slug)
+        club_url = page_url(f'/clubs/{city_slug}/{club["id"]}')
+        club_events = events_by_club.get(club['id'], [])
+
+        nightclub_sd = {
+            '@context': 'https://schema.org',
+            '@type': 'NightClub',
+            'name': club['name'],
+            'image': [u for u in [club.get('imageUrl')] + (club.get('venueImages') or [])[:3] if u] or None,
+            'description': club.get('description', ''),
+            'address': {'@type': 'PostalAddress', 'streetAddress': club.get('address', ''), 'addressLocality': club.get('location', ''), 'addressCountry': 'IN'},
+            'url': club_url,
+        }
+        if club.get('latitude') and club.get('longitude'):
+            nightclub_sd['geo'] = {'@type': 'GeoCoordinates', 'latitude': club['latitude'], 'longitude': club['longitude']}
+        if club.get('mapUrl'):
+            nightclub_sd['hasMap'] = club['mapUrl']
+        if club.get('instagramUrl'):
+            nightclub_sd['sameAs'] = [club['instagramUrl']]
+        # Only include ratings when real reviews exist (fake markup risks a manual action)
+        if club.get('totalReviews') and club.get('averageRating'):
+            nightclub_sd['aggregateRating'] = {
+                '@type': 'AggregateRating',
+                'ratingValue': club['averageRating'],
+                'reviewCount': club['totalReviews'],
+            }
+        nightclub_sd = {k: v for k, v in nightclub_sd.items() if v is not None}
+
+        img_html = ''
+        if club.get('imageUrl'):
+            img_html = f'<img src="{esc(club["imageUrl"])}" alt="{esc(club["name"])} - nightclub in {esc(club.get("location", ""))}" loading="lazy" />'
+        club_body = body_wrap(
+            f'<p class="muted">{link("/clubs/", "Clubs")} / {link(f"/clubs/{city_slug}/", city)}</p>'
+            f'<h1>{esc(club["name"])}</h1>'
+            f'<p class="muted">{esc(club.get("address") or club.get("location", ""))}</p>'
+            + img_html
+            + (f'<p>{esc(club.get("description", ""))}</p>' if club.get('description') else '')
+            + event_list_html(club_events, heading=f'Upcoming Events at {club["name"]}')
+            + f'<p>Book free guestlist entry and VIP tables at {esc(club["name"])} on the Clubin app — '
+              f'skip the queue and walk in stress-free.</p>'
+            + f'<p>{link(f"/clubs/{city_slug}/", f"More nightclubs in {city}")}</p>'
+        )
         html = inject_meta(template,
-            title=f'{club["name"]} - Nightclub in {club.get("location", "")} | Clubin',
+            title=f'{club["name"]} - Nightclub in {club.get("location", "")} | Guestlist & Tables | Clubin',
             description=f'{club["name"]} in {club.get("location", "")}. {club.get("description", "Book guestlists and VIP tables on Clubin.")[:160]}',
             image=club.get('imageUrl', OG_IMAGE),
             url=club_url,
             structured_data=[
-                {
-                    '@context': 'https://schema.org',
-                    '@type': 'NightClub',
-                    'name': club['name'],
-                    'image': club.get('imageUrl'),
-                    'description': club.get('description', ''),
-                    'address': {'@type': 'PostalAddress', 'streetAddress': club.get('address', ''), 'addressLocality': club.get('location', ''), 'addressCountry': 'IN'},
-                    'url': club_url,
-                },
+                nightclub_sd,
                 {
                     '@context': 'https://schema.org',
                     '@type': 'BreadcrumbList',
                     'itemListElement': [
                         {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
-                        {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': f'{SITE_URL}/clubs'},
-                        {'@type': 'ListItem', 'position': 3, 'name': club.get('location', ''), 'item': f'{SITE_URL}/clubs/{city_slug}'},
+                        {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': clubs_url},
+                        {'@type': 'ListItem', 'position': 3, 'name': city, 'item': page_url(f'/clubs/{city_slug}')},
                         {'@type': 'ListItem', 'position': 4, 'name': club['name']},
                     ],
                 },
             ]
         )
+        html = inject_body(html, club_body)
         write_route(f'/clubs/{city_slug}/{club["id"]}', html)
         count += 1
 
         # Also create a short link and pre-render /c/:code for club sharing
+        # (canonical inside points to the full club URL, so no duplicate-content risk)
         result = post_json(f'{API_BASE}/shortlinks', {'type': 'club', 'targetId': club['id']})
         if result and result.get('code'):
             write_route(f'/c/{result["code"]}', html)
@@ -313,24 +721,23 @@ def main():
     #    Enriched Event schema with all Google-recommended fields
     shortlink_count = 0
     for event in events:
-        date_str = event.get('date', '')[:10]
-        event_url = f'{SITE_URL}/events/{event["id"]}'
+        date_str = event_date_str(event)
+        event_url = page_url(f'/events/{event["id"]}')
         event_location = event.get('location', '')
-        city_slug = event_location.lower().replace(' ', '-') if event_location else ''
+        city_slug = event_city_slug(event)
+        city = city_name_from_slug(city_slug) if city_slug else ''
         is_open = event.get('guestlistStatus') in ('open', 'closing')
+        club = club_by_id.get(event.get('clubId') or '')
+        club_ref = event.get('clubRef') or {}
+        nice_date = fmt_date(date_str)
 
-        # Build start/end datetime strings
-        start_dt = date_str
-        if event.get('startTime'):
-            start_dt = f'{date_str}T{event["startTime"]}:00'
-        end_dt = date_str
-        if event.get('endTime'):
-            end_dt = f'{date_str}T{event["endTime"]}:00'
+        start_dt, end_dt = event_times_iso(event)
 
         # Build offers array with all recommended fields
+        # (`or` fallback: a 0 stag/couple/ladies price means "use the cover price")
         offers = []
         for label, price_key in [('Stag Entry', 'stagPrice'), ('Couple Entry', 'couplePrice'), ('Ladies Entry', 'ladiesPrice')]:
-            price = event.get(price_key, event.get('price', 0))
+            price = event.get(price_key) or event.get('price') or 0
             offers.append({
                 '@type': 'Offer',
                 'name': label,
@@ -357,6 +764,7 @@ def main():
                 'name': event.get('club', ''),
                 'address': {
                     '@type': 'PostalAddress',
+                    'streetAddress': (club or club_ref).get('address', ''),
                     'addressLocality': event_location,
                     'addressCountry': 'IN',
                 },
@@ -364,6 +772,7 @@ def main():
             'url': event_url,
             'offers': offers,
             'performer': {'@type': 'PerformingGroup', 'name': event.get('genre', event['title'])},
+            'isAccessibleForFree': False,
         }
 
         # Add organizer if promoter is available
@@ -372,12 +781,44 @@ def main():
             event_sd['organizer'] = {
                 '@type': 'Organization',
                 'name': promoter_ref['name'],
-                'url': f'{SITE_URL}/promoters/{promoter_ref["id"]}',
+                'url': page_url(f'/promoters/{promoter_ref["id"]}'),
             }
 
+        # Static crawlable body: full event details + links to club/city/promoter
+        club_link_html = ''
+        if club:
+            club_city_slug = get_city_slug(club.get('location', 'india'))
+            club_link_html = f'<p>Venue: {link(route_path("/clubs/" + club_city_slug + "/" + club["id"]), club["name"])}</p>'
+        elif event.get('club'):
+            club_link_html = f'<p>Venue: {esc(event["club"])}</p>'
+        promoter_html = ''
+        if promoter_ref and promoter_ref.get('name'):
+            promoter_html = f'<p>Organised by {link(route_path("/promoters/" + promoter_ref["id"]), promoter_ref["name"])}</p>'
+        img_html = ''
+        if event.get('imageUrl'):
+            img_html = f'<img src="{esc(event["imageUrl"])}" alt="{esc(event["title"])} at {esc(event.get("club", ""))}" loading="lazy" />'
+        time_text = nice_date
+        if event.get('startTime'):
+            time_text += f', {event["startTime"]}'
+            if event.get('endTime'):
+                time_text += f' – {event["endTime"]}'
+        event_body = body_wrap(
+            (f'<p class="muted">{link("/clubs/", "Clubs")} / {link(f"/clubs/{city_slug}/", city)}</p>' if city_slug else '')
+            + f'<h1>{esc(event["title"])}</h1>'
+            + f'<p class="muted">{esc(time_text)} · {esc(event.get("club", ""))}, {esc(event_location)}</p>'
+            + img_html
+            + (f'<p><strong>Entry:</strong> {esc(event_price_text(event))}</p>')
+            + (f'<p><strong>Genre:</strong> {esc(event["genre"])}</p>' if event.get('genre') else '')
+            + (f'<p>{esc(event.get("description", ""))}</p>' if event.get('description') else '')
+            + (f'<p class="muted">Rules: {esc(event["rules"])}</p>' if event.get('rules') else '')
+            + club_link_html
+            + promoter_html
+            + '<p>Book your guestlist spot or tickets for this party on Clubin — instant confirmation, QR entry, no queues.</p>'
+        )
+
         html = inject_meta(template,
-            title=f'{event["title"]} at {event.get("club", "")} - {date_str} | Clubin',
-            description=f'{event["title"]} at {event.get("club", "")} on {date_str}. {event.get("description", "Book your spot on Clubin!")[:150]}',
+            title=f'{event["title"]} at {event.get("club", "")} - {nice_date} | Guestlist & Tickets | Clubin',
+            description=f'{event["title"]} at {event.get("club", "")}, {event_location} on {nice_date}. Entry: {event_price_text(event)}. {event.get("description", "Book your spot on Clubin!")[:110]}',
             image=event.get('imageUrl', OG_IMAGE),
             url=event_url,
             structured_data=[
@@ -387,13 +828,14 @@ def main():
                     '@type': 'BreadcrumbList',
                     'itemListElement': [
                         {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
-                        {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': f'{SITE_URL}/clubs'},
-                        *([{'@type': 'ListItem', 'position': 3, 'name': event.get('club', ''), 'item': f'{SITE_URL}/clubs/{city_slug}'}] if city_slug else []),
+                        {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': clubs_url},
+                        *([{'@type': 'ListItem', 'position': 3, 'name': event.get('club', ''), 'item': page_url(f'/clubs/{city_slug}')}] if city_slug else []),
                         {'@type': 'ListItem', 'position': 4 if city_slug else 3, 'name': event['title']},
                     ],
                 },
             ]
         )
+        html = inject_body(html, event_body)
         write_route(f'/events/{event["id"]}', html)
         count += 1
 
@@ -409,7 +851,14 @@ def main():
     for pid, promoter in promoter_map.items():
         name = promoter.get('name', 'Promoter')
         region = promoter.get('region', '')
-        promoter_url = f'{SITE_URL}/promoters/{pid}'
+        promoter_url = page_url(f'/promoters/{pid}')
+        promoter_events = events_by_promoter.get(pid, [])
+        promoter_body = body_wrap(
+            f'<h1>{esc(name)}</h1>'
+            + (f'<p class="muted">Event promoter in {esc(region)}</p>' if region else '<p class="muted">Event promoter</p>')
+            + event_list_html(promoter_events, heading=f'Upcoming Events by {name}')
+            + f'<p>Browse parties and nightclub events by {esc(name)} and book guestlist entry on Clubin.</p>'
+        )
         html = inject_meta(template,
             title=f'{name} - Event Promoter{f" in {region}" if region else ""} | Clubin',
             description=f'{name} is an event promoter{f" based in {region}" if region else ""}. Browse their upcoming nightclub events and parties on Clubin.',
@@ -428,17 +877,17 @@ def main():
                     '@type': 'BreadcrumbList',
                     'itemListElement': [
                         {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
-                        {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': f'{SITE_URL}/clubs'},
+                        {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': clubs_url},
                         {'@type': 'ListItem', 'position': 3, 'name': name},
                     ],
                 },
             ]
         )
-        write_route(f'/promoters/{pid}', html)
+        write_route(f'/promoters/{pid}', inject_body(html, promoter_body))
         count += 1
 
     print(f'Pre-rendered {count} pages into {DIST_DIR}/')
-    print(f'  Cities: {len(CITIES)}, Clubs: {len(clubs)}, Events: {len(events)}, Promoters: {len(promoter_map)}')
+    print(f'  Cities: {len(CITIES)}, Clubs: {len(clubs)}, Events: {len(events)} ({len(upcoming)} upcoming), Promoters: {len(promoter_map)}')
     print(f'  Short links (events): {shortlink_count}')
 
 
