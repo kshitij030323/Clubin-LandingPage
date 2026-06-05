@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from './components/Footer';
+import { useDeferredVideo } from './hooks/useDeferredVideo';
 
 // --- Icons (Inline SVGs) ---
 
@@ -91,29 +92,19 @@ const BackgroundVideo = () => {
     const [isPlaying, setIsPlaying] = useState(false);
 
     const videoSrc = "https://pub-8cd3bcf3be92492690608c810aba8e95.r2.dev/AI%20Upscaler-2K-abstract_objects_new.mp4";
-    const posterSrc = "/poster.webp";
 
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-
-        video.src = videoSrc;
-        video.play()
-            .then(() => setIsPlaying(true))
-            .catch(() => { });
-    }, []);
+    // Load the heavy video only after page load + idle, so it never delays LCP
+    useDeferredVideo(videoRef, videoSrc, setIsPlaying);
 
     return (
         <div className="fixed inset-0 z-0 overflow-hidden w-full h-full bg-black">
             <div
-                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 z-10 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
-                style={{ backgroundImage: `url(${posterSrc})` }}
+                className={`poster-bg absolute inset-0 bg-cover bg-center transition-opacity duration-1000 z-10 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
             />
             <div className="absolute inset-0 bg-black/60 z-20 pointer-events-none" />
             <video
                 ref={videoRef}
                 className="absolute inset-0 z-0 w-full h-full object-cover"
-                poster={posterSrc}
                 playsInline
                 muted
                 loop

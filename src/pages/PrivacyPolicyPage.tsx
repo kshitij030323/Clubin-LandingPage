@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
+import { useDeferredVideo } from '../hooks/useDeferredVideo';
 import { Footer } from '../components/Footer';
 
 // ─── Shared Background Video with Scratch-Built Fluted Glass ────────────────
@@ -13,12 +14,8 @@ export function PageVideo() {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
-    useEffect(() => {
-        const video = videoRef.current;
-        if (!video) return;
-        video.src = VIDEO_SRC;
-        video.play().then(() => setIsPlaying(true)).catch(() => { });
-    }, []);
+    // Load the heavy video only after page load + idle, so it never delays LCP
+    useDeferredVideo(videoRef, VIDEO_SRC, setIsPlaying);
 
     const FlutedStrip = ({ i }: { i: number }) => (
         <div className="flex-1 h-full relative" style={{ marginRight: '-1px' }}>
@@ -31,13 +28,11 @@ export function PageVideo() {
     return (
         <div className="fixed inset-0 z-0 overflow-hidden bg-black">
             <div
-                className={`absolute inset-0 bg-cover bg-center z-10 transition-opacity duration-1000 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
-                style={{ backgroundImage: 'url(/poster.webp)' }}
+                className={`poster-bg absolute inset-0 bg-cover bg-center z-10 transition-opacity duration-1000 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
             />
             <video
                 ref={videoRef}
                 className="absolute inset-0 z-0 w-full h-full object-cover scale-[1.02]"
-                poster="/poster.webp"
                 playsInline
                 muted
                 loop

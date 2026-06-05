@@ -9,3 +9,14 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Responsive hero poster — small image on mobile (16 KB), full on desktop (74 KB).
+   Keep in sync with the media-scoped preloads in index.html. */
+.poster-bg {
+  background-image: url('/poster-mobile.webp');
+}
+@media (min-width: 768px) {
+  .poster-bg {
+    background-image: url('/poster.webp');
+  }
+}
