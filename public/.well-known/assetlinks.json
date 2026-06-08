@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kshitijdev02.afterhour",
+      "sha256_cert_fingerprints": [
+        "EC:1F:B3:CF:BF:D4:61:86:DB:1B:FF:EC:53:0D:B3:62:F4:A6:50:C6:99:9F:1B:1D:FF:8D:5D:F7:4B:E4:6D:50"
+      ]
+    }
+  }
+]
