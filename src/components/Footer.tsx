@@ -36,6 +36,7 @@ export function Footer() {
                             <ul className="flex flex-col gap-4 text-sm text-white/50 font-manrope">
                                 <li><Link to="/clubs" className="hover:text-white transition-colors">Browse Clubs</Link></li>
                                 <li><Link to="/list-your-club" className="hover:text-[#a484d7] transition-colors">List Your Club</Link></li>
+                                <li><Link to="/support" className="hover:text-white transition-colors">Support</Link></li>
                             </ul>
                         </div>
                         <div>

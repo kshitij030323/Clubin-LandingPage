@@ -248,7 +248,7 @@ def body_wrap(inner, city_slugs_with_clubs=None):
     footer = (
         '<h2>Explore Clubin</h2>'
         f'<p>{city_links}</p>'
-        f'<p class="muted">{link("/terms/", "Terms of Service")} &middot; {link("/privacy/", "Privacy Policy")} &middot; '
+        f'<p class="muted">{link("/support/", "Support")} &middot; {link("/terms/", "Terms of Service")} &middot; {link("/privacy/", "Privacy Policy")} &middot; '
         f'{link("/list-your-club/", "Partner with Clubin")}</p>'
     )
     return SEO_STYLE + f'<div class="seo-static"><div class="wrap">{nav}{inner}{footer}</div></div>'
@@ -546,6 +546,47 @@ def main():
             structured_data={'@context': 'https://schema.org', '@type': 'WebPage', 'name': h1, 'url': page_url(path)})
         write_route(path, inject_body(html, body_wrap(f'<h1>{esc(h1)}</h1><p>{esc(description)}</p>')))
         count += 1
+
+    # 0e. Support page — FAQs rendered visibly AND as FAQPage JSON-LD (must match
+    #     src/pages/SupportPage.tsx so the structured data reflects what users see)
+    support_path = '/support'
+    support_url = page_url(support_path)
+    support_faqs = [
+        ('What is Clubin?',
+         'Clubin is a nightlife platform that lets you discover clubs and events, book free guestlist entry, party tickets and VIP tables across India — all from one app.'),
+        ('How do I book guestlist entry or tickets?',
+         'Open the club or event page in the Clubin app, choose your event, and confirm your guestlist spot or ticket in seconds. You will receive a QR code to show at the door — no queues.'),
+        ("I didn't receive my booking confirmation or QR code. What should I do?",
+         'Your booking and QR code are available under the "My Bookings" section in the app. If it is missing, email us at admin@clubin.info with your registered phone number and we will help right away.'),
+        ('Can I get a refund on my booking?',
+         'Refunds are subject to the venue policy and the terms shown at checkout. Convenience fees are non-refundable unless stated otherwise. For refund queries, reach out to admin@clubin.info.'),
+        ('Does booking guarantee entry to the venue?',
+         'Booking through Clubin secures your spot, but venues reserve the right of admission. Please follow each venue dress code, age policy (18+) and behavioural guidelines.'),
+        ('How do I list my club or partner with Clubin?',
+         "Head to our List Your Club page and schedule a meeting with our team. We'll get you set up to manage events, guestlists and reach thousands of users."),
+        ('How do I delete my account?',
+         'You can request permanent deletion of your account and data from our Delete Account page. We process requests within 30 days as per our data retention policy.'),
+        ('How can I contact Clubin support?',
+         'Email us at admin@clubin.info or info@kauzway.com, or call +91 99110 06848. You can also visit our office in Indiranagar, Bangalore.'),
+    ]
+    support_body = body_wrap(
+        '<h1>Help &amp; Support</h1>'
+        '<p>Need help with Clubin? Browse the FAQs below or reach our support team. '
+        'Email <a href="mailto:admin@clubin.info">admin@clubin.info</a> or '
+        '<a href="mailto:info@kauzway.com">info@kauzway.com</a>, or call '
+        '<a href="tel:+919911006848">+91 99110 06848</a>.</p>'
+        + faq_html(support_faqs)
+    )
+    html = inject_meta(template,
+        title='Support & FAQs | Clubin',
+        description='Need help with Clubin? Find answers to frequently asked questions about bookings, guestlists, refunds and more, or reach our support team by email and phone.',
+        url=support_url,
+        structured_data=[
+            {'@context': 'https://schema.org', '@type': 'WebPage', 'name': 'Help & Support', 'url': support_url},
+            faq_schema(support_faqs),
+        ])
+    write_route(support_path, inject_body(html, support_body))
+    count += 1
 
     # 1. /clubs (city select)
     clubs_url = page_url('/clubs')

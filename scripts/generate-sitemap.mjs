@@ -90,6 +90,7 @@ async function generateSitemap() {
     urls.push({ loc: `${SITE_URL}/list-your-club/`, changefreq: 'monthly', priority: '0.8', lastmod: today });
     urls.push({ loc: `${SITE_URL}/list-your-club/schedule/`, changefreq: 'monthly', priority: '0.6', lastmod: today });
     urls.push({ loc: `${SITE_URL}/clubs/`, changefreq: 'weekly', priority: '0.9', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/support/`, changefreq: 'monthly', priority: '0.5', lastmod: today });
     urls.push({ loc: `${SITE_URL}/terms/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
     urls.push({ loc: `${SITE_URL}/privacy/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
     urls.push({ loc: `${SITE_URL}/delete-account/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
@@ -184,7 +185,7 @@ async function generateSitemap() {
     }
 
     console.log(`Sitemap generated with ${urls.length} URLs -> ${outPath}`);
-    console.log(`  - Static: 7`);
+    console.log(`  - Static: 8`);
     console.log(`  - Cities: ${CITIES.length}`);
     console.log(`  - Clubs: ${clubs.length}`);
     console.log(`  - Events: ${upcomingEvents.length} upcoming (${events.length - upcomingEvents.length} past skipped)`);

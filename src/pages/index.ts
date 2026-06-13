@@ -8,3 +8,4 @@ export { PrivacyPolicyPage } from './PrivacyPolicyPage';
 export { ListYourClubPage } from './ListYourClubPage';
 export { ScheduleMeetingPage } from './ScheduleMeetingPage';
 export { DeleteAccountPage } from './DeleteAccountPage';
+export { SupportPage } from './SupportPage';
