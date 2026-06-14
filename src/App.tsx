@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from './components/Footer';
 import { useDeferredVideo } from './hooks/useDeferredVideo';
-import { PLAY_STORE_URL } from './api';
+import { PLAY_STORE_URL, APP_STORE_URL } from './api';
 
 // --- Icons (Inline SVGs) ---
 
@@ -125,14 +125,19 @@ const BackgroundVideo = () => {
  */
 const StoreButtons = ({ centered = false }: { centered?: boolean }) => (
     <div className={`flex flex-col sm:flex-row gap-4 ${centered ? 'justify-center' : ''}`}>
-        <button className="group relative flex items-center justify-center gap-3 bg-[#2b2344] hover:bg-[#352b54] text-white px-6 py-3 rounded-xl border border-[rgba(164,132,215,0.3)] backdrop-blur-sm transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg">
+        <a
+            href={APP_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative flex items-center justify-center gap-3 bg-[#2b2344] hover:bg-[#352b54] text-white px-6 py-3 rounded-xl border border-[rgba(164,132,215,0.3)] backdrop-blur-sm transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
+        >
             <AppleIcon className="w-6 h-6 fill-current" />
             <div className="text-left">
-                <div className="text-[10px] font-manrope uppercase tracking-wider opacity-80">Download on the</div>
-                <div className="text-base font-cabin font-bold leading-none">App Store</div>
+                <div className="text-[10px] font-manrope uppercase tracking-wider opacity-80">Download on</div>
+                <div className="text-base font-cabin font-bold leading-none">TestFlight</div>
             </div>
             <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </button>
+        </a>
 
         <a
             href={PLAY_STORE_URL}
