@@ -124,7 +124,7 @@ export function LocationSelectPage() {
                             </div>
                         </div>
                         <a
-                            href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : APP_STORE_URL}
+                            href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : PLAY_STORE_URL}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center gap-2 w-full sm:w-auto py-3 px-6 bg-white hover:bg-white/90 text-black text-center font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-white/5"

@@ -97,7 +97,7 @@ export function ClubsListPage() {
                 </div>
 
                 <a
-                    href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : APP_STORE_URL}
+                    href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : PLAY_STORE_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
@@ -268,7 +268,7 @@ export function ClubsListPage() {
                         </div>
 
                         <a
-                            href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : APP_STORE_URL}
+                            href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : PLAY_STORE_URL}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="block w-full py-3.5 bg-white hover:bg-white/90 text-black text-center font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-white/5"
