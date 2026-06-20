@@ -4,6 +4,7 @@ import { Skeleton } from '../components/Skeleton';
 import { VenueImageSlideshow } from '../components/VenueImageSlideshow';
 import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
+import { extractId, eventUrl as buildEventUrl } from '../lib/urls';
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink, Instagram, User, Music, Image, Play, Volume2, VolumeX } from 'lucide-react';
 
@@ -52,7 +53,7 @@ export function EventDetailPage() {
                     if (data.type !== 'event') throw new Error('Invalid link');
                     eventData = data.data;
                 } else if (eventId) {
-                    eventData = await fetchEventDetails(eventId);
+                    eventData = await fetchEventDetails(extractId(eventId));
                 } else {
                     throw new Error('No event specified');
                 }
@@ -70,11 +71,12 @@ export function EventDetailPage() {
 
     // SEO
     const isGuestlistOpen = event?.guestlistStatus === 'open' || event?.guestlistStatus === 'closing';
+    const evUrl = event ? buildEventUrl(event) : '';
     useSEO({
         title: event ? `${event.title} at ${event.club} - ${formatDate(event.date)} | Guestlist & Tickets | Clubin` : 'Event | Clubin',
         description: event ? `${event.title} at ${event.club} on ${formatDate(event.date)}. ${event.description?.substring(0, 150) || 'Book your spot on Clubin!'}` : undefined,
         image: event?.imageUrl,
-        url: event ? `https://clubin.co.in/events/${event.id}` : undefined,
+        url: event ? evUrl : undefined,
         structuredData: event ? [
             {
                 '@context': 'https://schema.org',
@@ -96,11 +98,11 @@ export function EventDetailPage() {
                 },
                 image: event.imageUrl,
                 description: event.description,
-                url: `https://clubin.co.in/events/${event.id}`,
+                url: evUrl,
                 offers: [
-                    { '@type': 'Offer', name: 'Stag Entry', price: event.stagPrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: `https://clubin.co.in/events/${event.id}` },
-                    { '@type': 'Offer', name: 'Couple Entry', price: event.couplePrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: `https://clubin.co.in/events/${event.id}` },
-                    { '@type': 'Offer', name: 'Ladies Entry', price: event.ladiesPrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: `https://clubin.co.in/events/${event.id}` },
+                    { '@type': 'Offer', name: 'Stag Entry', price: event.stagPrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: evUrl },
+                    { '@type': 'Offer', name: 'Couple Entry', price: event.couplePrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: evUrl },
+                    { '@type': 'Offer', name: 'Ladies Entry', price: event.ladiesPrice, priceCurrency: 'INR', availability: isGuestlistOpen ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut', url: evUrl },
                 ],
                 ...(event.promoterRef ? { organizer: { '@type': 'Organization', name: event.promoterRef.name, url: `https://clubin.co.in/promoters/${event.promoterRef.id}` } } : {}),
                 performer: { '@type': 'PerformingGroup', name: event.genre || event.title },

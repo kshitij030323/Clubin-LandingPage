@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Skeleton } from '../components/Skeleton';
 import type { PromoterPublicResponse } from '../types';
 import { fetchPromoterPublic, formatDate, formatTime } from '../api';
+import { eventPath } from '../lib/urls';
 import { useSEO } from '../hooks/useSEO';
 import { ArrowLeft, Calendar, Clock, Instagram, ExternalLink, Music, MapPin } from 'lucide-react';
 
@@ -225,7 +226,7 @@ export function PromoterDetailPage() {
                                     {events.map((event) => (
                                         <Link
                                             key={event.id}
-                                            to={`/events/${event.id}`}
+                                            to={eventPath(event)}
                                             className="group block overflow-hidden rounded-2xl bg-[#120f1d] border border-white/5 transition-all duration-300 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1"
                                         >
                                             <div className="relative aspect-[4/3] overflow-hidden">
@@ -335,7 +336,7 @@ export function PromoterDetailPage() {
                                 {events.map((event) => (
                                     <Link
                                         key={event.id}
-                                        to={`/events/${event.id}`}
+                                        to={eventPath(event)}
                                         className="flex items-stretch bg-[#1e1b2e] border border-white/5 rounded-xl overflow-hidden hover:bg-[#252139] transition-colors shadow-lg shadow-black/20"
                                     >
                                         <div className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 relative">

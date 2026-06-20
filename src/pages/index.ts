@@ -1,4 +1,5 @@
 export { LocationSelectPage } from './LocationSelectPage';
+export { ExplorePage } from './ExplorePage';
 export { ClubsListPage } from './ClubsListPage';
 export { ClubDetailPage } from './ClubDetailPage';
 export { EventDetailPage } from './EventDetailPage';

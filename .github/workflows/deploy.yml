@@ -40,6 +40,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Persist the last-known-good API snapshot across runs. If the API (530s,
+      # downtime) is unreachable during a build, generate-sitemap.mjs and
+      # prerender.py fall back to this snapshot instead of gutting the sitemap
+      # and pre-rendered club/event pages. A unique key per run means the cache
+      # is always re-saved with the freshest data; restore-keys pulls the most
+      # recent prior snapshot.
+      - name: Restore API data snapshot
+        uses: actions/cache@v4
+        with:
+          path: .api-cache
+          key: clubin-api-data-${{ github.run_id }}
+          restore-keys: |
+            clubin-api-data-
+
       - name: Build
         run: npm run build
 

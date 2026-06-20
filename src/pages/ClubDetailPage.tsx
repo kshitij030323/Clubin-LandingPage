@@ -3,16 +3,8 @@ import { Skeleton } from '../components/Skeleton';
 import { VenueImageSlideshow } from '../components/VenueImageSlideshow';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Club, Event } from '../types';
-import { CITIES } from '../types';
 import { fetchClubDetails, fetchEventsByClubId, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
-
-/** Extract city slug from location like "Malleshwaram, Bengaluru" → "bengaluru" */
-function getCitySlug(location: string): string {
-    const parts = location.split(',');
-    const city = parts[parts.length - 1].trim();
-    const match = CITIES.find(c => c.id.toLowerCase() === city.toLowerCase());
-    return (match ? match.id : city).toLowerCase().replace(/\s+/g, '-');
-}
+import { extractId, clubUrl as buildClubUrl, eventPath, getCitySlug } from '../lib/urls';
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, ExternalLink, Share2, Check, Copy, ChevronDown, ChevronUp, Instagram, User, Music } from 'lucide-react';
 
@@ -66,7 +58,7 @@ export function ClubDetailPage() {
                     if (data.type !== 'club') throw new Error('Invalid link');
                     clubData = data.data as Club;
                 } else if (clubId) {
-                    clubData = await fetchClubDetails(clubId);
+                    clubData = await fetchClubDetails(extractId(clubId));
                 } else {
                     throw new Error('No club specified');
                 }
@@ -88,7 +80,7 @@ export function ClubDetailPage() {
 
     // SEO — use city slug (from URL param or derived from location) for clean canonical URLs
     const citySlug = city || (club ? getCitySlug(club.location) : '');
-    const clubUrl = club ? `https://clubin.co.in/clubs/${citySlug}/${club.id}` : undefined;
+    const clubUrl = club ? buildClubUrl(citySlug, club) : undefined;
     useSEO({
         title: club ? `${club.name} - Nightclub in ${club.location} | Guestlist & Tables | Clubin` : 'Club | Clubin',
         description: club ? `${club.name} in ${club.location}. ${club.description || 'Book guestlists and VIP tables on Clubin.'}` : undefined,
@@ -398,7 +390,7 @@ export function ClubDetailPage() {
                                     {upcomingEvents.map((event: Event) => (
                                         <Link
                                             key={event.id}
-                                            to={`/events/${event.id}`}
+                                            to={eventPath(event)}
                                             className="group block overflow-hidden rounded-2xl bg-[#120f1d] border border-white/5 transition-all duration-300 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1"
                                         >
                                             {/* Image */}
@@ -516,7 +508,7 @@ export function ClubDetailPage() {
                                     {upcomingEvents.map((event) => (
                                         <Link
                                             key={event.id}
-                                            to={`/events/${event.id}`}
+                                            to={eventPath(event)}
                                             className="flex items-stretch bg-[#1e1b2e] border border-white/5 rounded-xl overflow-hidden hover:bg-[#252139] transition-colors shadow-lg shadow-black/20"
                                         >
                                             {/* Image */}

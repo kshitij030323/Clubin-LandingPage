@@ -5,4 +5,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://clubin.co.in/sitemap.xml?v=20260614
+Sitemap: https://clubin.co.in/sitemap.xml

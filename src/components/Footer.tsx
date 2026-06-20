@@ -35,6 +35,7 @@ export function Footer() {
                             <h4 className="text-white font-bold font-inter mb-6 uppercase tracking-wider text-xs">Product</h4>
                             <ul className="flex flex-col gap-4 text-sm text-white/50 font-manrope">
                                 <li><Link to="/clubs" className="hover:text-white transition-colors">Browse Clubs</Link></li>
+                                <li><Link to="/explore" className="hover:text-white transition-colors">Explore</Link></li>
                                 <li><Link to="/list-your-club" className="hover:text-[#a484d7] transition-colors">List Your Club</Link></li>
                                 <li><Link to="/support" className="hover:text-white transition-colors">Support</Link></li>
                             </ul>

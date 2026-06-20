@@ -6,18 +6,77 @@
  * Run: node scripts/generate-sitemap.mjs
  */
 
+import fs from 'fs';
+import path from 'path';
+
 const API_BASE = 'https://api.clubin.info/api';
 const SITE_URL = 'https://clubin.co.in';
+
+// Shared with prerender.py — last-known-good API snapshots so an API outage
+// can't gut the sitemap (or the pre-rendered pages). Persisted across CI runs
+// via actions/cache in .github/workflows/deploy.yml.
+const CACHE_DIR = path.join(process.cwd(), '.api-cache');
 
 const CITIES = [
     'Bengaluru', 'Delhi NCR', 'Goa', 'Mumbai', 'Pune',
     'Hyderabad', 'Chandigarh', 'Jaipur', 'Chennai',
 ];
 
-async function fetchJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
-    return res.json();
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Fetch JSON with retries + timeout. Returns null on persistent failure (never throws). */
+async function fetchJSON(url, { retries = 3, timeoutMs = 15000 } = {}) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, {
+                    headers: { 'User-Agent': 'Clubin-Sitemap/1.0' },
+                    signal: controller.signal,
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
+            } finally {
+                clearTimeout(timer);
+            }
+        } catch (err) {
+            console.warn(`  Attempt ${attempt}/${retries} failed for ${url}: ${err.message}`);
+            if (attempt < retries) await sleep(attempt * 2000);
+        }
+    }
+    return null;
+}
+
+/**
+ * Load API data with graceful degradation:
+ *   1. Try the live API (with retries).
+ *   2. On success, refresh the on-disk cache snapshot and return it.
+ *   3. On failure, fall back to the last cached snapshot if present.
+ *   4. If nothing is available, return null (caller preserves the existing sitemap).
+ */
+async function loadData(name, url) {
+    const cachePath = path.join(CACHE_DIR, `${name}.json`);
+    const fresh = await fetchJSON(url);
+    if (fresh !== null) {
+        try {
+            fs.mkdirSync(CACHE_DIR, { recursive: true });
+            fs.writeFileSync(cachePath, JSON.stringify(fresh), 'utf-8');
+        } catch (err) {
+            console.warn(`  Could not write cache for ${name}: ${err.message}`);
+        }
+        return fresh;
+    }
+    if (fs.existsSync(cachePath)) {
+        console.warn(`  Using cached ${name} snapshot (live API unavailable): ${cachePath}`);
+        try {
+            return JSON.parse(fs.readFileSync(cachePath, 'utf-8'));
+        } catch (err) {
+            console.warn(`  Cached ${name} snapshot is unreadable: ${err.message}`);
+        }
+    }
+    console.warn(`  No data available for ${name} (live API down, no cache).`);
+    return null;
 }
 
 function escapeXml(str) {
@@ -31,6 +90,35 @@ function escapeXml(str) {
 
 function todayISO() {
     return new Date().toISOString().split('T')[0];
+}
+
+/** Slug rules MUST match src/lib/urls.ts and scripts/prerender.py exactly. */
+function slugify(text) {
+    return (text || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60)
+        .replace(/-+$/g, '');
+}
+
+/** `slug-<id>`, or just `<id>` when the name yields no slug. */
+function slugId(name, id) {
+    const slug = slugify(name);
+    return slug ? `${slug}-${id}` : id;
+}
+
+// High-intent sub-areas with their own landing page (mirrors src/lib/urls.ts
+// and scripts/prerender.py). Only sitemapped when real venues match.
+const SUBCITIES = [
+    { slug: 'gurgaon', needles: ['gurgaon', 'gurugram'] },
+    { slug: 'noida', needles: ['noida'] },
+    { slug: 'lucknow', needles: ['lucknow'] },
+];
+
+function locationMatches(location, needles) {
+    const loc = (location || '').toLowerCase();
+    return needles.some((n) => loc.includes(n));
 }
 
 // Aliases for location strings that don't exactly match a CITIES entry
@@ -55,10 +143,27 @@ function getCitySlug(location) {
 async function generateSitemap() {
     console.log('Fetching data from API...');
 
-    const [clubs, events] = await Promise.all([
-        fetchJSON(`${API_BASE}/clubs`),
-        fetchJSON(`${API_BASE}/events`),
+    const outPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+
+    const [clubsData, eventsData] = await Promise.all([
+        loadData('clubs', `${API_BASE}/clubs`),
+        loadData('events', `${API_BASE}/events`),
     ]);
+
+    // Total outage with no cache: never overwrite a good sitemap with a reduced
+    // one (that would drop every club/event URL Google already knows). Keep the
+    // last deployed sitemap if it exists; only write a static-only fallback when
+    // there is nothing at all to serve.
+    if (clubsData === null && eventsData === null) {
+        if (fs.existsSync(outPath)) {
+            console.warn('API unavailable and no cache — preserving existing sitemap.xml unchanged.');
+            return;
+        }
+        console.warn('API unavailable and no cache — writing a static-only sitemap fallback.');
+    }
+
+    const clubs = clubsData || [];
+    const events = eventsData || [];
 
     // Collect unique promoter IDs from events
     const promoterIds = new Set();
@@ -90,6 +195,7 @@ async function generateSitemap() {
     urls.push({ loc: `${SITE_URL}/list-your-club/`, changefreq: 'monthly', priority: '0.8', lastmod: today });
     urls.push({ loc: `${SITE_URL}/list-your-club/schedule/`, changefreq: 'monthly', priority: '0.6', lastmod: today });
     urls.push({ loc: `${SITE_URL}/clubs/`, changefreq: 'weekly', priority: '0.9', lastmod: today });
+    urls.push({ loc: `${SITE_URL}/explore/`, changefreq: 'weekly', priority: '0.7', lastmod: today });
     urls.push({ loc: `${SITE_URL}/support/`, changefreq: 'monthly', priority: '0.5', lastmod: today });
     urls.push({ loc: `${SITE_URL}/terms/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
     urls.push({ loc: `${SITE_URL}/privacy/`, changefreq: 'monthly', priority: '0.3', lastmod: today });
@@ -112,7 +218,7 @@ async function generateSitemap() {
         const citySlug = getCitySlug(club.location || 'India');
         const images = [club.imageUrl, ...(club.venueImages || []).slice(0, 3)].filter(Boolean);
         urls.push({
-            loc: `${SITE_URL}/clubs/${citySlug}/${club.id}/`,
+            loc: `${SITE_URL}/clubs/${citySlug}/${slugId(club.name, club.id)}/`,
             changefreq: 'weekly',
             priority: '0.7',
             lastmod: club.updatedAt ? club.updatedAt.split('T')[0] : today,
@@ -123,9 +229,19 @@ async function generateSitemap() {
     // 4. Upcoming event pages only — past events are removed to avoid stale URLs
     const now = new Date();
     const upcomingEvents = events.filter(e => new Date(e.date || e.startTime || e.updatedAt) >= now);
+
+    // Sub-area landing pages — only when real venues match (mirrors prerender.py)
+    for (const { slug, needles } of SUBCITIES) {
+        const hasClub = clubs.some(c => locationMatches(c.location, needles));
+        const hasEvent = upcomingEvents.some(e => locationMatches(e.location || e.region, needles));
+        if (hasClub || hasEvent) {
+            urls.push({ loc: `${SITE_URL}/clubs/${slug}/`, changefreq: 'daily', priority: '0.8', lastmod: today });
+        }
+    }
+
     for (const event of upcomingEvents) {
         urls.push({
-            loc: `${SITE_URL}/events/${event.id}/`,
+            loc: `${SITE_URL}/events/${slugId(event.title, event.id)}/`,
             changefreq: 'daily',
             priority: '0.8',
             lastmod: event.updatedAt ? event.updatedAt.split('T')[0] : today,
@@ -165,24 +281,11 @@ async function generateSitemap() {
 
     xml += `\n</urlset>\n`;
 
-    // Write to public/sitemap.xml
-    const fs = await import('fs');
-    const path = await import('path');
-    const outPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+    // Write to public/sitemap.xml. robots.txt advertises a STABLE sitemap URL
+    // (no ?v= cache-buster) — Google re-reads on its own cadence using <lastmod>,
+    // and a URL that changes daily just fragments Search Console tracking.
+    fs.mkdirSync(path.dirname(outPath), { recursive: true });
     fs.writeFileSync(outPath, xml, 'utf-8');
-
-    // Update robots.txt sitemap version to bust Google's cache on each build
-    const robotsPath = path.join(process.cwd(), 'public', 'robots.txt');
-    if (fs.existsSync(robotsPath)) {
-        let robots = fs.readFileSync(robotsPath, 'utf-8');
-        const version = today.replace(/-/g, '');
-        robots = robots.replace(
-            /Sitemap:\s*https:\/\/clubin\.co\.in\/sitemap\.xml\S*/,
-            `Sitemap: https://clubin.co.in/sitemap.xml?v=${version}`
-        );
-        fs.writeFileSync(robotsPath, robots, 'utf-8');
-        console.log(`Updated robots.txt sitemap version to ?v=${version}`);
-    }
 
     console.log(`Sitemap generated with ${urls.length} URLs -> ${outPath}`);
     console.log(`  - Static: 8`);
@@ -193,6 +296,9 @@ async function generateSitemap() {
 }
 
 generateSitemap().catch((err) => {
-    console.error('Failed to generate sitemap:', err);
-    process.exit(1);
+    // Never break the deploy over the sitemap step: log loudly and exit 0 so
+    // tsc/vite/prerender still run. Any previously deployed sitemap.xml is left
+    // in place and the next scheduled build regenerates it.
+    console.error('::warning::Sitemap generation failed; continuing build with existing sitemap.', err);
+    process.exit(0);
 });

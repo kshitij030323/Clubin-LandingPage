@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Last-known-good API snapshots (persisted across CI runs via actions/cache)
+.api-cache
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

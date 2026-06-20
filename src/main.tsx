@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
-import { LocationSelectPage, ClubsListPage, ClubDetailPage, EventDetailPage, PromoterDetailPage, ListYourClubPage, ScheduleMeetingPage, TermsOfServicePage, PrivacyPolicyPage, DeleteAccountPage, SupportPage } from './pages'
+import { LocationSelectPage, ExplorePage, ClubsListPage, ClubDetailPage, EventDetailPage, PromoterDetailPage, ListYourClubPage, ScheduleMeetingPage, TermsOfServicePage, PrivacyPolicyPage, DeleteAccountPage, SupportPage } from './pages'
 import { ScrollToTop } from './components/ScrollToTop.tsx'
 
 createRoot(document.getElementById('root')!).render(
@@ -15,6 +15,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<App />} />
 
         {/* Clubs browsing routes */}
+        <Route path="/explore" element={<ExplorePage />} />
         <Route path="/clubs" element={<LocationSelectPage />} />
         <Route path="/clubs/:city" element={<ClubsListPage />} />
         <Route path="/clubs/:city/:clubId" element={<ClubDetailPage />} />

@@ -23,6 +23,7 @@ import json
 import os
 import re
 import sys
+import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -31,6 +32,10 @@ from urllib.request import urlopen, Request
 API_BASE = 'https://api.clubin.info/api'
 SITE_URL = 'https://clubin.co.in'
 DIST_DIR = Path(__file__).resolve().parent.parent / 'dist'
+# Last-known-good API snapshots shared with generate-sitemap.mjs. Persisted
+# across CI runs via actions/cache so an API outage can't gut the pre-rendered
+# pages (which would otherwise return 404 for every club/event).
+CACHE_DIR = Path(__file__).resolve().parent.parent / '.api-cache'
 OG_IMAGE = 'https://clubin.co.in/clubin-logo-og.png'
 
 CITIES = ['Bengaluru', 'Delhi NCR', 'Goa', 'Mumbai', 'Pune', 'Hyderabad', 'Chandigarh', 'Jaipur', 'Chennai']
@@ -44,6 +49,21 @@ CITY_ALIASES = {
     'faridabad': 'Delhi NCR',
 }
 
+# High-intent sub-areas that fold into a metro by location (so club/event detail
+# URLs are unchanged) but get their own landing page listing matching venues.
+# slug, display name, location substrings to match. MUST match SUBCITIES in
+# src/lib/urls.ts and scripts/generate-sitemap.mjs.
+SUBCITIES = [
+    ('gurgaon', 'Gurgaon', ('gurgaon', 'gurugram')),
+    ('noida', 'Noida', ('noida',)),
+    ('lucknow', 'Lucknow', ('lucknow',)),
+]
+
+
+def location_matches(location, needles):
+    loc = (location or '').lower()
+    return any(n in loc for n in needles)
+
 # Slim sitewide JSON-LD graph for subpages — the template's full @graph
 # (FAQPage, WebPage about the home page, etc.) only belongs on the home page.
 SLIM_GRAPH = {
@@ -53,13 +73,13 @@ SLIM_GRAPH = {
             '@type': 'Organization',
             '@id': f'{SITE_URL}/#organization',
             'name': 'Clubin',
-            'url': SITE_URL,
+            'url': f'{SITE_URL}/',
             'logo': {'@type': 'ImageObject', 'url': OG_IMAGE},
         },
         {
             '@type': 'WebSite',
             '@id': f'{SITE_URL}/#website',
-            'url': SITE_URL,
+            'url': f'{SITE_URL}/',
             'name': 'Clubin - Best Nightclub & Party Event Entry App in India',
             'publisher': {'@id': f'{SITE_URL}/#organization'},
         },
@@ -91,15 +111,32 @@ def city_name_from_slug(slug):
     return slug.replace('-', ' ').title()
 
 
-def fetch_json(url):
-    """Fetch JSON from URL."""
-    try:
-        req = Request(url, headers={'User-Agent': 'Clubin-Prerender/1.0'})
-        with urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read())
-    except Exception as e:
-        print(f'  Warning: Could not fetch {url}: {e}')
-        return None
+def slugify(text):
+    """Slug rules MUST match src/lib/urls.ts and scripts/generate-sitemap.mjs exactly."""
+    text = (text or '').lower()
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    text = text.strip('-')
+    return text[:60].rstrip('-')
+
+
+def slug_id(name, ident):
+    """`slug-<id>`, or just `<id>` when the name yields no slug."""
+    s = slugify(name)
+    return f'{s}-{ident}' if s else ident
+
+
+def fetch_json(url, retries=3, timeout=15):
+    """Fetch JSON from URL with retries. Returns None on persistent failure."""
+    for attempt in range(1, retries + 1):
+        try:
+            req = Request(url, headers={'User-Agent': 'Clubin-Prerender/1.0'})
+            with urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read())
+        except Exception as e:
+            print(f'  Attempt {attempt}/{retries} failed for {url}: {e}')
+            if attempt < retries:
+                time.sleep(attempt * 2)
+    return None
 
 
 def post_json(url, payload):
@@ -118,16 +155,33 @@ def post_json(url, payload):
 
 
 def fetch_json_cached(url, cache_path):
-    """Fetch JSON, using cache if --cached flag is set."""
+    """
+    Fetch JSON with graceful degradation:
+      --cached + cache present  -> use cache (fast local dev, no network)
+      live fetch succeeds       -> refresh the cache snapshot and return it
+      live fetch fails + cache  -> fall back to the last cached snapshot
+      otherwise                 -> None
+    """
+    cache_path = str(cache_path)
     if '--cached' in sys.argv and os.path.exists(cache_path):
+        print(f'  Using cache (--cached): {cache_path}')
         with open(cache_path) as f:
             return json.load(f)
     data = fetch_json(url)
     if data is not None:
-        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-        with open(cache_path, 'w') as f:
-            json.dump(data, f)
-    return data
+        try:
+            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+            with open(cache_path, 'w') as f:
+                json.dump(data, f)
+        except OSError as e:
+            print(f'  Warning: could not write cache {cache_path}: {e}')
+        return data
+    if os.path.exists(cache_path):
+        print(f'  Using cached snapshot (live API unavailable): {cache_path}')
+        with open(cache_path) as f:
+            return json.load(f)
+    print(f'  No data available for {url} (live API down, no cache).')
+    return None
 
 
 def read_template():
@@ -239,6 +293,7 @@ def body_wrap(inner, city_slugs_with_clubs=None):
         '<nav>'
         + link('/', 'Clubin') + ' &middot; '
         + link('/clubs/', 'Browse Clubs') + ' &middot; '
+        + link('/explore/', 'Explore') + ' &middot; '
         + link('/list-your-club/', 'List Your Club')
         + '</nav>'
     )
@@ -248,7 +303,7 @@ def body_wrap(inner, city_slugs_with_clubs=None):
     footer = (
         '<h2>Explore Clubin</h2>'
         f'<p>{city_links}</p>'
-        f'<p class="muted">{link("/support/", "Support")} &middot; {link("/terms/", "Terms of Service")} &middot; {link("/privacy/", "Privacy Policy")} &middot; '
+        f'<p class="muted">{link("/explore/", "Explore all clubs & events")} &middot; {link("/support/", "Support")} &middot; {link("/terms/", "Terms of Service")} &middot; {link("/privacy/", "Privacy Policy")} &middot; '
         f'{link("/list-your-club/", "Partner with Clubin")}</p>'
     )
     return SEO_STYLE + f'<div class="seo-static"><div class="wrap">{nav}{inner}{footer}</div></div>'
@@ -342,7 +397,7 @@ def event_list_html(evts, heading=None, limit=None):
     if limit:
         evts = evts[:limit]
     items = ''.join(
-        f'<li>{link(route_path("/events/" + e["id"]), e["title"])} '
+        f'<li>{link(route_path("/events/" + slug_id(e["title"], e["id"])), e["title"])} '
         f'<span class="muted">at {esc(e.get("club", ""))} — {esc(fmt_date(event_date_str(e)))} · {esc(event_price_text(e))}</span></li>'
         for e in evts
     )
@@ -360,7 +415,7 @@ def club_list_html(club_items, heading=None):
         desc = (c.get('description') or '').strip()
         desc_html = f' <span class="muted">— {esc(desc[:140])}</span>' if desc else ''
         items += (
-            f'<li>{link(route_path("/clubs/" + slug + "/" + c["id"]), c["name"])} '
+            f'<li>{link(route_path("/clubs/" + slug + "/" + slug_id(c["name"], c["id"])), c["name"])} '
             f'<span class="muted">({esc(c.get("location", ""))})</span>{desc_html}</li>'
         )
     head = f'<h2>{esc(heading)}</h2>' if heading else ''
@@ -400,6 +455,43 @@ def faq_schema(qa_pairs):
     }
 
 
+def render_city_page(template, clubs_url, slug, display, city_clubs, city_events):
+    """Write a /clubs/<slug>/ landing page. Shared by curated cities and sub-areas."""
+    city_url = page_url(f'/clubs/{slug}')
+    club_names = [c['name'] for c in city_clubs]
+    if club_names:
+        description = (f'Discover the best nightclubs in {display}: {", ".join(club_names[:4])} & more. '
+                       f'Book free guestlist entry, party tickets and VIP tables on Clubin.')[:160]
+    else:
+        description = f'Discover the hottest nightclubs and party venues in {display}. Book guestlists and get VIP table reservations on Clubin.'
+    qa = city_faq(display, club_names)
+    city_body = body_wrap(
+        f'<h1>Best Nightclubs in {esc(display)}</h1>'
+        f'<p>Looking for the best nightlife in {esc(display)}? Browse top nightclubs and party venues, '
+        f'check upcoming events, and book free guestlist entry or VIP tables on Clubin.</p>'
+        + club_list_html(city_clubs, heading=f'Nightclubs in {display}')
+        + event_list_html(city_events, heading=f'Upcoming Parties &amp; Events in {display}')
+        + faq_html(qa)
+    )
+    structured = [
+        {'@context': 'https://schema.org', '@type': 'CollectionPage', 'name': f'Best Nightclubs in {display}', 'url': city_url},
+        {'@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+            {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
+            {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': clubs_url},
+            {'@type': 'ListItem', 'position': 3, 'name': display},
+        ]},
+    ]
+    if qa:
+        structured.append(faq_schema(qa))
+    html = inject_meta(template,
+        title=f'Best Nightclubs in {display} - Guestlist, Events & VIP Tables | Clubin',
+        description=description,
+        url=city_url,
+        structured_data=structured,
+    )
+    write_route(f'/clubs/{slug}', inject_body(html, city_body))
+
+
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -408,8 +500,8 @@ def main():
 
     # Fetch data
     print('Fetching API data...')
-    clubs = fetch_json_cached(f'{API_BASE}/clubs', '/tmp/prerender_clubs.json') or []
-    events = fetch_json_cached(f'{API_BASE}/events', '/tmp/prerender_events.json') or []
+    clubs = fetch_json_cached(f'{API_BASE}/clubs', CACHE_DIR / 'clubs.json') or []
+    events = fetch_json_cached(f'{API_BASE}/events', CACHE_DIR / 'events.json') or []
 
     # Collect promoters
     promoter_map = {}
@@ -441,6 +533,14 @@ def main():
         ref = e.get('promoterRef')
         if ref and ref.get('id'):
             events_by_promoter[ref['id']].append(e)
+
+    # Sub-area landing pages — only generated where real venues match (no thin pages)
+    subcity_pages = []
+    for sub_slug, sub_name, needles in SUBCITIES:
+        sc_clubs = [c for c in clubs if location_matches(c.get('location', ''), needles)]
+        sc_events = [e for e in upcoming if location_matches(e.get('location') or e.get('region', ''), needles)]
+        if sc_clubs or sc_events:
+            subcity_pages.append((sub_slug, sub_name, sc_clubs, sc_events))
 
     count = 0
 
@@ -602,6 +702,14 @@ def main():
             counts.append(f'{n_events} upcoming event{"s" if n_events != 1 else ""}')
         suffix = f' <span class="muted">({", ".join(counts)})</span>' if counts else ''
         city_items += f'<li>{link(f"/clubs/{slug}/", f"Best Nightclubs in {city}")}{suffix}</li>'
+    for sub_slug, sub_name, sc_clubs, sc_events in subcity_pages:
+        counts = []
+        if sc_clubs:
+            counts.append(f'{len(sc_clubs)} club{"s" if len(sc_clubs) != 1 else ""}')
+        if sc_events:
+            counts.append(f'{len(sc_events)} upcoming event{"s" if len(sc_events) != 1 else ""}')
+        suffix = f' <span class="muted">({", ".join(counts)})</span>' if counts else ''
+        city_items += f'<li>{link(f"/clubs/{sub_slug}/", f"Best Nightclubs in {sub_name}")}{suffix}</li>'
     clubs_body = body_wrap(
         '<h1>Nightclubs &amp; Party Venues in India</h1>'
         '<p>Browse the best nightclubs, lounges and party venues across India. Book free guestlist entry and VIP tables on Clubin.</p>'
@@ -632,62 +740,54 @@ def main():
     write_route('/clubs', inject_body(html, clubs_body))
     count += 1
 
-    # 2. City pages — real club + event content, dynamic description, city FAQ
+    # 1b. /explore — internal-linking hub indexing every city, club and event
+    explore_url = page_url('/explore')
+    explore_city_links = ' &middot; '.join(
+        link(f'/clubs/{c.lower().replace(" ", "-")}/', f'Nightclubs in {c}') for c in CITIES
+    )
+    explore_sub_links = ' &middot; '.join(
+        link(f'/clubs/{s}/', f'Nightclubs in {n}') for (s, n, _c, _e) in subcity_pages
+    )
+    all_city_links = explore_city_links + ((' &middot; ' + explore_sub_links) if explore_sub_links else '')
+    explore_body = body_wrap(
+        '<h1>Explore Clubin — Nightclubs, Events &amp; Cities</h1>'
+        '<p>Browse every nightclub, upcoming party and city on Clubin in one place. '
+        'Find clubs and events across India and book free guestlist entry or VIP tables.</p>'
+        f'<h2>Browse by City</h2><p>{all_city_links}</p>'
+        + club_list_html(clubs, heading='All Nightclubs')
+        + event_list_html(upcoming, heading='Upcoming Parties &amp; Events')
+    )
+    html = inject_meta(template,
+        title='Explore Nightclubs, Events & Cities | Clubin',
+        description='Browse every nightclub, upcoming party and city on Clubin in one place. Find clubs and events across Bengaluru, Mumbai, Delhi NCR, Goa, Pune, Hyderabad and more.',
+        url=explore_url,
+        structured_data=[
+            {'@context': 'https://schema.org', '@type': 'CollectionPage', 'name': 'Explore Clubin', 'url': explore_url},
+            {'@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
+                {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
+                {'@type': 'ListItem', 'position': 2, 'name': 'Explore'},
+            ]},
+        ]
+    )
+    write_route('/explore', inject_body(html, explore_body))
+    count += 1
+
+    # 2. City pages — curated cities + sub-area landing pages (Gurgaon/Noida/Lucknow)
     for city in CITIES:
         slug = city.lower().replace(' ', '-')
-        city_url = page_url(f'/clubs/{slug}')
-        city_clubs = clubs_by_city.get(slug, [])
-        city_events = events_by_city.get(slug, [])
-        club_names = [c['name'] for c in city_clubs]
-
-        if club_names:
-            description = (f'Discover the best nightclubs in {city}: {", ".join(club_names[:4])} & more. '
-                           f'Book free guestlist entry, party tickets and VIP tables on Clubin.')[:160]
-        else:
-            description = f'Discover the hottest nightclubs and party venues in {city}. Book guestlists and get VIP table reservations on Clubin.'
-
-        qa = city_faq(city, club_names)
-        city_body = body_wrap(
-            f'<h1>Best Nightclubs in {esc(city)}</h1>'
-            f'<p>Looking for the best nightlife in {esc(city)}? Browse top nightclubs and party venues, '
-            f'check upcoming events, and book free guestlist entry or VIP tables on Clubin.</p>'
-            + club_list_html(city_clubs, heading=f'Nightclubs in {city}')
-            + event_list_html(city_events, heading=f'Upcoming Parties &amp; Events in {city}')
-            + faq_html(qa)
-        )
-        structured = [
-            {
-                '@context': 'https://schema.org',
-                '@type': 'CollectionPage',
-                'name': f'Best Nightclubs in {city}',
-                'url': city_url,
-            },
-            {
-                '@context': 'https://schema.org',
-                '@type': 'BreadcrumbList',
-                'itemListElement': [
-                    {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': f'{SITE_URL}/'},
-                    {'@type': 'ListItem', 'position': 2, 'name': 'Clubs', 'item': clubs_url},
-                    {'@type': 'ListItem', 'position': 3, 'name': city},
-                ],
-            },
-        ]
-        if qa:
-            structured.append(faq_schema(qa))
-        html = inject_meta(template,
-            title=f'Best Nightclubs in {city} - Guestlist, Events & VIP Tables | Clubin',
-            description=description,
-            url=city_url,
-            structured_data=structured,
-        )
-        write_route(f'/clubs/{slug}', inject_body(html, city_body))
+        render_city_page(template, clubs_url, slug, city,
+                         clubs_by_city.get(slug, []), events_by_city.get(slug, []))
+        count += 1
+    for sub_slug, sub_name, sc_clubs, sc_events in subcity_pages:
+        render_city_page(template, clubs_url, sub_slug, sub_name, sc_clubs, sc_events)
         count += 1
 
     # 3. Club detail pages (+ short link pages /c/:code)
     for club in clubs:
         city_slug = get_city_slug(club.get('location', 'india'))
         city = city_name_from_slug(city_slug)
-        club_url = page_url(f'/clubs/{city_slug}/{club["id"]}')
+        club_seg = slug_id(club['name'], club['id'])
+        club_url = page_url(f'/clubs/{city_slug}/{club_seg}')
         club_events = events_by_club.get(club['id'], [])
 
         nightclub_sd = {
@@ -748,8 +848,13 @@ def main():
             ]
         )
         html = inject_body(html, club_body)
-        write_route(f'/clubs/{city_slug}/{club["id"]}', html)
+        write_route(f'/clubs/{city_slug}/{club_seg}', html)
         count += 1
+        # Legacy bare-UUID path: same HTML (its canonical already points to the
+        # slug URL), so Google consolidates and previously-indexed links never 404.
+        if club_seg != club['id']:
+            write_route(f'/clubs/{city_slug}/{club["id"]}', html)
+            count += 1
 
         # Also create a short link and pre-render /c/:code for club sharing
         # (canonical inside points to the full club URL, so no duplicate-content risk)
@@ -763,7 +868,8 @@ def main():
     shortlink_count = 0
     for event in events:
         date_str = event_date_str(event)
-        event_url = page_url(f'/events/{event["id"]}')
+        event_seg = slug_id(event['title'], event['id'])
+        event_url = page_url(f'/events/{event_seg}')
         event_location = event.get('location', '')
         city_slug = event_city_slug(event)
         city = city_name_from_slug(city_slug) if city_slug else ''
@@ -829,7 +935,7 @@ def main():
         club_link_html = ''
         if club:
             club_city_slug = get_city_slug(club.get('location', 'india'))
-            club_link_html = f'<p>Venue: {link(route_path("/clubs/" + club_city_slug + "/" + club["id"]), club["name"])}</p>'
+            club_link_html = f'<p>Venue: {link(route_path("/clubs/" + club_city_slug + "/" + slug_id(club["name"], club["id"])), club["name"])}</p>'
         elif event.get('club'):
             club_link_html = f'<p>Venue: {esc(event["club"])}</p>'
         promoter_html = ''
@@ -877,8 +983,12 @@ def main():
             ]
         )
         html = inject_body(html, event_body)
-        write_route(f'/events/{event["id"]}', html)
+        write_route(f'/events/{event_seg}', html)
         count += 1
+        # Legacy bare-UUID path → same content, canonical points to the slug URL.
+        if event_seg != event['id']:
+            write_route(f'/events/{event["id"]}', html)
+            count += 1
 
         # Also create a short link and pre-render /e/:code so social media crawlers
         # see OG tags when short links are shared (crawlers don't execute JS)

@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Club } from '../types';
 import { CITIES } from '../types';
 import { fetchClubs, APP_STORE_URL, PLAY_STORE_URL, isMobileDevice } from '../api';
+import { clubPath, locationInCity, SUBCITIES } from '../lib/urls';
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, Calendar, ArrowLeft, Search, X, Download } from 'lucide-react';
 
@@ -24,12 +25,15 @@ export function ClubsListPage() {
         return () => clearTimeout(timer);
     }, []);
 
-    // Get display name for city
+    // Get display name for city (curated city, sub-area, or a titlecased slug)
     const cityData = CITIES.find(
         (c) => c.id.toLowerCase().replace(/\s+/g, '-') === city?.toLowerCase()
     );
-    const displayCity = cityData?.label || city || 'All Cities';
-    const cityParam = cityData?.searchKey || cityData?.id || city;
+    const subCity = SUBCITIES.find((s) => s.slug === city?.toLowerCase());
+    const displayCity =
+        cityData?.label ||
+        subCity?.label ||
+        (city ? city.replace(/-/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase()) : 'All Cities');
 
     // SEO — emit BreadcrumbList as standalone JSON-LD, use URL slug for canonical
     const citySlug = city || '';
@@ -62,8 +66,10 @@ export function ClubsListPage() {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await fetchClubs(cityParam);
-                setClubs(data);
+                // Fetch all clubs and filter client-side so the live page matches the
+                // pre-rendered one for every city/sub-area slug (incl. Gurgaon, Noida, Lucknow).
+                const data = await fetchClubs();
+                setClubs(city ? data.filter((c) => locationInCity(c.location, city)) : data);
             } catch (err) {
                 setError('Failed to load clubs. Please try again.');
                 console.error(err);
@@ -72,7 +78,7 @@ export function ClubsListPage() {
             }
         }
         loadClubs();
-    }, [cityParam]);
+    }, [city]);
 
     // Filter clubs by search query
     const filteredClubs = clubs.filter((club) =>
@@ -191,7 +197,7 @@ export function ClubsListPage() {
                         {filteredClubs.map((club) => (
                             <Link
                                 key={club.id}
-                                to={`/clubs/${city}/${club.id}`}
+                                to={clubPath(city || '', club)}
                                 className="group block overflow-hidden rounded-2xl bg-[#1e1b2e]/90 backdrop-blur-xl border border-white/5 transition-all duration-500 hover:bg-[#252139]/90 hover:border-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1"
                             >
                                 {/* Club Image */}
