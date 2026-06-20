@@ -5,10 +5,12 @@ import './index.css'
 import App from './App.tsx'
 import { LocationSelectPage, ExplorePage, ClubsListPage, ClubDetailPage, EventDetailPage, PromoterDetailPage, ListYourClubPage, ScheduleMeetingPage, TermsOfServicePage, PrivacyPolicyPage, DeleteAccountPage, SupportPage } from './pages'
 import { ScrollToTop } from './components/ScrollToTop.tsx'
+import { AuthProvider } from './lib/auth'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+      <AuthProvider>
       <ScrollToTop />
       <Routes>
         {/* Home page (existing landing page) */}
@@ -45,6 +47,7 @@ createRoot(document.getElementById('root')!).render(
         {/* Fallback to home */}
         <Route path="*" element={<App />} />
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )

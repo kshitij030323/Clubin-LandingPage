@@ -1,6 +1,6 @@
 // API client for fetching clubs and events from the backend
 
-import type { Club, Event, ShortLinkResponse, ShortLinkCreateResponse, PromoterPublicResponse } from './types';
+import type { Club, Event, ShortLinkResponse, ShortLinkCreateResponse, PromoterPublicResponse, Booking, AuthUser, BookingGuest } from './types';
 
 const API_BASE = 'https://api.clubin.info/api';
 
@@ -180,4 +180,85 @@ export function openInApp(type: 'event' | 'club', id: string): void {
             window.location.href = storeUrl;
         }
     }, 2000);
+}
+
+/* ───────────── Auth + Guestlist booking (web) ───────────── */
+
+function extractApiError(data: unknown, fallback: string): string {
+    const d = data as { error?: unknown; message?: string } | null;
+    if (!d) return fallback;
+    if (typeof d.error === 'string') return d.error;
+    if (Array.isArray(d.error) && d.error.length) {
+        return d.error.map((e: { message?: string }) => e?.message).filter(Boolean).join(', ') || fallback;
+    }
+    return d.message || fallback;
+}
+
+export interface VerifyOtpResult {
+    verified: boolean;
+    isNewUser: boolean;
+    user?: AuthUser;
+    token?: string;
+    message?: string;
+}
+
+export interface AuthResult {
+    user: AuthUser;
+    token: string;
+}
+
+export interface CreateBookingPayload {
+    eventId: string;
+    couples: number;
+    ladies: number;
+    stags: number;
+    guests: BookingGuest[];
+}
+
+/** Send a WhatsApp OTP to a phone in `+91XXXXXXXXXX` format. */
+export async function sendOtp(phone: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+    });
+    if (!res.ok) {
+        throw new Error(extractApiError(await res.json().catch(() => null), 'Failed to send OTP'));
+    }
+}
+
+/** Verify an OTP. Existing users get { user, token }; new users get { isNewUser: true }. */
+export async function verifyOtp(phone: string, otp: string): Promise<VerifyOtpResult> {
+    const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(extractApiError(data, 'Invalid OTP'));
+    return data as VerifyOtpResult;
+}
+
+/** Complete sign-up for a new user (after OTP verified) and get a token. */
+export async function phoneAuth(phone: string, name: string): Promise<AuthResult> {
+    const res = await fetch(`${API_BASE}/auth/phone-auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, name }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(extractApiError(data, 'Could not complete sign-up'));
+    return data as AuthResult;
+}
+
+/** Create a pay-at-venue guestlist booking. Requires a Bearer token. */
+export async function createBooking(token: string, payload: CreateBookingPayload): Promise<Booking> {
+    const res = await fetch(`${API_BASE}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(extractApiError(data, 'Failed to create booking'));
+    return data as Booking;
 }

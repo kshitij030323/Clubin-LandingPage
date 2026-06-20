@@ -3,8 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Skeleton } from '../components/Skeleton';
 import { VenueImageSlideshow } from '../components/VenueImageSlideshow';
 import type { Event } from '../types';
-import { fetchEventDetails, formatDate, formatTime, createShortLink, openInApp, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
+import { fetchEventDetails, formatDate, formatTime, createShortLink, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { extractId, eventUrl as buildEventUrl } from '../lib/urls';
+import { BookingModal } from '../components/booking/BookingModal';
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink, Instagram, User, Music, Image, Play, Volume2, VolumeX } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export function EventDetailPage() {
     const [shortUrl, setShortUrl] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
+    const [showBooking, setShowBooking] = useState(false);
 
     // Track screen size for performance
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
@@ -153,11 +155,7 @@ export function EventDetailPage() {
 
     const handleGetTickets = () => {
         if (!event) return;
-        if (isMobileDevice()) {
-            openInApp('event', event.id);
-        } else {
-            setShowShareModal(true);
-        }
+        setShowBooking(true);
     };
 
     if (loading) {
@@ -466,7 +464,7 @@ export function EventDetailPage() {
                                     : 'bg-white/10 text-white/30 cursor-not-allowed'
                                     }`}
                             >
-                                {isGuestlistOpen ? 'Get Tickets on App' : 'Guestlist Closed'}
+                                {isGuestlistOpen ? 'Get Tickets' : 'Guestlist Closed'}
                             </button>
                         </div>
                     </div>
@@ -839,6 +837,8 @@ export function EventDetailPage() {
                     </div>
                 </div>
             )}
+
+            <BookingModal event={event} open={showBooking} onClose={() => setShowBooking(false)} />
         </div>
     );
 }

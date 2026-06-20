@@ -59,6 +59,9 @@ export interface Event {
     originalStagPrice?: number | null;
     originalCouplePrice?: number | null;
     originalLadiesPrice?: number | null;
+    stagDescription?: string;
+    coupleDescription?: string;
+    ladiesDescription?: string;
     date: string;
     startTime: string;
     endTime: string;
@@ -143,3 +146,30 @@ export const CITIES: City[] = [
     { id: 'Jaipur', label: 'Jaipur', icon: 'crown' },
     { id: 'Chennai', label: 'Chennai', icon: 'waves' },
 ];
+
+// Web guestlist booking + auth types
+export interface BookingGuest {
+    name: string;
+    gender: 'male' | 'female' | 'couple';
+    type: 'couple' | 'lady' | 'stag';
+}
+
+export interface Booking {
+    id: string;
+    eventId: string;
+    couples: number;
+    ladies: number;
+    stags: number;
+    guests?: BookingGuest[] | null;
+    status: string;
+    qrCode: string;
+    createdAt: string;
+    event?: Event;
+}
+
+export interface AuthUser {
+    id: string;
+    phone: string;
+    name: string;
+    isAdmin?: boolean;
+}
