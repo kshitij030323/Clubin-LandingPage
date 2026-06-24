@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
 import { APP_STORE_URL, PLAY_STORE_URL, isMobileDevice } from '../api';
+import { AccountButton } from '../components/AccountButton';
 
 const getCityIcon = (iconName: string) => {
     const props = { className: "w-6 h-6 sm:w-8 sm:h-8" };
@@ -85,7 +86,7 @@ export function LocationSelectPage() {
                         height="128"
                     />
 
-                    <div className="w-10" /> {/* Spacer */}
+                    <AccountButton />
                 </div>
             </header>
 

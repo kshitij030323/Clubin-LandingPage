@@ -173,3 +173,49 @@ export interface AuthUser {
     name: string;
     isAdmin?: boolean;
 }
+
+// ───────────── PayU payment integration ─────────────
+
+export type BookingPaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
+
+/**
+ * The PayU hosted-checkout form body. This is built and SHA-512–signed entirely
+ * on the backend (the salt key never reaches the browser); the client posts it
+ * verbatim. Keys are PayU field names (key, txnid, amount, hash, firstname, …).
+ */
+export type PayuParams = Record<string, string>;
+
+export interface PaymentBreakdown {
+    /** Sum of guest prices (couples/ladies/stags) for the booking. */
+    subtotal: number;
+    /** Platform/convenience fee — admin-controlled, always > 0 so nothing is free. */
+    convenienceFee: number;
+    /** Central GST (9%) on the ticket subtotal. */
+    cgst: number;
+    /** State GST (9%) on the ticket subtotal. */
+    sgst: number;
+    /** Amount actually charged via PayU = subtotal + convenienceFee + cgst + sgst. */
+    total: number;
+}
+
+/** Response from POST /api/payments/initiate — a pending booking + signed PayU params. */
+export interface PaymentInitiateResponse {
+    bookingId: string;
+    txnid: string;
+    /** Total amount as a 2-dp string, matching `params.amount`. */
+    amount: string;
+    breakdown: PaymentBreakdown;
+    /** PayU hosted-checkout URL to POST `params` to (test or production). */
+    action: string;
+    /** Complete, server-signed form body to post to `action`. */
+    params: PayuParams;
+}
+
+/** Response from GET /api/payments/status — authoritative payment + booking state. */
+export interface PaymentStatusResponse {
+    bookingId: string;
+    paymentStatus: BookingPaymentStatus;
+    /** Full booking (incl. event + guests) so the ticket can be rendered after payment. */
+    booking: Booking;
+    breakdown?: PaymentBreakdown;
+}

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock-payu": "node scripts/dev/mock-payu-server.mjs",
     "build": "node scripts/generate-sitemap.mjs && tsc -b && vite build && python3 scripts/prerender.py",
     "build:no-prerender": "tsc -b && vite build",
     "sitemap": "node scripts/generate-sitemap.mjs",

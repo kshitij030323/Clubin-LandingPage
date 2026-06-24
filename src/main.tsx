@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
-import { LocationSelectPage, ExplorePage, ClubsListPage, ClubDetailPage, EventDetailPage, PromoterDetailPage, ListYourClubPage, ScheduleMeetingPage, TermsOfServicePage, PrivacyPolicyPage, DeleteAccountPage, SupportPage } from './pages'
+import { LocationSelectPage, ExplorePage, ClubsListPage, ClubDetailPage, EventDetailPage, PromoterDetailPage, ListYourClubPage, ScheduleMeetingPage, TermsOfServicePage, PrivacyPolicyPage, DeleteAccountPage, SupportPage, PaymentReturnPage, TicketsPage } from './pages'
 import { ScrollToTop } from './components/ScrollToTop.tsx'
 import { AuthProvider } from './lib/auth'
 
@@ -34,6 +34,12 @@ createRoot(document.getElementById('root')!).render(
 
         {/* Support */}
         <Route path="/support" element={<SupportPage />} />
+
+        {/* PayU payment return (success/failure landing after hosted checkout) */}
+        <Route path="/payment/return" element={<PaymentReturnPage />} />
+
+        {/* User login + their guestlist tickets */}
+        <Route path="/tickets" element={<TicketsPage />} />
 
         {/* Legal pages */}
         <Route path="/terms" element={<TermsOfServicePage />} />

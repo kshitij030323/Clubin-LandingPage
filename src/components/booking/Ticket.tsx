@@ -68,8 +68,8 @@ export const TicketCard = forwardRef<HTMLDivElement, TicketProps>(function Ticke
                         <p className="text-base font-extrabold">{guests}</p>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold tracking-wide text-neutral-500">PAY AT VENUE</p>
-                        <p className="text-base font-extrabold">{amount > 0 ? `₹${amount}` : 'FREE'}</p>
+                        <p className="text-[9px] font-bold tracking-wide text-neutral-500">PAID</p>
+                        <p className="text-base font-extrabold">{amount > 0 ? `₹${amount}` : '—'}</p>
                     </div>
                     <div>
                         <p className="text-[9px] font-bold tracking-wide text-neutral-500">BOOKING</p>

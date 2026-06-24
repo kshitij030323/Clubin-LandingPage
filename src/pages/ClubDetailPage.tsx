@@ -6,6 +6,7 @@ import type { Club, Event } from '../types';
 import { fetchClubDetails, fetchEventsByClubId, resolveShortLink, createShortLink, formatDate, formatTime, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { extractId, clubUrl as buildClubUrl, eventPath, getCitySlug } from '../lib/urls';
 import { useSEO } from '../hooks/useSEO';
+import { AccountButton } from '../components/AccountButton';
 import { MapPin, ArrowLeft, Calendar, Clock, ExternalLink, Share2, Check, Copy, ChevronDown, ChevronUp, Instagram, User, Music } from 'lucide-react';
 
 function getTodayDateString(): string {
@@ -457,12 +458,15 @@ export function ClubDetailPage() {
                             <img src="/clubin-logo-header.webp" alt="Clubin" className="h-14 w-auto object-contain" width="192" height="128" />
                         </div>
 
-                        <button
-                            onClick={handleShare}
-                            className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
-                        >
-                            <Share2 className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handleShare}
+                                className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
+                            >
+                                <Share2 className="w-5 h-5" />
+                            </button>
+                            <AccountButton />
+                        </div>
                     </div>
 
                     {/* Hero Image Section */}

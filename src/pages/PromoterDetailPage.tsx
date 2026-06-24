@@ -5,6 +5,7 @@ import type { PromoterPublicResponse } from '../types';
 import { fetchPromoterPublic, formatDate, formatTime } from '../api';
 import { eventPath } from '../lib/urls';
 import { useSEO } from '../hooks/useSEO';
+import { AccountButton } from '../components/AccountButton';
 import { ArrowLeft, Calendar, Clock, Instagram, ExternalLink, Music, MapPin } from 'lucide-react';
 
 export function PromoterDetailPage() {
@@ -152,13 +153,14 @@ export function PromoterDetailPage() {
                     {/* Left Column: Promoter Info */}
                     <div className="w-[400px] xl:w-[450px] flex-shrink-0 h-full overflow-y-auto border-r border-white/5 bg-[#0a0a0a] relative">
                         {/* Back Button */}
-                        <div className="p-6">
+                        <div className="p-6 flex items-center justify-between">
                             <button
                                 onClick={handleBackAction}
                                 className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10"
                             >
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
+                            <AccountButton />
                         </div>
 
                         {/* Promoter Profile */}
@@ -281,6 +283,7 @@ export function PromoterDetailPage() {
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                         <span className="text-sm font-semibold truncate">{promoter.name}</span>
+                        <div className="ml-auto"><AccountButton /></div>
                     </div>
 
                     {/* Promoter Profile Header */}

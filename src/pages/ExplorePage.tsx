@@ -6,6 +6,7 @@ import { fetchClubs, fetchEvents, formatDate } from '../api';
 import { useSEO } from '../hooks/useSEO';
 import { clubPath, eventPath, getCitySlug, SUBCITIES } from '../lib/urls';
 import { ArrowLeft, MapPin, Calendar } from 'lucide-react';
+import { AccountButton } from '../components/AccountButton';
 
 const PAGE_URL = 'https://clubin.co.in/explore';
 
@@ -59,7 +60,7 @@ export function ExplorePage() {
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <img src="/clubin-logo-header.webp" alt="Clubin" className="h-14 w-auto object-contain" width="192" height="128" />
-                <div className="w-10" />
+                <AccountButton />
             </div>
 
             <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pt-28">

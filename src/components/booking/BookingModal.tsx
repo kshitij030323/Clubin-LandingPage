@@ -1,16 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
-import { X, ArrowLeft, Minus, Plus, Loader2, Download, Check, PartyPopper } from 'lucide-react';
-import { toPng } from 'html-to-image';
-import type { Event, Booking } from '../../types';
+import { useEffect, useState } from 'react';
+import { X, ArrowLeft, Minus, Plus, Loader2, ShieldCheck, Lock } from 'lucide-react';
+import type { Event, PaymentInitiateResponse } from '../../types';
 import { useAuth } from '../../lib/auth';
-import { sendOtp, verifyOtp, phoneAuth, createBooking } from '../../api';
-import { TicketCard } from './Ticket';
+import { sendOtp, verifyOtp, phoneAuth, initiatePayment } from '../../api';
+import { submitPayuForm } from '../../lib/payu';
 import {
     totalGuests, calcAmountAtVenue, descriptionLines, buildNameSlots, buildGuestPayload,
     type GuestCounts,
 } from '../../lib/booking';
 
-type Step = 'phone' | 'otp' | 'name' | 'quantity' | 'names' | 'ticket';
+type Step = 'phone' | 'otp' | 'name' | 'quantity' | 'names' | 'review';
 
 const GUEST_ROWS = [
     { key: 'couples', label: 'Couples', priceKey: 'couplePrice', origKey: 'originalCouplePrice', descKey: 'coupleDescription', unit: 'per couple' },
@@ -24,7 +23,7 @@ const HEADERS: Record<Step, string> = {
     name: 'Almost there',
     quantity: 'Select Guests',
     names: 'Guest Names',
-    ticket: "You're on the list!",
+    review: 'Review & Pay',
 };
 
 export function BookingModal({ event, open, onClose }: { event: Event; open: boolean; onClose: () => void }) {
@@ -35,10 +34,10 @@ export function BookingModal({ event, open, onClose }: { event: Event; open: boo
     const [name, setName] = useState('');
     const [counts, setCounts] = useState<GuestCounts>({ couples: 0, ladies: 0, stags: 0 });
     const [names, setNames] = useState<string[]>([]);
-    const [booking, setBooking] = useState<Booking | null>(null);
+    const [payment, setPayment] = useState<PaymentInitiateResponse | null>(null);
+    const [redirecting, setRedirecting] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const ticketRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!open) return;
@@ -88,32 +87,32 @@ export function BookingModal({ event, open, onClose }: { event: Event; open: boo
         setStep('names');
     };
 
-    const handleConfirm = async () => {
+    // Create a pending booking + fetch server-signed PayU params, then show the
+    // payment summary. The ticket is issued on /payment/return after PayU's
+    // verified callback marks the payment as paid.
+    const handleProceedToPayment = async () => {
         if (names.some((n) => !n.trim())) { setError('Please enter names for all guests'); return; }
         if (!token) { logout(); setStep('phone'); setError('Session expired, please verify your number again'); return; }
         setLoading(true); setError('');
         try {
             const guests = buildGuestPayload(counts, names);
-            const b = await createBooking(token, {
+            const p = await initiatePayment(token, {
                 eventId: event.id, couples: counts.couples, ladies: counts.ladies, stags: counts.stags, guests,
             });
-            setBooking(b); setStep('ticket');
+            setPayment(p); setStep('review');
         } catch (e) {
-            const msg = e instanceof Error ? e.message : 'Failed to create booking';
+            const msg = e instanceof Error ? e.message : 'Could not start payment';
             if (msg.toLowerCase().includes('token')) { logout(); setStep('phone'); setError('Session expired, please verify your number again'); }
             else setError(msg);
         } finally { setLoading(false); }
     };
 
-    const handleDownload = async () => {
-        if (!ticketRef.current) return;
-        try {
-            const dataUrl = await toPng(ticketRef.current, { pixelRatio: 2, backgroundColor: '#0a0a0a', cacheBust: true });
-            const a = document.createElement('a');
-            a.href = dataUrl;
-            a.download = `clubin-ticket-${(booking?.qrCode || booking?.id || 'ticket').slice(-8)}.png`;
-            a.click();
-        } catch { setError('Could not download. Please screenshot the ticket instead.'); }
+    // Hand off to PayU's hosted checkout. This navigates the whole tab away, so
+    // we show a "redirecting" state rather than resetting it.
+    const handlePay = () => {
+        if (!payment) return;
+        setRedirecting(true); setError('');
+        submitPayuForm(payment.action, payment.params);
     };
 
     const updateCount = (key: keyof GuestCounts, delta: number) =>
@@ -127,17 +126,18 @@ export function BookingModal({ event, open, onClose }: { event: Event; open: boo
         if (step === 'otp') setStep('phone');
         else if (step === 'name') setStep('otp');
         else if (step === 'names') setStep('quantity');
+        else if (step === 'review') { setPayment(null); setStep('names'); }
     };
 
     return (
         <div
             className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={(e) => { if (e.target === e.currentTarget && step !== 'ticket') onClose(); }}
+            onClick={(e) => { if (e.target === e.currentTarget && !redirecting) onClose(); }}
         >
             <div className="bg-[#120f1d] border border-purple-500/20 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 duration-300 text-white">
                 <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
                     <div className="flex items-center gap-2">
-                        {(step === 'otp' || step === 'name' || step === 'names') && (
+                        {(step === 'otp' || step === 'name' || step === 'names' || step === 'review') && !redirecting && (
                             <button onClick={handleBack} className="p-1.5 rounded-full hover:bg-white/10 transition-colors"><ArrowLeft className="w-5 h-5" /></button>
                         )}
                         <h3 className="font-bold text-base">{HEADERS[step]}</h3>
@@ -241,14 +241,39 @@ export function BookingModal({ event, open, onClose }: { event: Event; open: boo
                         </div>
                     )}
 
-                    {step === 'ticket' && booking && (
-                        <div className="flex flex-col items-center">
-                            <div className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center mb-3">
-                                <PartyPopper className="w-7 h-7 text-white" />
+                    {step === 'review' && payment && (
+                        <div className="space-y-4">
+                            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2.5">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-white/60">Guestlist ({total} {total === 1 ? 'guest' : 'guests'})</span>
+                                    <span className="font-semibold">{payment.breakdown.subtotal > 0 ? `₹${payment.breakdown.subtotal}` : '₹0'}</span>
+                                </div>
+                                {payment.breakdown.convenienceFee > 0 && (
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-white/60">Convenience fee</span>
+                                        <span className="font-semibold">₹{payment.breakdown.convenienceFee}</span>
+                                    </div>
+                                )}
+                                {payment.breakdown.cgst > 0 && (
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-white/60">CGST (9%)</span>
+                                        <span className="font-semibold">₹{payment.breakdown.cgst}</span>
+                                    </div>
+                                )}
+                                {payment.breakdown.sgst > 0 && (
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-white/60">SGST (9%)</span>
+                                        <span className="font-semibold">₹{payment.breakdown.sgst}</span>
+                                    </div>
+                                )}
+                                <div className="border-t border-white/10 pt-2.5 flex items-center justify-between">
+                                    <span className="font-bold">Total payable</span>
+                                    <span className="text-lg font-bold text-purple-300">₹{payment.breakdown.total}</span>
+                                </div>
                             </div>
-                            <p className="text-sm text-white/60 text-center mb-4">Show this QR at the venue. Pay {amount > 0 ? `₹${amount}` : 'nothing — free entry'} at the door.</p>
-                            <div className="w-full rounded-2xl overflow-hidden">
-                                <TicketCard ref={ticketRef} booking={booking} amount={amount} />
+                            <div className="flex items-start gap-2 text-xs text-white/50">
+                                <ShieldCheck className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                                <p>You'll be redirected to PayU's secure checkout to pay. Your ticket with QR code is issued instantly after a successful payment.</p>
                             </div>
                         </div>
                     )}
@@ -256,12 +281,13 @@ export function BookingModal({ event, open, onClose }: { event: Event; open: boo
 
                 {step === 'quantity' && (
                     <div className="p-4 border-t border-white/10 flex-shrink-0">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm text-white/60">{total > 0 ? 'Pay at the venue' : 'Select guests to continue'}</span>
+                        <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm text-white/60">{total > 0 ? 'Subtotal' : 'Select guests to continue'}</span>
                             {total > 0 && (
-                                <span className="text-lg font-bold text-purple-300">{amount > 0 ? `₹${amount}` : 'Free entry'}</span>
+                                <span className="text-lg font-bold text-purple-300">{amount > 0 ? `₹${amount}` : '₹0'}</span>
                             )}
                         </div>
+                        {total > 0 && <p className="text-[11px] text-white/40 mb-3">+ convenience fee, shown before you pay</p>}
                         <button className={primaryBtn} disabled={total === 0} onClick={goToNames}>
                             {total === 0 ? 'Select guests' : `Continue · ${total} ${total === 1 ? 'guest' : 'guests'}`}
                         </button>
@@ -269,15 +295,18 @@ export function BookingModal({ event, open, onClose }: { event: Event; open: boo
                 )}
                 {step === 'names' && (
                     <div className="p-4 border-t border-white/10 flex-shrink-0">
-                        <button className={primaryBtn} disabled={loading} onClick={handleConfirm}>
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5" /> Get on Guestlist</>}
+                        <button className={primaryBtn} disabled={loading} onClick={handleProceedToPayment}>
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Continue to payment'}
                         </button>
                     </div>
                 )}
-                {step === 'ticket' && (
-                    <div className="p-4 border-t border-white/10 flex-shrink-0 space-y-2">
-                        <button className={primaryBtn} onClick={handleDownload}><Download className="w-5 h-5" /> Download Ticket</button>
-                        <button className="w-full py-3 text-white/60 hover:text-white text-sm" onClick={onClose}>Done</button>
+                {step === 'review' && payment && (
+                    <div className="p-4 border-t border-white/10 flex-shrink-0">
+                        <button className={primaryBtn} disabled={redirecting} onClick={handlePay}>
+                            {redirecting
+                                ? <><Loader2 className="w-5 h-5 animate-spin" /> Redirecting to PayU…</>
+                                : <><Lock className="w-5 h-5" /> Pay ₹{payment.breakdown.total} securely</>}
+                        </button>
                     </div>
                 )}
             </div>

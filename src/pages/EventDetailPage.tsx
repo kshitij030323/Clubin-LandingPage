@@ -6,6 +6,7 @@ import type { Event } from '../types';
 import { fetchEventDetails, formatDate, formatTime, createShortLink, isMobileDevice, APP_STORE_URL, PLAY_STORE_URL } from '../api';
 import { extractId, eventUrl as buildEventUrl } from '../lib/urls';
 import { BookingModal } from '../components/booking/BookingModal';
+import { AccountButton } from '../components/AccountButton';
 import { useSEO } from '../hooks/useSEO';
 import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink, Instagram, User, Music, Image, Play, Volume2, VolumeX } from 'lucide-react';
 
@@ -486,7 +487,8 @@ export function EventDetailPage() {
                             <img src="/clubin-logo-header.webp" alt="Clubin" className="h-14 w-auto object-contain" width="192" height="128" />
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex items-center gap-2">
+                            <AccountButton />
                             <button
                                 onClick={handleShare}
                                 className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"

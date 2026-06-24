@@ -10,3 +10,5 @@ export { ListYourClubPage } from './ListYourClubPage';
 export { ScheduleMeetingPage } from './ScheduleMeetingPage';
 export { DeleteAccountPage } from './DeleteAccountPage';
 export { SupportPage } from './SupportPage';
+export { PaymentReturnPage } from './PaymentReturnPage';
+export { TicketsPage } from './TicketsPage';

@@ -1,8 +1,15 @@
 // API client for fetching clubs and events from the backend
 
-import type { Club, Event, ShortLinkResponse, ShortLinkCreateResponse, PromoterPublicResponse, Booking, AuthUser, BookingGuest } from './types';
+import type { Club, Event, ShortLinkResponse, ShortLinkCreateResponse, PromoterPublicResponse, Booking, AuthUser, BookingGuest, PaymentInitiateResponse, PaymentStatusResponse } from './types';
 
 const API_BASE = 'https://api.clubin.info/api';
+
+// Payments base URL. In dev only, VITE_PAYMENTS_API_BASE can repoint the PayU
+// initiate/status calls at a local mock backend (see scripts/dev/mock-payu-server.mjs)
+// so the full pay flow is testable before the real endpoints ship. Production
+// always uses API_BASE.
+const ENV = import.meta.env as unknown as { DEV?: boolean; VITE_PAYMENTS_API_BASE?: string };
+const PAYMENTS_API_BASE = ENV.DEV && ENV.VITE_PAYMENTS_API_BASE ? ENV.VITE_PAYMENTS_API_BASE : API_BASE;
 
 /**
  * Fetch all clubs, optionally filtered by city
@@ -251,6 +258,19 @@ export async function phoneAuth(phone: string, name: string): Promise<AuthResult
     return data as AuthResult;
 }
 
+/** Fetch the signed-in user's bookings (for the "My Tickets" page). */
+export async function fetchMyBookings(token: string): Promise<Booking[]> {
+    const res = await fetch(`${API_BASE}/bookings/my`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(extractApiError(data, 'Failed to load your tickets'));
+    // Backend may return a bare array or a { bookings } wrapper.
+    if (Array.isArray(data)) return data as Booking[];
+    const wrapped = (data as { bookings?: Booking[] } | null)?.bookings;
+    return Array.isArray(wrapped) ? wrapped : [];
+}
+
 /** Create a pay-at-venue guestlist booking. Requires a Bearer token. */
 export async function createBooking(token: string, payload: CreateBookingPayload): Promise<Booking> {
     const res = await fetch(`${API_BASE}/bookings`, {
@@ -261,4 +281,42 @@ export async function createBooking(token: string, payload: CreateBookingPayload
     const data = await res.json().catch(() => null);
     if (!res.ok) throw new Error(extractApiError(data, 'Failed to create booking'));
     return data as Booking;
+}
+
+/* ───────────── PayU payments (web) ───────────── */
+
+export type InitiatePaymentPayload = CreateBookingPayload;
+
+/**
+ * Create a *pending* booking and get server-signed PayU hosted-checkout params.
+ *
+ * The backend creates the booking in a `pending` payment state, computes the
+ * authoritative amount (guest subtotal + convenience fee — never trusts a
+ * client-sent amount), generates the txnid + SHA-512 hash with the salt key,
+ * and returns the complete form body to POST to PayU. The booking only becomes
+ * confirmed once PayU's verified callback marks the payment `paid`.
+ */
+export async function initiatePayment(token: string, payload: InitiatePaymentPayload): Promise<PaymentInitiateResponse> {
+    const res = await fetch(`${PAYMENTS_API_BASE}/payments/initiate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(extractApiError(data, 'Could not start payment'));
+    return data as PaymentInitiateResponse;
+}
+
+/**
+ * Fetch the authoritative payment + booking status for the return page.
+ * We trust this — not the `status` query param PayU/our backend put in the
+ * return URL — before showing a ticket.
+ */
+export async function fetchPaymentStatus(token: string, bookingId: string): Promise<PaymentStatusResponse> {
+    const res = await fetch(`${PAYMENTS_API_BASE}/payments/status?bookingId=${encodeURIComponent(bookingId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(extractApiError(data, 'Could not fetch payment status'));
+    return data as PaymentStatusResponse;
 }

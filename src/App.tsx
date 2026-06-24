@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from './components/Footer';
+import { AccountButton } from './components/AccountButton';
 import { useDeferredVideo } from './hooks/useDeferredVideo';
 import { PLAY_STORE_URL, APP_STORE_URL } from './api';
 
@@ -463,6 +464,7 @@ const App = () => {
                     />
                 </div>
                 <div className="relative z-10 flex items-center gap-2 sm:gap-3">
+                    <AccountButton />
                     <Link
                         to="/list-your-club"
                         className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white text-xs sm:text-sm font-semibold rounded-xl border border-white/10 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-sm hidden sm:block"

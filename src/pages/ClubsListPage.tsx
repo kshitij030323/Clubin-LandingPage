@@ -6,6 +6,7 @@ import { CITIES } from '../types';
 import { fetchClubs, APP_STORE_URL, PLAY_STORE_URL, isMobileDevice } from '../api';
 import { clubPath, locationInCity, SUBCITIES } from '../lib/urls';
 import { useSEO } from '../hooks/useSEO';
+import { AccountButton } from '../components/AccountButton';
 import { MapPin, Calendar, ArrowLeft, Search, X, Download } from 'lucide-react';
 
 export function ClubsListPage() {
@@ -102,14 +103,17 @@ export function ClubsListPage() {
                     <img src="/clubin-logo-header.webp" alt="Clubin" className="h-14 w-auto object-contain" width="192" height="128" />
                 </div>
 
-                <a
-                    href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : PLAY_STORE_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
-                >
-                    <Download className="w-5 h-5" />
-                </a>
+                <div className="flex items-center gap-2">
+                    <a
+                        href={isMobileDevice() ? (navigator.userAgent.match(/Android/i) ? PLAY_STORE_URL : APP_STORE_URL) : PLAY_STORE_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2.5 rounded-full bg-white/5 text-white hover:bg-white/10 transition-all active:scale-95"
+                    >
+                        <Download className="w-5 h-5" />
+                    </a>
+                    <AccountButton />
+                </div>
             </div>
 
             {/* Content */}
