@@ -75,12 +75,13 @@ export function PaymentReturnPage() {
             const dataUrl = await toPng(ticketRef.current, { pixelRatio: 2, backgroundColor: '#0a0a0a', cacheBust: true });
             const a = document.createElement('a');
             a.href = dataUrl;
-            a.download = `clubin-ticket-${(data?.booking.qrCode || data?.booking.id || 'ticket').slice(-8)}.png`;
+            a.download = `clubin-ticket-${(data?.booking?.qrCode || data?.booking?.id || 'ticket').slice(-8)}.png`;
             a.click();
         } catch { setError('Could not download. Please screenshot the ticket instead.'); }
     };
 
-    const eventHref = data?.booking.event ? eventPath(data.booking.event) : null;
+    const ev = data?.booking?.event;
+    const eventHref = ev ? eventPath(ev) : null;
     const primaryBtn = 'w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90 transition-all';
     const ghostBtn = 'w-full py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2 text-white/60 hover:text-white transition-colors';
 
