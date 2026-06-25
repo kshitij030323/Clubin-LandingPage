@@ -155,8 +155,8 @@ export function getAppDeepLink(type: 'event' | 'club', id: string): string {
 /**
  * Get app store URLs for fallback
  */
-// iOS app is in TestFlight beta for now — point downloads at the public TestFlight invite.
-export const APP_STORE_URL = 'https://testflight.apple.com/join/5V54xug2';
+// iOS app is live on the App Store.
+export const APP_STORE_URL = 'https://apps.apple.com/in/app/clubin-guestlists-clubs/id6779749688';
 export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.kshitijdev02.afterhour';
 
 /**

@@ -134,8 +134,8 @@ const StoreButtons = ({ centered = false }: { centered?: boolean }) => (
         >
             <AppleIcon className="w-6 h-6 fill-current" />
             <div className="text-left">
-                <div className="text-[10px] font-manrope uppercase tracking-wider opacity-80">Download on</div>
-                <div className="text-base font-cabin font-bold leading-none">iOS</div>
+                <div className="text-[10px] font-manrope uppercase tracking-wider opacity-80">Available on</div>
+                <div className="text-base font-cabin font-bold leading-none">App Store</div>
             </div>
             <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         </a>
