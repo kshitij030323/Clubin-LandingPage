@@ -8,7 +8,7 @@ import { extractId, eventUrl as buildEventUrl } from '../lib/urls';
 import { BookingModal } from '../components/booking/BookingModal';
 import { AccountButton } from '../components/AccountButton';
 import { useSEO } from '../hooks/useSEO';
-import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink, Instagram, User, Music, Image, Play, Volume2, VolumeX } from 'lucide-react';
+import { MapPin, ArrowLeft, Calendar, Clock, Share2, Ticket, Check, Copy, ExternalLink, Instagram, User, Music, Image, Play, Volume2, VolumeX, Sparkles, Download } from 'lucide-react';
 
 export function EventDetailPage() {
     const { eventId, code } = useParams<{ eventId?: string; code?: string }>();
@@ -31,6 +31,7 @@ export function EventDetailPage() {
     const [copied, setCopied] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [showBooking, setShowBooking] = useState(false);
+    const [showAppChoice, setShowAppChoice] = useState(false);
 
     // Track screen size for performance
     const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
@@ -156,8 +157,17 @@ export function EventDetailPage() {
 
     const handleGetTickets = () => {
         if (!event) return;
+        setShowAppChoice(true);
+    };
+
+    const handleContinueOnWebsite = () => {
+        setShowAppChoice(false);
         setShowBooking(true);
     };
+
+    const appDownloadUrl = /Android/i.test(typeof navigator !== 'undefined' ? navigator.userAgent : '')
+        ? PLAY_STORE_URL
+        : APP_STORE_URL;
 
     if (loading) {
         return (
@@ -235,10 +245,12 @@ export function EventDetailPage() {
                         {event.videoUrl ? (
                             <video
                                 src={event.videoUrl}
+                                poster={event.bannerUrl || event.imageUrl}
                                 autoPlay
                                 loop
                                 muted
                                 playsInline
+                                preload="auto"
                                 className="w-full h-full object-cover opacity-80"
                             />
                         ) : (
@@ -503,10 +515,12 @@ export function EventDetailPage() {
                         {event.videoUrl && !viewBanner ? (
                             <video
                                 src={event.videoUrl}
+                                poster={event.bannerUrl || event.imageUrl}
                                 autoPlay
                                 loop
                                 muted={isMuted}
                                 playsInline
+                                preload="auto"
                                 className="w-full h-full object-cover"
                             />
                         ) : (
@@ -836,6 +850,48 @@ export function EventDetailPage() {
                         >
                             Close
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* App vs Website Choice Popup */}
+            {showAppChoice && (
+                <div
+                    className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+                    onClick={(e) => { if (e.target === e.currentTarget) setShowAppChoice(false); }}
+                >
+                    <div className="bg-[#120f1d] border border-purple-500/20 rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
+                        <div className="flex flex-col items-center text-center mb-6">
+                            <img
+                                src="/app-logo.png"
+                                alt="Clubin"
+                                className="w-14 h-14 rounded-2xl border border-white/10 object-cover mb-3"
+                            />
+                            <h3 className="text-xl font-bold">Get the best experience</h3>
+                            <p className="text-sm text-white/60 mt-1.5 flex items-center gap-1.5 justify-center">
+                                <Sparkles className="w-4 h-4 text-purple-300 flex-shrink-0" />
+                                Get better offers on the Clubin app
+                            </p>
+                        </div>
+
+                        <div className="space-y-2.5">
+                            <a
+                                href={appDownloadUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setShowAppChoice(false)}
+                                className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-bold text-base bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 transition-all active:scale-[0.98] shadow-lg shadow-purple-900/30"
+                            >
+                                <Download className="w-5 h-5" />
+                                Download the App
+                            </a>
+                            <button
+                                onClick={handleContinueOnWebsite}
+                                className="w-full py-3.5 rounded-xl font-bold text-base bg-white/5 hover:bg-white/10 border border-white/10 transition-all active:scale-[0.98]"
+                            >
+                                Continue on website
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -49,6 +49,7 @@ export interface Event {
     rules?: string;
     genre: string;
     imageUrl: string;
+    bannerUrl?: string | null;
     videoUrl?: string;
     gallery?: string[];
     price: number;
